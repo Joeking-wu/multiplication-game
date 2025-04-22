@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <title>九九乘法挑戰（選擇題版）</title>
+  <title>九九乘法挑戰（選擇題 + 計分）</title>
   <style>
     body {
       font-family: "Microsoft JhengHei", sans-serif;
@@ -10,9 +10,18 @@
       padding: 40px;
       background-color: #f9f9f9;
     }
+    h1 {
+      margin-bottom: 10px;
+    }
+    .score {
+      font-size: 20px;
+      margin-bottom: 20px;
+      color: #333;
+    }
     .question {
       font-size: 36px;
       margin: 20px 0;
+      display: none;
     }
     .options {
       display: flex;
@@ -20,6 +29,7 @@
       align-items: center;
       gap: 12px;
       margin: 20px 0;
+      display: none;
     }
     .option {
       font-size: 24px;
@@ -42,19 +52,29 @@
       font-size: 20px;
       color: #555;
       margin-top: 10px;
+      display: none;
+    }
+    #startButton {
+      font-size: 24px;
+      padding: 10px 30px;
+      margin-top: 40px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
   <h1>九九乘法挑戰</h1>
+  <div class="score" id="score">目前分數：0</div>
   <div class="question" id="question">題目載入中...</div>
   <div class="options" id="options"></div>
   <div class="timer" id="timer">倒數 20 秒</div>
   <div class="result" id="result"></div>
 
+  <button id="startButton" onclick="startGame()">開始挑戰！</button>
+
   <script>
-    let num1, num2, correctAnswer, timer, timeLeft;
+    let num1, num2, correctAnswer, timer, timeLeft, score = 0;
 
     function generateOptions(correct) {
       const options = new Set();
@@ -67,11 +87,9 @@
     }
 
     function renderQuestion() {
-      // 清除舊結果與計時器
       clearInterval(timer);
       document.getElementById("result").innerText = "";
 
-      // 產生題目
       num1 = Math.floor(Math.random() * 9) + 1;
       num2 = Math.floor(Math.random() * 9) + 1;
       correctAnswer = num1 * num2;
@@ -90,21 +108,23 @@
         optionsDiv.appendChild(btn);
       });
 
-      // 開始倒數計時
       startTimer();
     }
 
     function checkAnswer(selected) {
       clearInterval(timer);
       const result = document.getElementById("result");
+
       if (selected === correctAnswer) {
         result.innerText = "✅ 答對了！";
         result.style.color = "green";
+        score++;
       } else {
         result.innerText = `❌ 錯了，正確答案是 ${correctAnswer}`;
         result.style.color = "red";
       }
 
+      updateScore();
       setTimeout(renderQuestion, 2000);
     }
 
@@ -127,8 +147,19 @@
       document.getElementById("timer").innerText = `倒數 ${timeLeft} 秒`;
     }
 
-    // 初始化第一題
-    renderQuestion();
+    function updateScore() {
+      document.getElementById("score").innerText = `目前分數：${score}`;
+    }
+
+    function startGame() {
+      score = 0;
+      updateScore();
+      document.getElementById("startButton").style.display = "none";
+      document.getElementById("question").style.display = "block";
+      document.getElementById("options").style.display = "flex";
+      document.getElementById("timer").style.display = "block";
+      renderQuestion();
+    }
   </script>
 
 </body>
