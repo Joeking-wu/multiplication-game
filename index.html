@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>九九乘法挑戰（選擇題版）</title>
+  <style>
+    body {
+      font-family: "Microsoft JhengHei", sans-serif;
+      text-align: center;
+      padding: 40px;
+      background-color: #f9f9f9;
+    }
+    .question {
+      font-size: 36px;
+      margin: 20px 0;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .option {
+      font-size: 24px;
+      padding: 10px 20px;
+      background-color: #e0e0e0;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 200px;
+    }
+    .option:hover {
+      background-color: #d4d4d4;
+    }
+    .result {
+      font-size: 24px;
+      margin-top: 20px;
+      height: 30px;
+    }
+    .timer {
+      font-size: 20px;
+      color: #555;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>九九乘法挑戰</h1>
+  <div class="question" id="question">題目載入中...</div>
+  <div class="options" id="options"></div>
+  <div class="timer" id="timer">倒數 20 秒</div>
+  <div class="result" id="result"></div>
+
+  <script>
+    let num1, num2, correctAnswer, timer, timeLeft;
+
+    function generateOptions(correct) {
+      const options = new Set();
+      options.add(correct);
+      while (options.size < 4) {
+        let fake = Math.floor(Math.random() * 81) + 1;
+        if (fake !== correct) options.add(fake);
+      }
+      return Array.from(options).sort(() => Math.random() - 0.5);
+    }
+
+    function renderQuestion() {
+      // 清除舊結果與計時器
+      clearInterval(timer);
+      document.getElementById("result").innerText = "";
+
+      // 產生題目
+      num1 = Math.floor(Math.random() * 9) + 1;
+      num2 = Math.floor(Math.random() * 9) + 1;
+      correctAnswer = num1 * num2;
+
+      document.getElementById("question").innerText = `${num1} × ${num2} = ?`;
+
+      const optionValues = generateOptions(correctAnswer);
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
+
+      optionValues.forEach(val => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        btn.innerText = val;
+        btn.onclick = () => checkAnswer(val);
+        optionsDiv.appendChild(btn);
+      });
+
+      // 開始倒數計時
+      startTimer();
+    }
+
+    function checkAnswer(selected) {
+      clearInterval(timer);
+      const result = document.getElementById("result");
+      if (selected === correctAnswer) {
+        result.innerText = "✅ 答對了！";
+        result.style.color = "green";
+      } else {
+        result.innerText = `❌ 錯了，正確答案是 ${correctAnswer}`;
+        result.style.color = "red";
+      }
+
+      setTimeout(renderQuestion, 2000);
+    }
+
+    function startTimer() {
+      timeLeft = 20;
+      updateTimerDisplay();
+      timer = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay();
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          document.getElementById("result").innerText = `⏰ 時間到！正確答案是 ${correctAnswer}`;
+          document.getElementById("result").style.color = "orange";
+          setTimeout(renderQuestion, 2000);
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      document.getElementById("timer").innerText = `倒數 ${timeLeft} 秒`;
+    }
+
+    // 初始化第一題
+    renderQuestion();
+  </script>
+
+</body>
+</html>
