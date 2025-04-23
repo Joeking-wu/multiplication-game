@@ -1,225 +1,73 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <title>九九乘法挑戰（十題版）</title>
+  <meta charset="UTF-8" />
+  <title>九九乘法挑戰</title>
   <style>
     body {
-      font-family: "Microsoft JhengHei", sans-serif;
+      font-family: sans-serif;
       text-align: center;
-      padding: 40px;
-      background-color: #f0f8ff;
+      background: linear-gradient(-45deg, #ffecd2, #fcb69f, #a1c4fd, #c2e9fb);
+      background-size: 400% 400%;
+      animation: gradientBG 10s ease infinite;
+      margin: 0;
+      padding: 2rem;
     }
-    h1 {
-      margin-bottom: 10px;
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
-    .score, .progress, .high-score {
-      font-size: 20px;
-      margin-bottom: 10px;
+    #app, #question, #options, #timerBar, #startScreen {
+      margin-top: 1.5rem;
     }
-    .question {
-      font-size: 36px;
-      margin: 20px 0;
-      display: none;
+    .progress-container {
+      width: 100%;
+      background-color: #eee;
+      border-radius: 20px;
+      overflow: hidden;
+      margin: 1rem 0;
     }
-    .options {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      margin: 20px 0;
-      display: none;
+    .progress-bar {
+      height: 20px;
+      background-color: #4caf50;
+      width: 100%;
+      transition: width 0.2s;
     }
-    .option {
-      font-size: 24px;
-      padding: 10px 20px;
-      background-color: #e0e0e0;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      width: 200px;
-    }
-    .option:hover {
-      background-color: #d4d4d4;
-    }
-    .result {
-      font-size: 24px;
-      margin-top: 20px;
-      height: 30px;
-    }
-    .timer {
-      font-size: 20px;
-      color: #555;
-      margin-top: 10px;
-      display: none;
-    }
-    #startButton, #restartButton {
-      font-size: 24px;
-      padding: 10px 30px;
-      margin-top: 30px;
-      cursor: pointer;
-    }
-    #restartButton {
-      display: none;
+    button, select {
+      font-size: 1.2rem;
+      padding: 0.5rem 1rem;
+      margin: 0.5rem;
     }
   </style>
 </head>
 <body>
+  <div id="startScreen">
+    <h1>九九乘法挑戰</h1>
+    <p>請選擇每題倒數時間：</p>
+    <select id="timeSelect">
+      <option value="20">20 秒</option>
+      <option value="15">15 秒</option>
+      <option value="10">10 秒</option>
+      <option value="5">5 秒</option>
+    </select>
+    <br>
+    <button onclick="startGame()">開始挑戰</button>
+  </div>
 
-  <h1>九九乘法挑戰</h1>
-  <div class="score" id="score">目前分數：0</div>
-  <div class="high-score" id="highScore">最高分數：0</div>
-  <div class="progress" id="progress">第 0 題 / 共 10 題</div>
-  <div class="question" id="question">題目載入中...</div>
-  <div class="options" id="options"></div>
-  <div class="timer" id="timer">倒數 20 秒</div>
-  <div class="result" id="result"></div>
+  <div id="app" style="display:none;">
+    <div id="question"></div>
+    <div id="options"></div>
+    <div class="progress-container">
+      <div class="progress-bar" id="timerBar"></div>
+    </div>
+    <p id="scoreDisplay">分數：0 / 0</p>
+  </div>
 
-  <button id="startButton" onclick="startGame()">開始挑戰！</button>
-  <button id="restartButton" onclick="startGame()">重新開始</button>
+  <audio id="audioCorrect" src="assets/sounds/correct.mp3" preload="auto"></audio>
+  <audio id="audioWrong" src="assets/sounds/wrong.mp3" preload="auto"></audio>
+  <audio id="audioClick" src="assets/sounds/click.mp3" preload="auto"></audio>
 
-  <script>
-    let num1, num2, correctAnswer, timer, timeLeft;
-    let score = 0, questionIndex = 0;
-    const totalQuestions = 10;
-
-    const scoreEl = document.getElementById("score");
-    const highScoreEl = document.getElementById("highScore");
-    const questionEl = document.getElementById("question");
-    const optionsEl = document.getElementById("options");
-    const timerEl = document.getElementById("timer");
-    const resultEl = document.getElementById("result");
-    const progressEl = document.getElementById("progress");
-    const startButton = document.getElementById("startButton");
-    const restartButton = document.getElementById("restartButton");
-
-    function generateOptions(correct) {
-      const options = new Set();
-      options.add(correct);
-      while (options.size < 4) {
-        let fake = Math.floor(Math.random() * 81) + 1;
-        if (fake !== correct) options.add(fake);
-      }
-      return Array.from(options).sort(() => Math.random() - 0.5);
-    }
-
-    function renderQuestion() {
-      clearInterval(timer);
-      resultEl.innerText = "";
-
-      num1 = Math.floor(Math.random() * 9) + 1;
-      num2 = Math.floor(Math.random() * 9) + 1;
-      correctAnswer = num1 * num2;
-
-      questionEl.innerText = `${num1} × ${num2} = ?`;
-      progressEl.innerText = `第 ${questionIndex + 1} 題 / 共 ${totalQuestions} 題`;
-
-      const optionValues = generateOptions(correctAnswer);
-      optionsEl.innerHTML = "";
-
-      optionValues.forEach(val => {
-        const btn = document.createElement("button");
-        btn.className = "option";
-        btn.innerText = val;
-        btn.onclick = () => checkAnswer(val);
-        optionsEl.appendChild(btn);
-      });
-
-      startTimer();
-    }
-
-    function checkAnswer(selected) {
-      clearInterval(timer);
-
-      if (selected === correctAnswer) {
-        resultEl.innerText = "✅ 答對了！";
-        resultEl.style.color = "green";
-        score++;
-      } else {
-        resultEl.innerText = `❌ 錯了，正確答案是 ${correctAnswer}`;
-        resultEl.style.color = "red";
-      }
-
-      updateScore();
-      questionIndex++;
-      if (questionIndex < totalQuestions) {
-        setTimeout(renderQuestion, 1500);
-      } else {
-        endGame();
-      }
-    }
-
-    function startTimer() {
-      timeLeft = 20;
-      updateTimerDisplay();
-      timer = setInterval(() => {
-        timeLeft--;
-        updateTimerDisplay();
-        if (timeLeft <= 0) {
-          clearInterval(timer);
-          resultEl.innerText = `⏰ 時間到！正確答案是 ${correctAnswer}`;
-          resultEl.style.color = "orange";
-          questionIndex++;
-          if (questionIndex < totalQuestions) {
-            setTimeout(renderQuestion, 1500);
-          } else {
-            endGame();
-          }
-        }
-      }, 1000);
-    }
-
-    function updateTimerDisplay() {
-      timerEl.innerText = `倒數 ${timeLeft} 秒`;
-    }
-
-    function updateScore() {
-      scoreEl.innerText = `目前分數：${score}`;
-    }
-
-    function updateHighScore() {
-      const high = parseInt(localStorage.getItem("highScore") || "0");
-      if (score > high) {
-        localStorage.setItem("highScore", score);
-      }
-      highScoreEl.innerText = `最高分數：${localStorage.getItem("highScore")}`;
-    }
-
-    function startGame() {
-      score = 0;
-      questionIndex = 0;
-      updateScore();
-      updateHighScore();
-
-      startButton.style.display = "none";
-      restartButton.style.display = "none";
-      questionEl.style.display = "block";
-      optionsEl.style.display = "flex";
-      timerEl.style.display = "block";
-      resultEl.innerText = "";
-
-      renderQuestion();
-    }
-
-    function endGame() {
-      clearInterval(timer);
-      questionEl.style.display = "none";
-      optionsEl.style.display = "none";
-      timerEl.style.display = "none";
-      restartButton.style.display = "inline-block";
-
-      resultEl.innerText = `🎉 挑戰完成！你的分數是 ${score} 分`;
-      resultEl.style.color = "blue";
-
-      updateHighScore();
-    }
-
-    // 初始載入時顯示最高分
-    window.onload = () => {
-      highScoreEl.innerText = `最高分數：${localStorage.getItem("highScore") || 0}`;
-    };
-
-  </script>
-
+  <script src="script.js"></script>
 </body>
 </html>
