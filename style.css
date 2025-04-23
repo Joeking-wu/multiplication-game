@@ -1,0 +1,28 @@
+
+body {
+  font-family: sans-serif;
+  padding: 20px;
+  background: #f0f8ff;
+}
+button {
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 1.2em;
+}
+#timerBarContainer {
+  width: 100%;
+  background-color: #ddd;
+  height: 20px;
+  border-radius: 10px;
+  margin: 10px 0;
+}
+#timerBar {
+  height: 100%;
+  width: 100%;
+  background-color: #4caf50;
+  border-radius: 10px;
+  transition: width 1s linear;
+}
+.filters, .timer-options {
+  margin-bottom: 10px;
+}
