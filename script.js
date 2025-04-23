@@ -1,4 +1,3 @@
-
 let score = 0;
 let highScore = localStorage.getItem("highScore") || 0;
 let currentQuestion = 0;
