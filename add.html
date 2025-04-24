@@ -1,0 +1,443 @@
+﻿
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加法挑戰</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            min-height: 100vh;
+        }
+        .card {
+            transition: all 0.3s ease;
+        }
+
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            border-radius: 50%;
+            animation: fall 3s ease-out forwards;
+        }
+
+        .btn {
+            transition: all 0.2s ease;
+        }
+
+            .btn:active {
+                transform: scale(0.95);
+            }
+
+        @media (max-width: 640px) {
+            .number-pad button {
+                font-size: 1.25rem;
+                height: 3rem;
+            }
+        }
+
+        .question-card {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-animation {
+            animation: pulse 0.5s ease-out;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body class="p-4">
+    <div class="max-w-md mx-auto bg-white rounded-xl shadow-lg overflow-hidden md:max-w-lg">
+        <!-- 頂部狀態列 -->
+        <div class="bg-indigo-600 text-white p-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span id="timer" class="font-bold">00:00</span>
+            </div>
+            <h1 class="text-lg font-bold">加法</h1>
+            <div class="flex items-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span id="score" class="font-bold">0</span>
+            </div>
+        </div>
+
+        <!-- 遊戲區域 -->
+        <div id="game-container" class="p-6">
+            <!-- 開始畫面 -->
+            <div id="start-screen" class="text-center py-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">加法挑戰</h2>
+                <p class="text-gray-600 mb-8">測試你的加法計算能力！<br>在最短時間內回答正確</p>
+                <div class="mb-6">
+                    <label class="block text-gray-700 mb-2">選擇題型 幾 位數內的加法計算:</label>
+                    <select id="question-count1" class="w-full p-2 border rounded-lg bg-gray-50">
+                        <option value="10" selected>10 以內</option>
+                        <option value="100">100 以內</option>
+                        <option value="1000">1000 以內</option>
+                    </select>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 mb-2">選擇題目數量:</label>
+                    <select id="question-count" class="w-full p-2 border rounded-lg bg-gray-50">
+                        <option value="10" selected>10 題</option>
+                        <option value="20">20 題</option>
+                        <option value="30">30 題</option>
+                        <option value="50">50 題</option>
+                    </select>
+                </div>
+                <button id="start-btn" class="btn bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
+                    開始挑戰
+                </button>
+            </div>
+
+            <!-- 問題畫面 -->
+            <div id="question-screen" class="hidden">
+                <div class="flex justify-between text-sm text-gray-500 mb-2">
+                    <span id="progress">題目: 1/20</span>
+                    <span id="accuracy">正確率: 0%</span>
+                </div>
+
+                <div class="question-card bg-indigo-50 p-6 rounded-xl mb-6 text-center">
+                    <div id="question" class="text-3xl md:text-4xl font-bold text-indigo-800 mb-2">3 × 7 = ?</div>
+                    <div id="answer-display" class="text-2xl md:text-3xl font-bold h-8 text-gray-700"></div>
+                </div>
+
+                <!-- 數字鍵盤 -->
+                <div class="number-pad grid grid-cols-3 gap-2 md:gap-3">
+                    <button class="btn bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 rounded-lg">1</button>
+                    <button class="btn bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 rounded-lg">2</button>
+                    <button class="btn bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 rounded-lg">3</button>
+                    <button class="btn bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 rounded-lg">4</button>
+                    <button class="btn bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 rounded-lg">5</button>
+                    <button class="btn bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 rounded-lg">6</button>
+                    <button class="btn bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 rounded-lg">7</button>
+                    <button class="btn bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 rounded-lg">8</button>
+                    <button class="btn bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 rounded-lg">9</button>
+                    <button class="btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 rounded-lg">清除</button>
+                    <button class="btn bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 rounded-lg">0</button>
+                    <button class="btn bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg">確認</button>
+                </div>
+            </div>
+
+            <!-- 結果畫面 -->
+            <div id="result-screen" class="hidden text-center py-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">挑戰完成！</h2>
+
+                <div class="bg-indigo-50 rounded-xl p-6 mb-6">
+                    <div class="grid grid-cols-2 gap-4 text-center">
+                        <div>
+                            <p class="text-gray-600">用時</p>
+                            <p id="final-time" class="text-2xl font-bold text-indigo-600">00:45</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">得分</p>
+                            <p id="final-score" class="text-2xl font-bold text-indigo-600">18</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">正確率</p>
+                            <p id="final-accuracy" class="text-2xl font-bold text-indigo-600">90%</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">題目數</p>
+                            <p id="final-questions" class="text-2xl font-bold text-indigo-600">20</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="resultMessage" class="text-lg text-gray-600 mb-6"></div>
+                <button id="restart-btn" class="btn bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
+                    再次挑戰
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 音效 -->
+    <audio id="audioCorrect" src="assets/sounds/correct.mp3" preload="auto"></audio>
+    <audio id="audioWrong" src="assets/sounds/wrong.mp3" preload="auto"></audio>
+    <audio id="audioClick" src="assets/sounds/click.mp3" preload="auto"></audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // 遊戲變數
+            let currentQuestion = 0;
+            let totalQuestions = 20;
+            let score = 0;
+            let correctAnswers = 0;
+            let startTime;
+            let timerInterval;
+            let currentAnswer = "";
+            let questions = [];
+
+            // DOM 元素
+            const startScreen = document.getElementById('start-screen');
+            const questionScreen = document.getElementById('question-screen');
+            const resultScreen = document.getElementById('result-screen');
+            const startBtn = document.getElementById('start-btn');
+            const restartBtn = document.getElementById('restart-btn');
+            const questionCountSelect = document.getElementById('question-count');
+            const questionCountSelect1 = document.getElementById('question-count1');
+            const questionElement = document.getElementById('question');
+            const answerDisplay = document.getElementById('answer-display');
+            const progressElement = document.getElementById('progress');
+            const accuracyElement = document.getElementById('accuracy');
+            const timerElement = document.getElementById('timer');
+            const scoreElement = document.getElementById('score');
+            const finalTimeElement = document.getElementById('final-time');
+            const finalScoreElement = document.getElementById('final-score');
+            const finalAccuracyElement = document.getElementById('final-accuracy');
+            const finalQuestionsElement = document.getElementById('final-questions');
+            const resultMessage = document.getElementById('resultMessage');
+
+            // 數字鍵盤按鈕
+            const numberPad = document.querySelector('.number-pad');
+
+            // 開始遊戲
+            startBtn.addEventListener('click', startGame);
+            restartBtn.addEventListener('click', () => {
+                resultScreen.classList.add('hidden');
+                startScreen.classList.remove('hidden');
+            });
+
+            // 數字鍵盤事件處理
+            numberPad.addEventListener('click', (e) => {
+                if (!e.target.matches('button')) return;
+
+                const buttonText = e.target.textContent.trim();
+
+                if (buttonText === '確認') {
+                    checkAnswer();
+                } else if (buttonText === '清除') {
+                    document.getElementById("audioClick").play();
+                    currentAnswer = "";
+                    answerDisplay.textContent = "";
+                } else if (currentAnswer.length < PP(totalQuestions1)) { // 限制最多輸入兩位數
+                    document.getElementById("audioClick").play();
+                    currentAnswer += buttonText;
+                    answerDisplay.textContent = currentAnswer;
+                }
+            });
+            function PP(count) {
+                var L = 0;
+                while (count >= 1) {
+                    count = count / 10;
+                    L++;
+                }
+                return L;
+            }
+
+            // 生成問題
+            function generateQuestions(count) {
+                const questions = [];
+                for (let i = 0; i < count; i++) {
+                    var num1 = Math.floor(Math.random() * (totalQuestions1 - 1)) + 1;
+                    var num2 = Math.floor(Math.random() * (totalQuestions1 - 1)) + 1;
+
+                    while ((num1 + num2) >= (totalQuestions1 + 1)) {
+                        num1 = Math.floor(Math.random() * (totalQuestions1 - 1)) + 1;
+                        num2 = Math.floor(Math.random() * (totalQuestions1 - 1)) + 1;
+                    }
+                    questions.push({
+                        num1,
+                        num2,
+                        answer: num1 + num2
+                    });
+                }
+                return questions;
+            }
+
+            // 開始遊戲
+            function startGame() {
+                document.getElementById("audioClick").play();
+                totalQuestions = parseInt(questionCountSelect.value);
+                totalQuestions1 = parseInt(questionCountSelect1.value);
+
+                questions = generateQuestions(totalQuestions);
+                currentQuestion = 0;
+                score = 0;
+                correctAnswers = 0;
+                currentAnswer = "";
+
+                scoreElement.textContent = score;
+                startScreen.classList.add('hidden');
+                questionScreen.classList.remove('hidden');
+
+                // 開始計時
+                startTime = new Date();
+                timerInterval = setInterval(updateTimer, 1000);
+
+                // 顯示第一個問題
+                showQuestion();
+            }
+
+            // 顯示問題
+            function showQuestion() {
+                if (currentQuestion < totalQuestions) {
+                    const question = questions[currentQuestion];
+                    questionElement.textContent = `${question.num1} + ${question.num2} = ?`;
+                    answerDisplay.textContent = "";
+                    currentAnswer = "";
+
+                    progressElement.textContent = `題目: ${currentQuestion + 1}/${totalQuestions}`;
+
+                    const accuracy = currentQuestion === 0 ? 0 : Math.round((correctAnswers / currentQuestion) * 100);
+                    accuracyElement.textContent = `正確率: ${accuracy}%`;
+
+                    // 添加動畫效果
+                    questionElement.parentElement.classList.remove('question-card');
+                    void questionElement.parentElement.offsetWidth; // 觸發重繪
+                    questionElement.parentElement.classList.add('question-card');
+                } else {
+                    endGame();
+                }
+            }
+
+            // 檢查答案
+            function checkAnswer() {
+                if (currentAnswer === "") return;
+
+                const userAnswer = parseInt(currentAnswer);
+                const correctAnswer = questions[currentQuestion].answer;
+
+                if (userAnswer === correctAnswer) {
+                    score += 1;
+                    correctAnswers += 1;
+                    scoreElement.textContent = score;
+
+                    // 正確答案動畫
+                    answerDisplay.textContent = "✓";
+                    answerDisplay.className = "text-2xl md:text-3xl font-bold h-8 text-green-600 result-animation";
+                    document.getElementById("audioCorrect").play();
+                } else {
+                    // 錯誤答案動畫
+                    answerDisplay.textContent = `✗ ${correctAnswer}`;
+                    answerDisplay.className = "text-2xl md:text-3xl font-bold h-8 text-red-600 result-animation";
+                    document.getElementById("audioWrong").play();
+                }
+
+                // 延遲顯示下一題
+                setTimeout(() => {
+                    currentQuestion++;
+                    answerDisplay.className = "text-2xl md:text-3xl font-bold h-8 text-gray-700";
+                    showQuestion();
+                }, 1000);
+            }
+
+            // 更新計時器
+            function updateTimer() {
+                const now = new Date();
+                const diff = Math.floor((now - startTime) / 1000);
+                const minutes = Math.floor(diff / 60).toString().padStart(2, '0');
+                const seconds = (diff % 60).toString().padStart(2, '0');
+                timerElement.textContent = `${minutes}:${seconds}`;
+            }
+
+            // 結束遊戲
+            function endGame() {
+                clearInterval(timerInterval);
+                questionScreen.classList.add('hidden');
+                resultScreen.classList.remove('hidden');
+
+                const totalTime = Math.floor((new Date() - startTime) / 1000);
+                const minutes = Math.floor(totalTime / 60).toString().padStart(2, '0');
+                const seconds = (totalTime % 60).toString().padStart(2, '0');
+
+                finalTimeElement.textContent = `${minutes}:${seconds}`;
+                finalScoreElement.textContent = score;
+                finalAccuracyElement.textContent = `${Math.round((correctAnswers / totalQuestions) * 100)}%`;
+                finalQuestionsElement.textContent = totalQuestions;
+
+                // 根據分數顯示不同的訊息
+                if (score === totalQuestions) {
+                    resultMessage.textContent = '太厲害了！你是加法超級大師！';
+                    createConfetti(300);
+                } else if (score >= totalQuestions * 0.7) {
+                    resultMessage.textContent = '做得很好！再接再厲！你是加法大師！';
+                    createConfetti(100);
+                } else if (score >= totalQuestions * 0.4) {
+                    resultMessage.textContent = '還不錯，繼續練習吧！';
+                    createConfetti(10);
+                } else {
+                    resultMessage.textContent = '需要多練習加法哦！';
+                }
+            }
+
+            // 創建五彩紙屑效果
+            function createConfetti(num) {
+                const colors = ['#f94144', '#f3722c', '#f8961e', '#f9c74f', '#90be6d', '#43aa8b', '#577590', '#5500FF', '#227700', '#00DDDD', '	#FFFF00', '#E93EFF', '#FF00FF', '#99FF33'];
+                const container = document.getElementById('result-screen');
+
+                for (let i = 0; i < num; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.top = -20 + 'px';
+                    confetti.style.transform = 'rotate(' + Math.random() * 360 + 'deg)';
+
+                    container.appendChild(confetti);
+
+                    const animation = confetti.animate([
+                        {
+                            transform: 'translate3d(0, 0, 0) rotate(' + Math.random() * 360 + 'deg)',
+                            opacity: 1
+                        },
+                        {
+                            transform: 'translate3d(' + (Math.random() * 200 - 100) + 'px, ' + (Math.random() * 500 + 200) + 'px, 0) rotate(' + Math.random() * 360 + 'deg)',
+                            opacity: 0
+                        }
+                    ], {
+                        duration: Math.random() * 3000 + 2000,
+                        delay: Math.random() * 1000,
+                        fill: 'forwards'
+                    });
+
+                    animation.onfinish = () => {
+                        confetti.remove();
+                    };
+                }
+            }
+        });
+    </script>
+
+    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'93536739c0934a8a',t:'MTc0NTQ3NDY2Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+</body>
+</html>
