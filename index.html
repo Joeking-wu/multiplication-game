@@ -1,523 +1,334 @@
-<HTML>
-<HEAD>
-    <META NAME="GENERATOR" Content="Microsoft Visual Studio">
-    <TITLE>九九乘法表挑戰</TITLE>
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>九九乘法表挑戰</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
-
+        
         body {
             font-family: 'Noto Sans TC', sans-serif;
-            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            background: linear-gradient(135deg, #f0f9ff 0%, #e1f1ff 100%);
             min-height: 100vh;
         }
-
-        .question-card {
+        
+        .card {
             transition: all 0.3s ease;
         }
-
-            .question-card.correct {
-                background-color: rgba(72, 187, 120, 0.2);
-                border-color: #48bb78;
-            }
-
-            .question-card.incorrect {
-                background-color: rgba(245, 101, 101, 0.2);
-                border-color: #f56565;
-            }
-
-        .btn {
-            transition: all 0.2s ease;
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
-
-            .btn:hover {
-                transform: translateY(-2px);
-            }
-
-            .btn:active {
-                transform: translateY(0);
-            }
-
-        .result-animation {
-            animation: popIn 0.5s ease-out;
-        }
-
-        @keyframes popIn {
-            0% {
-                transform: scale(0.8);
-                opacity: 0;
-            }
-
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        .timer-bar {
-            transition: width 1s linear;
-        }
-
+        
         .confetti {
             position: absolute;
             width: 10px;
             height: 10px;
-            opacity: 0;
+            background-color: #f00;
+            border-radius: 50%;
+            animation: fall 3s ease-out forwards;
         }
-
-        #timerSelect {
-            padding: 10px 20px;
-            margin: 12px;
-            font-size: 1.2em;
-        }
-        p,
-        label {
-            font: 1.2rem "Fira Sans", sans-serif;
+        
+        @keyframes fall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
         }
     </style>
-</HEAD>
+</head>
 <body class="p-4">
-    <div class="max-w-3xl mx-auto">
-        <!-- 遊戲容器 -->
-        <div class="bg-white rounded-xl shadow-xl p-6 md:p-8">
-            <!-- 標題 -->
-            <div class="text-center mb-6">
-                <h1 class="text-3xl md:text-4xl font-bold text-gray-800">九九乘法表挑戰</h1>
-                <p class="text-gray-600 mt-2">測試你的乘法表能力！提高計算能力！</p>
-                <p class="text-gray-600 mt-2">每輪10題，答對1題答 1得分！</p>
-            </div>
-
-            <!-- 遊戲狀態 -->
-            <div id="gameStatus" class="flex flex-col md:flex-row justify-between items-center mb-6 p-4 bg-blue-50 rounded-lg">
-                <div class="flex items-center mb-4 md:mb-0">
-                    <div class="text-center mr-6">
-                        <p class="text-sm text-gray-600">題目</p>
-                        <p id="questionCounter" class="text-xl font-bold text-blue-600">0 / 10</p>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-sm text-gray-600">分數</p>
-                        <p id="score" class="text-xl font-bold text-green-600">0</p>
-                    </div>
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-blue-700 mb-2">九九乘法表挑戰</h1>
+            <p class="text-gray-600">測試你的乘法技能！選擇正確答案獲得分數。</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <div class="text-lg font-medium">難度：
+                    <select id="difficulty" class="ml-2 p-1 border rounded bg-blue-50">
+                        <option value="easy">簡單 (1-5)</option>
+                        <option value="medium" selected>中等 (1-9)</option>
+                        <option value="hard">困難 (全部)</option>
+                    </select>
                 </div>
-
-                <div class="w-full md:w-1/2">
-                    <p class="text-sm text-gray-600 text-center md:text-right mb-1">剩餘時間</p>
-                    <div class="h-4 bg-gray-200 rounded-full overflow-hidden">
-                        <div id="timerBar" class="h-full bg-blue-500 rounded-full timer-bar" style="width: 100%"></div>
-                    </div>
-                    <p id="timer" class="text-sm text-gray-600 text-center md:text-right mt-1">20 秒</p>
+                <div class="flex items-center">
+                    <span class="mr-2">時間：</span>
+                    <span id="timer" class="text-xl font-bold text-blue-600">60</span>
+                    <span class="ml-1">秒</span>
+                </div>
+                <div>
+                    <span class="mr-2">分數：</span>
+                    <span id="score" class="text-xl font-bold text-green-600">0</span>
                 </div>
             </div>
-
-            <script>
-                function renew() {
-                    document.getElementById('timer').textContent = `${parseInt(document.getElementById("timerSelect").value)} 秒`;
-                }
-            </script>
-
-            <!-- 遊戲區域 -->
-            <div id="gameArea" class="mb-6">
-                <!-- 開始畫面 -->
-                <div id="startScreen" class="text-center py-10">
-                    <!-- 一張計算機圖 -->
-                    <!--<svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto text-blue-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>-->
-                    <!-- 題目過濾選項 -->
-                    <div class="filters">
-                        <label><input type="checkbox" id="exclude1" checked> 不出現包含 1 的題目  </label>
-                        <p class="mb-4"></p>
-                        <label><input type="checkbox" id="exclude2" checked> 不出現包含 2 的題目  </label>
-                        <p class="mb-4"></p>
-                    </div>
-
-                    <label>每輪10題，可更換倒數時間：</label>
-                    <form name="myForm">
-                        <select id="timerSelect" onChange="renew();">
-                            <option value="20">20 秒</option>
-                            <option value="15">15 秒</option>
-                            <option value="10">10 秒</option>
-                            <option value="5">5 秒</option>
-                        </select>
-                    </form>
-                    <p id="timer1" class="text-gray-600 mb-6">測試你的乘法能力！秒數愈短能力需要愈好！</p>
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4">準備好挑戰九九乘法表了嗎？</h2>
-
-                    <button id="startButton" class="btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg">
-                        開始遊戲
-                    </button>
+            
+            <div id="question-container" class="text-center py-8">
+                <div class="text-4xl md:text-6xl font-bold text-blue-800 mb-6">
+                    <span id="num1">3</span> × <span id="num2">4</span> = ?
                 </div>
-
-                <!-- 問題區域 -->
-                <div id="questionScreen" class="hidden">
-                    <div id="questionCard" class="question-card bg-white border-2 border-gray-200 rounded-xl p-6 text-center">
-                        <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
-                            <span id="num1">3</span> × <span id="num2">4</span> = ?
-                        </h2>
-
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
-                            <button class="answer-btn btn bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 rounded-lg">12</button>
-                            <button class="answer-btn btn bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 rounded-lg">15</button>
-                            <button class="answer-btn btn bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 rounded-lg">16</button>
-                            <button class="answer-btn btn bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 rounded-lg">10</button>
-                        </div>
-                    </div>
-
-                    <div id="resultFeedback" class="hidden result-animation mt-4 p-4 rounded-lg text-center">
-                        <p id="resultText" class="text-xl font-bold"></p>
-                        <p id="correctAnswer" class="text-lg"></p>
-                    </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <!-- 答案選項會在這裡動態生成 -->
                 </div>
-
-                <!-- 結果畫面 -->
-                <div id="resultScreen" class="hidden text-center py-10">
-                    <div class="mb-6">
-                        <!--<svg id="trophyIcon" xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto text-yellow-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                        </svg>
-                        <svg id="trophyIcon" class="h-24 w-24 mx-auto text-yellow-500 mb-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" />
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13c0 2.038-2.239 4.5-5 4.5S7 15.038 7 13c0 1.444 10 1.444 10 0Z" />
-                            <path fill="currentColor" d="m9 6.811.618 1.253 1.382.2-1 .975.236 1.377L9 9.966l-1.236.65L8 9.239l-1-.975 1.382-.2L9 6.811Zm6 0 .618 1.253 1.382.2-1 .975.236 1.377L15 9.966l-1.236.65L14 9.239l-1-.975 1.382-.2L15 6.811Z" />
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m9 6.811.618 1.253 1.382.2-1 .975.236 1.377L9 9.966l-1.236.65L8 9.239l-1-.975 1.382-.2L9 6.811Zm6 0 .618 1.253 1.382.2-1 .975.236 1.377L15 9.966l-1.236.65L14 9.239l-1-.975 1.382-.2L15 6.811Z" />
-                        </svg>-->
-                        <svg version="1.1" id="Layer_1" class="h-36 w-36 mx-auto text-yellow-500 mb-4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0" y="0" viewBox="0 0 95.86 122.88" xml:space="preserve">
-                        <style>
-                            .st2 {
-                                fill: #ffd401
-                            }
-</style>
-                        <path d="M48.61 3.59c.32-1.63 1.17-2.68 2.32-3.22.94-.43 2.02-.48 3.16-.18.99.26 2.02.79 3.02 1.54 2.69 2.04 5.21 5.91 5.53 10.73.1 1.48.07 3.07-.07 4.75a47.6 47.6 0 01-.43 3.5h11.44l.05.01c1.86.07 3.66.53 5.18 1.32 1.31.69 2.42 1.62 3.19 2.8a7.113 7.113 0 011.16 4.27c-.05 1.22-.37 2.53-1.04 3.94.38 1.58.56 3.28.31 4.77-.21 1.27-.7 2.39-1.58 3.23.05 2.09-.23 3.84-.8 5.37-.58 1.56-1.44 2.86-2.56 4-.1 1.01-.26 1.96-.51 2.86-.32 1.13-.78 2.16-1.42 3.07-1.95 2.75-3.51 2.69-5.98 2.59-.34-.01-.72-.03-1.28-.03H45.9c-2.01 0-3.6-.29-5.04-1.02-1.43-.72-2.65-1.81-3.95-3.45l-.34-.95v-26.1l1.14-.31c2.89-.78 5.16-3.25 6.92-6.2 1.81-3.04 3.09-6.59 3.95-9.46V3.88l.03-.29zM14.99 24.67h16.67c1.27 0 2.29 1.04 2.29 2.29v30.49c0 1.26-1.04 2.29-2.29 2.29H14.99c-1.27 0-2.29-1.04-2.29-2.29V26.96c0-1.26 1.03-2.29 2.29-2.29zM52.21 3.14c-.25.11-.45.4-.57.9v7.61l-.07.44c-.93 3.08-2.3 6.98-4.33 10.38-1.91 3.2-4.39 5.94-7.61 7.21v23.29c.89 1.05 1.7 1.76 2.59 2.2.99.49 2.14.69 3.68.69h22.38c.4 0 .92.02 1.4.04 1.46.06 2.39.1 3.38-1.31.43-.61.75-1.32.98-2.13.24-.86.38-1.8.45-2.82l.47-1.01c.99-.94 1.74-1.98 2.22-3.28.49-1.32.71-2.93.59-4.93l-.05-.91.77-.48c.53-.33.82-.95.94-1.7.2-1.21-.01-2.68-.39-4.05l.12-1.11c.62-1.19.92-2.25.96-3.18.04-.97-.21-1.8-.67-2.5-.48-.73-1.19-1.32-2.04-1.77-1.11-.58-2.43-.91-3.83-.97H58.47l.34-1.81c.33-1.75.57-3.42.7-5 .13-1.55.16-2.99.07-4.29-.26-3.86-2.23-6.9-4.33-8.51-.67-.51-1.33-.86-1.94-1.02-.44-.1-.83-.1-1.1.02z" fill-rule="evenodd" clip-rule="evenodd" fill="#393939" /><defs><path id="SVGID_1_" d="M14.19 69.3l3.46 8.11 8.78.79c.39.03.67.37.64.76a.74.74 0 01-.24.47l-6.64 5.8 1.96 8.6a.71.71 0 01-.53.85.72.72 0 01-.54-.1l-7.54-4.51-7.57 4.52c-.34.19-.77.09-.97-.25a.686.686 0 01-.08-.52l1.96-8.6-6.64-5.8a.709.709 0 01-.07-.99.7.7 0 01.49-.24l8.76-.79 3.46-8.11c.15-.36.57-.53.92-.37.19.08.32.22.39.38z" /></defs>
-                        <clipPath id="SVGID_2_"><use xlink:href="#SVGID_1_" overflow="visible" /></clipPath><g clip-path="url(#SVGID_2_)"><defs><path id="SVGID_3_" d="M-.08 68.77h27.19v26.01H-.08z" /></defs><clipPath id="SVGID_4_"><use xlink:href="#SVGID_3_" overflow="visible" /></clipPath><g clip-path="url(#SVGID_4_)"><image width="64" height="58" xlink:href="data:image/jpeg;base64,/9j/4AAQSkZJRgABAgEAlgCWAAD/7AARRHVja3kAAQAEAAAAHgAA/+4AIUFkb2JlAGTAAAAAAQMA EAMCAwYAAAI7AAACmQAAA23/2wCEABALCwsMCxAMDBAXDw0PFxsUEBAUGx8XFxcXFx8eFxoaGhoX Hh4jJSclIx4vLzMzLy9AQEBAQEBAQEBAQEBAQEABEQ8PERMRFRISFRQRFBEUGhQWFhQaJhoaHBoa JjAjHh4eHiMwKy4nJycuKzU1MDA1NUBAP0BAQEBAQEBAQEBAQP/CABEIADwAQwMBIgACEQEDEQH/ xACfAAADAQEBAQAAAAAAAAAAAAAAAgUEAQMGAQACAwEAAAAAAAAAAAAAAAAAAwQFBgIQAAIBAwUA AwEBAAAAAAAAAAARAwEEBQIjFCQVEBIzIjQRAAACCAUEAwAAAAAAAAAAAAABECARoQJCggOBwRIy sjFBscJhInISAAIABAIKAwAAAAAAAAAAAAECABAxA7GyESGBkRIycoKScyJSQ//aAAwDAQACEQMR AAAA+68kw0cqiTiL3RJwFFpnu3mqBoYmDBun5iewpCa4gD++b3fzYA1tbOnUJuasWFIbmFAbTk0u 4tgaurmTKc3OWfDpDdw6BzTn0u4uAamp/9oACAECAAEFAL7IXEVz6t2erdkGTutcxk6dxCLWnYMl TtoRa07BkaU5aoKhbUpyD//aAAgBAwABBQCKHRq0ceM48Zrg0U0kFNpCJKfwW9NpCJabZbfj8S/m f//aAAgBAQABBQCe40wHoRHoRHoRHoRHoRHoREV5HLIZIYx/DGWX+kyYxjGMZZV7RlRjGMYyxr2j LDGMYxlhXtmYGMYxjMdXuGZGMYxjMbXumY+ptG2bZtm2bRjvpzD/2gAIAQICBj8Ae2jKFXh0aV01 UGOZfERzL4iLaMy8L3FU/EUJld7MonZ9yZpXO3KJ2famMrmv65RFYqIs6/1TGX//2gAIAQMCBj8A BI1mKHfFDvhiBQEyXbjNukyXbjN+k4SXbjN+hsJf/9oACAEBAQY/AIdRGeprGfA2xOG2Jw2xOG2J w2xOG2JwKAoTIz7mzsTUW6sl4MfBotVZLwY+DRaqyXt48TRaq9V7ePE0WavVe3VxNFmr1Xt1cTRZ 1Nm6UiZwmcJnCZwmcJnC2xrft1/Jo//Z" transform="matrix(.48 0 0 -.48 -1.005 95.888)" overflow="visible" /></g></g><path class="st2" d="M14.19 69.3l3.46 8.11 8.78.79c.39.03.67.37.64.76a.74.74 0 01-.24.47l-1.19 1.04c-3.23 1.12-7.47 1.79-12.11 1.79s-8.88-.68-12.11-1.79L.23 79.43a.709.709 0 01-.07-.99.7.7 0 01.49-.24l8.76-.79 3.46-8.11c.15-.36.57-.53.92-.37.2.07.33.21.4.37z" /><defs><path id="SVGID_5_" d="M48.58 69.3l3.46 8.11 8.78.79c.39.03.67.37.64.76a.74.74 0 01-.24.47l-6.64 5.8 1.96 8.6a.71.71 0 01-.53.85.72.72 0 01-.54-.1l-7.54-4.51-7.57 4.52c-.33.2-.77.09-.97-.24a.686.686 0 01-.08-.52l1.97-8.6-6.64-5.8a.709.709 0 01-.07-.99.7.7 0 01.49-.24l8.76-.79 3.46-8.11c.15-.36.57-.53.92-.37.18.07.31.21.38.37z" /></defs><clipPath id="SVGID_6_"><use xlink:href="#SVGID_5_" overflow="visible" /></clipPath><g clip-path="url(#SVGID_6_)"><defs><path id="SVGID_7_" d="M34.31 68.77H61.5v26.01H34.31z" /></defs><clipPath id="SVGID_8_"><use xlink:href="#SVGID_7_" overflow="visible" /></clipPath><g clip-path="url(#SVGID_8_)"><image width="64" height="58" xlink:href="data:image/jpeg;base64,/9j/4AAQSkZJRgABAgEAlgCWAAD/7AARRHVja3kAAQAEAAAAHgAA/+4AIUFkb2JlAGTAAAAAAQMA EAMCAwYAAAI8AAACngAAA2L/2wCEABALCwsMCxAMDBAXDw0PFxsUEBAUGx8XFxcXFx8eFxoaGhoX Hh4jJSclIx4vLzMzLy9AQEBAQEBAQEBAQEBAQEABEQ8PERMRFRISFRQRFBEUGhQWFhQaJhoaHBoa JjAjHh4eHiMwKy4nJycuKzU1MDA1NUBAP0BAQEBAQEBAQEBAQP/CABEIADwAQQMBIgACEQEDEQH/ xACeAAADAQEBAQAAAAAAAAAAAAAABAUCAQMGAQACAwEAAAAAAAAAAAAAAAAABAMFBgIQAAIABQQD AAMAAAAAAAAAAAARAQMjBAUCMjMVEhQkECITEQAAAwcEAQUAAAAAAAAAAAAAAQIQIHGhwTIDERJC cjEhQVFhgRIAAQIDBgYDAAAAAAAAAAAAARACADEDESFxgbHBkSIycpKyQlKC/9oADAMBAAIRAxEA AAD7nz8VKFqiThfuiTgKPrJdZ4fAvVZqbaWWsNdwKSbMAbdQeciogahCWi4jmLPRkVk0ZA1Qm0W4 qYGmrZCFBDNWnDorLw6BylOotw1ANJWf/9oACAECAAEFALvI3Mu47W7O1uyyyFzNuDIQ+tCMbD7C /h9SEY6H1l9CHtKAoGPhD2j/2gAIAQMAAQUAlydGrR68s9eWTJOjToJMKaET4UyRCkhFxCkSOL8X PCf/2gAIAQEAAQUAn3WiTq7CUdhKOwlHYSjsJR2EokXOifEyPKxjGMZjdxkuVjGMYzGbjJxrMYxj GYuP7GV5mMYxjMVuMtzMYxjGYjcZfnYxjGMw+4y/h/amUymUymUjEePkf//aAAgBAgIGPwCpTY5o a02DlEdTfER1N8RFOm9zS11tvLZIEpV7tlpYu9SlXu2Wl+vUpVv+W0TiYinf9vUp/9oACAEDAgY/ AASJxI8YkeMEgXhG4K7LVG4K7LVGYK7LVP/aAAgBAQEGPwAkqIzMy19BaqQtVIWqkLVSFqpC1UgZ JIy2/P2xPWr+SBVYnrV/JAqsR1q/kgVWI61N/JAqsR1qb+WBVYjrU38sE1Yjdrb7RMcpDlIcpDlI cpDlIZduvgvP6z//2Q==" transform="matrix(.48 0 0 -.48 33.199 95.888)" overflow="visible" /></g></g><path class="st2" d="M48.58 69.3l3.46 8.11 8.78.79c.39.03.67.37.64.76a.74.74 0 01-.24.47l-1.19 1.04c-3.23 1.12-7.47 1.79-12.11 1.79s-8.88-.68-12.11-1.79l-1.19-1.04a.709.709 0 01-.07-.99.7.7 0 01.49-.24l8.76-.79 3.46-8.11c.15-.36.57-.53.92-.37.2.07.33.21.4.37z" /><defs><path id="SVGID_9_" d="M82.97 69.3l3.46 8.11 8.78.79c.39.03.67.37.64.76a.74.74 0 01-.24.47l-6.64 5.8 1.96 8.6a.71.71 0 01-.53.85.72.72 0 01-.54-.1l-7.54-4.51-7.57 4.52c-.33.2-.77.09-.97-.24a.686.686 0 01-.08-.52l1.97-8.6-6.64-5.8a.709.709 0 01-.07-.99.7.7 0 01.49-.24l8.76-.79 3.46-8.11c.15-.36.57-.53.92-.37.18.07.31.21.38.37z" /></defs><clipPath id="SVGID_10_"><use xlink:href="#SVGID_9_" overflow="visible" /></clipPath><g clip-path="url(#SVGID_10_)"><defs><path id="SVGID_11_" d="M68.7 68.77h27.19v26.01H68.7z" /></defs><clipPath id="SVGID_12_"><use xlink:href="#SVGID_11_" overflow="visible" /></clipPath><g clip-path="url(#SVGID_12_)"><image width="64" height="58" xlink:href="data:image/jpeg;base64,/9j/4AAQSkZJRgABAgEAlgCWAAD/7AARRHVja3kAAQAEAAAAHgAA/+4AIUFkb2JlAGTAAAAAAQMA EAMCAwYAAAI0AAACmgAAA1D/2wCEABALCwsMCxAMDBAXDw0PFxsUEBAUGx8XFxcXFx8eFxoaGhoX Hh4jJSclIx4vLzMzLy9AQEBAQEBAQEBAQEBAQEABEQ8PERMRFRISFRQRFBEUGhQWFhQaJhoaHBoa JjAjHh4eHiMwKy4nJycuKzU1MDA1NUBAP0BAQEBAQEBAQEBAQP/CABEIADwAQwMBIgACEQEDEQH/ xACZAAADAQEBAQAAAAAAAAAAAAAABAUCAQMGAQACAwEAAAAAAAAAAAAAAAAAAwQFBgIQAAIBAwQC AgMAAAAAAAAAAAARAwEEBQIjJBUzFBIyEBM0EQABAQYHAQAAAAAAAAAAAAABABAgcaECMhEhMbFC cgMSEgACAQMACQUAAAAAAAAAAAABAhAAMQMhcZGxIjJyknMRQWESQ//aAAwDAQACEQMRAAAA+58/ JOilUScRu6JOAo7lsu5pgaCJOScRy9hruCGzZgDbKjMjisBrK6Yg6hmLLRkit0ZA02k29dkDVVkm fRn5q04dIreHQOOKOPXZA1FV/9oACAECAAEFALzI3MVx2t2drdltkrmScyNOWhFnTkmQpy0Is6ck v6U9pUFQtKU9g//aAAgBAwABBQCOHRq0evGevGa4dFNJDTbQiWm2QU2kImptlv4vxN4z/9oACAEB AAEFAJ7nRBXsIjsIjsIjsIjsIjsIiG70TazI/djGMYyw/oMl92MYxjMfXkGUruMYxjGY6vJMr5GM YxjMbXlGX8jGMYxmMryjMeRjGMYzF/1mX+H7No2zbNs2zaMZ8PaP/9oACAECAgY/AMmNGUKpHpw/ Fcy9ormXtFY0Zl+ruFPCLGMusbhOHyLGXWNwnD5FjLp9xuq9XFYtP6LH/9oACAEDAgY/AASL1Y7a sdtEgWELLdJhZfpMLL9Jj//aAAgBAQEGPwACoE455K2qStqkrapK2qStqkrapL4ppIOubKIF8QLK IHd8QLKIHd8QLPOB3fECzz6nd8dSzz6nd8dSzz+sbTpFcpLlJcpLlJcpLlJDDHH5OrP/2Q==" transform="matrix(.48 0 0 -.48 67.403 95.888)" overflow="visible" /></g></g><path class="st2" d="M82.97 69.3l3.46 8.11 8.78.79c.39.03.67.37.64.76a.74.74 0 01-.24.47l-1.19 1.04c-3.23 1.12-7.47 1.79-12.11 1.79s-8.88-.68-12.11-1.79l-1.19-1.04a.709.709 0 01-.07-.99.7.7 0 01.49-.24l8.76-.79 3.46-8.11c.15-.36.57-.53.92-.37.2.07.33.21.4.37z" /><g><defs><path id="SVGID_13_" d="M31.38 97.49l3.46 8.11 8.78.79c.39.03.67.37.64.76a.74.74 0 01-.24.47l-6.64 5.8 1.96 8.6a.71.71 0 01-.53.85.72.72 0 01-.54-.1l-7.54-4.51-7.57 4.52c-.33.2-.77.09-.97-.24a.686.686 0 01-.08-.52l1.97-8.6-6.64-5.8a.709.709 0 01-.07-.99.7.7 0 01.49-.24l8.76-.79 3.46-8.11c.15-.36.57-.53.92-.37.19.07.32.21.38.37z" /></defs><clipPath id="SVGID_14_"><use xlink:href="#SVGID_13_" overflow="visible" /></clipPath><g clip-path="url(#SVGID_14_)"><defs><path id="SVGID_15_" d="M17.11 96.96H44.3v26.01H17.11z" /></defs><clipPath id="SVGID_16_"><use xlink:href="#SVGID_15_" overflow="visible" /></clipPath><g clip-path="url(#SVGID_16_)"><image width="64" height="57" xlink:href="data:image/jpeg;base64,/9j/4AAQSkZJRgABAgEAlgCWAAD/7AARRHVja3kAAQAEAAAAHgAA/+4AIUFkb2JlAGTAAAAAAQMA EAMCAwYAAAI5AAAClgAAA2T/2wCEABALCwsMCxAMDBAXDw0PFxsUEBAUGx8XFxcXFx8eFxoaGhoX Hh4jJSclIx4vLzMzLy9AQEBAQEBAQEBAQEBAQEABEQ8PERMRFRISFRQRFBEUGhQWFhQaJhoaHBoa JjAjHh4eHiMwKy4nJycuKzU1MDA1NUBAP0BAQEBAQEBAQEBAQP/CABEIADoAQQMBIgACEQEDEQH/ xACdAAEBAQEBAQAAAAAAAAAAAAAABAUCAwYBAAMBAQEAAAAAAAAAAAAAAAADBAYFAhAAAgEDBAIC AwAAAAAAAAAAABEEAQIFAzMUJBMjITIgEjQRAAEBBgYBBQAAAAAAAAAAAAEAECBxkQIyETGxcgNE MyFBgRJDEgACAAQCCgMAAAAAAAAAAAABAgAQMQNBkREhcYGx4TJykjNRYXP/2gAMAwEAAhEDEQAA APsvFPmLaE5HuhOCivMvtVaNDJlTUS5To9OU7OnIOtHM0rk3DSwY8lMmW6nTlOzpyDvTydW5GgNH zsSPWnzPVhXEe4VwIdae6xNY0PN//9oACAECAAEFAJcmRbI5ck5ckxsjXvlEynZQjF07ZMp2UIxl O2S6WchWCsMb+vKP/9oACAEDAAEFANPTsrZ47Dx2GtZbSw0qetCJFPWaNPWhEmnqNF+P5PklPxH/ 2gAIAQEAAQUAlSdbS1udIOdIOdIOdIOdIOdIIetqatpP/oYxjGMxv0MhXssYxjGYzbMjXssYxjGY vbMlXtMYxjGYnbMpXtMYxjGYjbMr/WxjGMZh9om7/wCUD6H/2gAIAQICBj8Auqt24oFxgAGOiPdd 8zHuu+ZhFe5cdSG1MxIpK9+jTTY3CV39GmmxuErukt7Gw5xVvHnFW8ecJoJo2H1tl//aAAgBAwIG PwBSVFPiOlco6VygkACkl7RM7pJ2iZ3STUOkYxQZxQZwdQwxl//aAAgBAQEGPwD60HAYD2CuEgrh IK4SCuEgrhIK4SCqNZxIPowwD9cQwwD9cRowwD9cRowwD/JEaMO0P8m4aMO0P8m4aMPgyHkuXVXV XVXVXVXVVfjz/LL5Z//Z" transform="matrix(.48 0 0 -.48 16.097 123.508)" overflow="visible" /></g></g></g><path class="st2" d="M31.38 97.49l3.46 8.11 8.78.79c.39.03.67.37.64.76a.74.74 0 01-.24.47l-1.19 1.04c-3.23 1.12-7.47 1.79-12.11 1.79s-8.88-.68-12.11-1.79l-1.19-1.04a.709.709 0 01-.07-.99.7.7 0 01.49-.24l8.76-.79 3.46-8.11c.15-.36.57-.53.92-.37.21.07.34.21.4.37z" /><g><defs><path id="SVGID_17_" d="M65.78 97.49l3.46 8.11 8.78.79c.39.03.67.37.64.76a.74.74 0 01-.24.47l-6.64 5.8 1.96 8.6a.71.71 0 01-.53.85.72.72 0 01-.54-.1l-7.54-4.51-7.57 4.52c-.33.2-.77.09-.97-.24a.686.686 0 01-.08-.52l1.96-8.6-6.64-5.8a.709.709 0 01-.07-.99.7.7 0 01.49-.24l8.76-.79 3.46-8.11c.15-.36.57-.53.92-.37.19.07.32.21.39.37z" /></defs><clipPath id="SVGID_18_"><use xlink:href="#SVGID_17_" overflow="visible" /></clipPath><g clip-path="url(#SVGID_18_)"><defs><path id="SVGID_19_" d="M51.51 96.96H78.7v26.01H51.51z" /></defs><clipPath id="SVGID_20_"><use xlink:href="#SVGID_19_" overflow="visible" /></clipPath><g clip-path="url(#SVGID_20_)"><image width="64" height="57" xlink:href="data:image/jpeg;base64,/9j/4AAQSkZJRgABAgEAlgCWAAD/7AARRHVja3kAAQAEAAAAHgAA/+4AIUFkb2JlAGTAAAAAAQMA EAMCAwYAAAIzAAACkgAAA2L/2wCEABALCwsMCxAMDBAXDw0PFxsUEBAUGx8XFxcXFx8eFxoaGhoX Hh4jJSclIx4vLzMzLy9AQEBAQEBAQEBAQEBAQEABEQ8PERMRFRISFRQRFBEUGhQWFhQaJhoaHBoa JjAjHh4eHiMwKy4nJycuKzU1MDA1NUBAP0BAQEBAQEBAQEBAQP/CABEIADoAQwMBIgACEQEDEQH/ xACZAAEBAQEAAwAAAAAAAAAAAAAABAIFAQMGAQACAwEAAAAAAAAAAAAAAAAABAMFBgIQAAIBAwUB AQEBAAAAAAAAAAARBAECAyMzFCQFEyEgNBEAAQEHAwUBAAAAAAAAAAAAAQAQIJHBAjJyETFEQbGC M0MSEgABAgMHBAMAAAAAAAAAAAABAgMAEDERUXGRMnKSIcHhM0Fhgf/aAAwDAQACEQMRAAAA+z9H mbMu0Jy/dCcFFHPra46I0iXLlpkyljpkvJpkGrIbWoumNTX8iOuLLWmmS8mmQau597UXWGnrOLF1 5s1aQri8kK4EPQzUzFeNJWf/2gAIAQIAAQUAmSZFsnlyTlySDJz3SSbTtIRAp2ybTsoRAp2iZSzk qwVhBpbyT//aAAgBAwABBQDHjtrZ87D52GWy2lhippoRmppmGmmhGemkYX8v0/TO/kf/2gAIAQEA AQUAlycuLLzpBzpBzpBzpBzpBzpBDkZct56G+xjGMZ526ejXsMYxjGebXVPSr2GMYxjPLrrHqV7L GMYxnlV1j1a9pjGMYzyK6x63+pjGMYzx98nb39QNw//aAAgBAgIGPwB1KXXEgLNgCjZHud5mPc7z MNJU64pJV1BUSKSe3mbW7tJ3eZtbu0nbSrWfjzFVcfMVVx8w1YVarvrGX//aAAgBAwIGPwBJKRS6 NKco0pyhRCQPyScJqwkjbNWEkdBpvigzigzhXQUvl//aAAgBAQEGPwD80HQaA7K4QCuEArhAK4QC uEArhAKqms6gDXZniJv1YzZ4ib9eM2DETfrxmGDETfrxmGDETfrxmGDEdy/XjMM+Fo9ty4q4q4q4 q4q4qq9Nvy336s//2Q==" transform="matrix(.48 0 0 -.48 50.3 123.508)" overflow="visible" /></g></g></g><path class="st2" d="M65.78 97.49l3.46 8.11 8.78.79c.39.03.67.37.64.76a.74.74 0 01-.24.47l-1.19 1.04c-3.23 1.12-7.46 1.79-12.11 1.79-4.64 0-8.88-.68-12.11-1.79l-1.19-1.04a.709.709 0 01-.07-.99.7.7 0 01.49-.24l8.76-.79 3.46-8.11c.15-.36.57-.53.92-.37.2.07.33.21.4.37z" /></svg>
-                        <h2 class="text-2xl font-bold text-gray-800 mb-2">遊戲結束！！</h2>
-                        <p class="text-3xl font-bold text-blue-600 mb-4">你的得分：<span id="finalScore">0</span> / 10</p>
-                        <div id="resultMessage" class="text-lg text-gray-600 mb-6"></div>
-                    </div>
-
-                    <div class="flex flex-col md:flex-row justify-center gap-4">
-                        <button id="playAgainButton" class="btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg">
-                            再玩一次
-                        </button>
-                        <button id="BaerkButton" class="btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg">
-                            回首頁
-                        </button>
-                    </div>
-                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-bold text-blue-700 mb-4">九九乘法表</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse">
+                    <tbody id="multiplication-table" class="text-center">
+                        <!-- 乘法表會在這裡動態生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- 結果彈窗 -->
+        <div id="result-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-xl p-8 max-w-md w-full text-center">
+                <h2 class="text-2xl font-bold mb-4">挑戰結束！</h2>
+                <p class="text-lg mb-2">你的最終分數：<span id="final-score" class="font-bold text-green-600">0</span></p>
+                <p class="text-lg mb-6">答對題數：<span id="correct-answers" class="font-bold text-blue-600">0</span></p>
+                <button id="restart-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition">
+                    再玩一次
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- 音效 -->
-    <audio id="audioCorrect" src="assets/sounds/correct.mp3" preload="auto"></audio>
-    <audio id="audioWrong" src="assets/sounds/wrong.mp3" preload="auto"></audio>
-    <audio id="audioClick" src="assets/sounds/click.mp3" preload="auto"></audio>
-
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // 遊戲變數
-            const gameState = {
-                currentQuestion: 0,
-                totalQuestions: 10,
-                score: 0,
-                timePerQuestion: 15,
-                timer: null,
-                timeLeft: 15,
-                questions: [],
-                currentAnswer: null
-            };
-
-            // DOM 元素
-            const startScreen = document.getElementById('startScreen');
-            const questionScreen = document.getElementById('questionScreen');
-            const resultScreen = document.getElementById('resultScreen');
-            const startButton = document.getElementById('startButton');
-            const questionCounter = document.getElementById('questionCounter');
-            const scoreElement = document.getElementById('score');
-            const timerElement = document.getElementById('timer');
-            const timerBar = document.getElementById('timerBar');
-            const questionCard = document.getElementById('questionCard');
-            const num1Element = document.getElementById('num1');
-            const num2Element = document.getElementById('num2');
-            const resultFeedback = document.getElementById('resultFeedback');
-            const resultText = document.getElementById('resultText');
-            const correctAnswer = document.getElementById('correctAnswer');
-            const finalScore = document.getElementById('finalScore');
-            const resultMessage = document.getElementById('resultMessage');
-            const playAgainButton = document.getElementById('playAgainButton');
-            const BaerkButton = document.getElementById('BaerkButton');
-            const answerButtons = document.querySelectorAll('.answer-btn');
-
-            // 開始遊戲
-            startButton.addEventListener('click', startGame);
-            playAgainButton.addEventListener('click', startGame);
-            BaerkButton.addEventListener('click', barekGame);
-
-            // 答案按鈕事件
-            answerButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    checkAnswer(parseInt(this.textContent));
-                });
+        // 初始化變數
+        let score = 0;
+        let timer = 60;
+        let timerInterval;
+        let correctAnswers = 0;
+        let totalQuestions = 0;
+        let currentAnswer = 0;
+        
+        // DOM 元素
+        const scoreElement = document.getElementById('score');
+        const timerElement = document.getElementById('timer');
+        const num1Element = document.getElementById('num1');
+        const num2Element = document.getElementById('num2');
+        const questionContainer = document.getElementById('question-container');
+        const difficultySelect = document.getElementById('difficulty');
+        const resultModal = document.getElementById('result-modal');
+        const finalScoreElement = document.getElementById('final-score');
+        const correctAnswersElement = document.getElementById('correct-answers');
+        const restartBtn = document.getElementById('restart-btn');
+        
+        // 生成乘法表
+        function generateMultiplicationTable() {
+            const table = document.getElementById('multiplication-table');
+            table.innerHTML = '';
+            
+            // 表頭行
+            const headerRow = document.createElement('tr');
+            headerRow.innerHTML = '<td class="border border-gray-300 bg-blue-100 p-2 font-bold">×</td>';
+            for (let i = 1; i <= 9; i++) {
+                headerRow.innerHTML += `<td class="border border-gray-300 bg-blue-100 p-2 font-bold">${i}</td>`;
+            }
+            table.appendChild(headerRow);
+            
+            // 表格內容
+            for (let i = 1; i <= 9; i++) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td class="border border-gray-300 bg-blue-100 p-2 font-bold">${i}</td>`;
+                
+                for (let j = 1; j <= 9; j++) {
+                    const result = i * j;
+                    row.innerHTML += `<td class="border border-gray-300 p-2 hover:bg-blue-50">${i} × ${j} = ${result}</td>`;
+                }
+                
+                table.appendChild(row);
+            }
+        }
+        
+        // 生成新問題
+        function generateQuestion() {
+            const difficulty = difficultySelect.value;
+            let maxNum;
+            
+            switch (difficulty) {
+                case 'easy':
+                    maxNum = 5;
+                    break;
+                case 'medium':
+                    maxNum = 9;
+                    break;
+                case 'hard':
+                    maxNum = 9;
+                    break;
+                default:
+                    maxNum = 9;
+            }
+            
+            const num1 = Math.floor(Math.random() * maxNum) + 1;
+            const num2 = Math.floor(Math.random() * maxNum) + 1;
+            
+            num1Element.textContent = num1;
+            num2Element.textContent = num2;
+            
+            currentAnswer = num1 * num2;
+            
+            // 生成答案選項
+            generateAnswerOptions(currentAnswer, maxNum);
+            
+            totalQuestions++;
+        }
+        
+        // 生成答案選項
+        function generateAnswerOptions(correctAnswer, maxNum) {
+            const optionsContainer = questionContainer.querySelector('.grid');
+            optionsContainer.innerHTML = '';
+            
+            // 創建包含正確答案的選項數組
+            const options = [correctAnswer];
+            
+            // 添加3個不同的錯誤選項
+            while (options.length < 4) {
+                const wrongAnswer = Math.floor(Math.random() * (maxNum * maxNum)) + 1;
+                if (!options.includes(wrongAnswer)) {
+                    options.push(wrongAnswer);
+                }
+            }
+            
+            // 打亂選項順序
+            shuffleArray(options);
+            
+            // 創建選項按鈕
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'card bg-blue-50 hover:bg-blue-100 p-4 rounded-lg text-xl font-bold';
+                button.textContent = option;
+                button.addEventListener('click', () => checkAnswer(option));
+                optionsContainer.appendChild(button);
             });
-
-            var l1 = 0;
-
-            function getRandom() {
-                var correctGuess = true;
-
-                const exclude1 = document.getElementById("exclude1").checked;
-                const exclude2 = document.getElementById("exclude2").checked;
-                var num11 = Math.floor(Math.random() * 9) + 1;
-                var num22 = Math.floor(Math.random() * 9) + 1;
-                while (correctGuess) {
-                    num11 = Math.floor(Math.random() * 9) + 1;
-                    num22 = Math.floor(Math.random() * 9) + 1;
-                    if (num11 == l1)
-                        correctGuess = true;
-                    else if ((num11 === 1 || num22 === 1) && exclude1)
-                        correctGuess = true;
-                    else if ((num11 === 2 || num22 === 2) && exclude2)
-                        correctGuess = true;
-                    else
-                        return [num11, num22];
-                }
-            };
-
-
-            // 生成問題
-            function generateQuestions() {
-                const questions = [];
-
-                for (let i = 0; i < gameState.totalQuestions; i++) {
-                    const [num1, num2] = getRandom();
-                    l1 = num1;
-
-                    const correctAnswer = num1 * num2;
-
-                    // 生成三個不同的錯誤答案
-                    const wrongAnswers = [];
-                    while (wrongAnswers.length < 3) {
-                        const wrongAnswer = Math.floor(Math.random() * 81) + 1;
-                        if (wrongAnswer !== correctAnswer && !wrongAnswers.includes(wrongAnswer)) {
-                            wrongAnswers.push(wrongAnswer);
-                        }
-                    }
-
-                    // 將正確答案和錯誤答案混合並打亂順序
-                    const answers = [...wrongAnswers, correctAnswer].sort(() => Math.random() - 0.5);
-
-                    questions.push({
-                        num1,
-                        num2,
-                        correctAnswer,
-                        answers
-                    });
-                }
-                return questions;
+        }
+        
+        // 檢查答案
+        function checkAnswer(selectedAnswer) {
+            if (selectedAnswer === currentAnswer) {
+                // 答對
+                score += 10;
+                scoreElement.textContent = score;
+                correctAnswers++;
+                
+                // 創建煙花效果
+                createConfetti();
+                
+                // 顯示正確提示
+                showFeedback(true);
+            } else {
+                // 答錯
+                showFeedback(false);
             }
-            // 回首頁
-            function barekGame() {
-                document.getElementById("audioClick").play();
-                // 重置遊戲狀態
-                gameState.currentQuestion = 0;
-                gameState.score = 0;
-                //gameState.questions = generateQuestions();
-                //gameState.timePerQuestion = parseInt(document.getElementById("timerSelect").value);
-                // 更新 UI
-                startScreen.classList.remove('hidden');
-                questionScreen.classList.add('hidden');
-                resultScreen.classList.add('hidden');
-                scoreElement.textContent = '0';
-                //questionCounter.textContent = `1 / ${gameState.totalQuestions}`;
-
-                // 顯示第一個問題
-                //showQuestion();
-            }
-
-            // 開始遊戲
-            function startGame() {
-                document.getElementById("audioClick").play();
-                // 重置遊戲狀態
-                gameState.currentQuestion = 0;
-                gameState.score = 0;
-                gameState.questions = generateQuestions();
-                gameState.timePerQuestion = parseInt(document.getElementById("timerSelect").value);
-                // 更新 UI
-                startScreen.classList.add('hidden');
-                resultScreen.classList.add('hidden');
-                questionScreen.classList.remove('hidden');
-                scoreElement.textContent = '0';
-                questionCounter.textContent = `1 / ${gameState.totalQuestions}`;
-
-                // 顯示第一個問題
-                showQuestion();
-            }
-
-            // 顯示問題
-            function showQuestion() {
-                clearInterval(gameState.timer);
-
-                if (gameState.currentQuestion >= gameState.totalQuestions) {
-                    endGame();
-                    return;
-                }
-
-                const question = gameState.questions[gameState.currentQuestion];
-
-                // 更新問題文字
-                num1Element.textContent = question.num1;
-                num2Element.textContent = question.num2;
-
-                // 更新答案按鈕
-                answerButtons.forEach((button, index) => {
-                    button.textContent = question.answers[index];
-                    button.disabled = false;
-                    button.classList.remove('bg-green-500', 'bg-red-500', 'text-white');
-                    button.classList.add('bg-gray-100', 'hover:bg-gray-200', 'text-gray-800');
-                });
-
-                // 重置問題卡片樣式
-                questionCard.classList.remove('correct', 'incorrect');
-                resultFeedback.classList.add('hidden');
-
-                // 更新計數器
-                questionCounter.textContent = `${gameState.currentQuestion + 1} / ${gameState.totalQuestions}`;
-
-                // 設置當前答案
-                gameState.currentAnswer = question.correctAnswer;
-
-                // 重置並啟動計時器
-                gameState.timeLeft = gameState.timePerQuestion;
-                timerElement.textContent = `${gameState.timeLeft} 秒`;
-                timerBar.style.width = '100%';
-
-                gameState.timer = setInterval(updateTimer, 1000);
-            }
-
-            // 更新計時器
-            function updateTimer() {
-                gameState.timeLeft--;
-                timerElement.textContent = `${gameState.timeLeft} 秒`;
-                timerBar.style.width = `${(gameState.timeLeft / gameState.timePerQuestion) * 100}%`;
-
-                if (gameState.timeLeft <= 0) {
-                    clearInterval(gameState.timer);
-                    showFeedback(false);
-                }
-            }
-
-            // 檢查答案
-            function checkAnswer(answer) {
-                clearInterval(gameState.timer);
-
-                const isCorrect = answer === gameState.currentAnswer;
-
-                if (isCorrect) {
-                    gameState.score++;
-                    scoreElement.textContent = gameState.score;
-                }
-
-                // 禁用所有按鈕
-                answerButtons.forEach(button => {
-                    button.disabled = true;
-                });
-
-                // 標記正確和錯誤的按鈕
-                answerButtons.forEach(button => {
-                    const buttonValue = parseInt(button.textContent);
-                    if (buttonValue === gameState.currentAnswer) {
-                        button.classList.remove('bg-gray-100', 'hover:bg-gray-200', 'text-gray-800');
-                        button.classList.add('bg-green-500', 'text-white');
-                    } else if (buttonValue === answer && !isCorrect) {
-                        button.classList.remove('bg-gray-100', 'hover:bg-gray-200', 'text-gray-800');
-                        button.classList.add('bg-red-500', 'text-white');
-                    }
-                });
-
-                showFeedback(isCorrect);
-            }
-
-            // 顯示反饋
-            function showFeedback(isCorrect) {
-                questionCard.classList.add(isCorrect ? 'correct' : 'incorrect');
-                resultFeedback.classList.remove('hidden');
-
-                if (isCorrect) {
-                    document.getElementById("audioCorrect").play();
-                    resultText.textContent = '答對了！';
-                    resultText.className = 'text-xl font-bold text-green-600';
-                    correctAnswer.textContent = '';
-                } else {
-                    document.getElementById("audioWrong").play();
-                    resultText.textContent = '答錯了！';
-                    resultText.className = 'text-xl font-bold text-red-600';
-                    correctAnswer.textContent = `正確答案：${gameState.currentAnswer}`;
-                }
-
-                // 延遲後顯示下一題
+            
+            // 生成新問題
+            setTimeout(generateQuestion, 800);
+        }
+        
+        // 顯示答題反饋
+        function showFeedback(isCorrect) {
+            const feedback = document.createElement('div');
+            feedback.className = `absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
+                                text-4xl font-bold p-4 rounded-lg ${isCorrect ? 'text-green-500' : 'text-red-500'}`;
+            feedback.textContent = isCorrect ? '✓ 正確!' : '✗ 錯誤!';
+            feedback.style.zIndex = '10';
+            feedback.style.pointerEvents = 'none';
+            feedback.style.animation = 'fadeOut 0.8s forwards';
+            
+            document.body.appendChild(feedback);
+            
+            setTimeout(() => {
+                document.body.removeChild(feedback);
+            }, 800);
+        }
+        
+        // 創建煙花效果
+        function createConfetti() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+            
+            for (let i = 0; i < 30; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDuration = `${Math.random() * 2 + 1}s`;
+                
+                document.body.appendChild(confetti);
+                
                 setTimeout(() => {
-                    gameState.currentQuestion++;
-                    showQuestion();
-                }, 1500);
+                    document.body.removeChild(confetti);
+                }, 3000);
             }
-
-            // 結束遊戲
-            function endGame() {
-                document.getElementById("audioClick").play();
-                questionScreen.classList.add('hidden');
-                resultScreen.classList.remove('hidden');
-
-                finalScore.textContent = gameState.score;
-
-                // 根據分數顯示不同的訊息
-                if (gameState.score === gameState.totalQuestions) {
-                    resultMessage.textContent = '太厲害了！你是乘法表大師！';
-                    createConfetti();
-                } else if (gameState.score >= gameState.totalQuestions * 0.7) {
-                    resultMessage.textContent = '做得很好！再接再厲！';
-                } else if (gameState.score >= gameState.totalQuestions * 0.4) {
-                    resultMessage.textContent = '還不錯，繼續練習吧！';
-                } else {
-                    resultMessage.textContent = '需要多練習九九乘法表哦！';
+        }
+        
+        // 開始計時器
+        function startTimer() {
+            clearInterval(timerInterval);
+            timer = 60;
+            timerElement.textContent = timer;
+            
+            timerInterval = setInterval(() => {
+                timer--;
+                timerElement.textContent = timer;
+                
+                if (timer <= 0) {
+                    clearInterval(timerInterval);
+                    endGame();
                 }
+            }, 1000);
+        }
+        
+        // 結束遊戲
+        function endGame() {
+            clearInterval(timerInterval);
+            resultModal.classList.remove('hidden');
+            finalScoreElement.textContent = score;
+            correctAnswersElement.textContent = `${correctAnswers}/${totalQuestions}`;
+        }
+        
+        // 重新開始遊戲
+        function restartGame() {
+            score = 0;
+            correctAnswers = 0;
+            totalQuestions = 0;
+            scoreElement.textContent = score;
+            resultModal.classList.add('hidden');
+            startTimer();
+            generateQuestion();
+        }
+        
+        // 打亂數組
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
             }
-
-            // 創建五彩紙屑效果
-            function createConfetti() {
-                const colors = ['#f94144', '#f3722c', '#f8961e', '#f9c74f', '#90be6d', '#43aa8b', '#577590'];
-                const container = document.getElementById('resultScreen');
-
-                for (let i = 0; i < 50; i++) {
-                    const confetti = document.createElement('div');
-                    confetti.className = 'confetti';
-                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                    confetti.style.left = Math.random() * 100 + '%';
-                    confetti.style.top = -20 + 'px';
-                    confetti.style.transform = 'rotate(' + Math.random() * 360 + 'deg)';
-
-                    container.appendChild(confetti);
-
-                    const animation = confetti.animate([
-                        {
-                            transform: 'translate3d(0, 0, 0) rotate(' + Math.random() * 360 + 'deg)',
-                            opacity: 1
-                        },
-                        {
-                            transform: 'translate3d(' + (Math.random() * 200 - 100) + 'px, ' + (Math.random() * 500 + 200) + 'px, 0) rotate(' + Math.random() * 360 + 'deg)',
-                            opacity: 0
-                        }
-                    ], {
-                        duration: Math.random() * 3000 + 2000,
-                        delay: Math.random() * 1000,
-                        fill: 'forwards'
-                    });
-
-                    animation.onfinish = () => {
-                        confetti.remove();
-                    };
-                }
-            }
+        }
+        
+        // 初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            generateMultiplicationTable();
+            generateQuestion();
+            startTimer();
+            
+            // 事件監聽器
+            difficultySelect.addEventListener('change', generateQuestion);
+            restartBtn.addEventListener('click', restartGame);
         });
     </script>
-    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9351c9fe153a0744',t:'MTc0NTQ1Nzc0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
-</body>
-</HTML>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93533d968350a343',t:'MTc0NTQ3Mjk2MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
