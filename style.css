@@ -1,28 +1,40 @@
-
 body {
-  font-family: sans-serif;
-  padding: 20px;
-  background: #f0f8ff;
+    font-family: sans-serif;
+    text-align: center;
+    background-color: #f2f2f2;
+    margin: 0;
+    padding: 20px;
 }
-button {
-  padding: 10px 20px;
-  margin: 10px;
-  font-size: 1.2em;
+
+h1 {
+    color: #333;
 }
+
+#question {
+    font-size: 2em;
+    margin: 20px 0;
+}
+
+#options button {
+    padding: 10px 20px;
+    margin: 10px;
+    font-size: 2.2em;
+}
+
 #timerBarContainer {
-  width: 100%;
-  background-color: #ddd;
-  height: 20px;
-  border-radius: 10px;
-  margin: 10px 0;
+    width: 80%;
+    height: 20px;
+    background-color: #ddd;
+    margin: 10px auto;
 }
+
 #timerBar {
-  height: 100%;
-  width: 100%;
-  background-color: #4caf50;
-  border-radius: 10px;
-  transition: width 1s linear;
+    height: 100%;
+    background-color: #4caf50;
+    width: 100%;
 }
-.filters, .timer-options {
-  margin-bottom: 10px;
+
+#score, #resultArea {
+    margin-top: 20px;
+    font-size: 1.2em;
 }
