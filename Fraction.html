@@ -1,0 +1,392 @@
+﻿
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分數探險家</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0f9ff;
+        }
+        
+        .fraction-shape {
+            transition: all 0.3s ease;
+        }
+        
+        .fraction-shape:hover {
+            transform: scale(1.05);
+        }
+        
+        .fraction-shape.correct {
+            animation: correct 0.5s ease;
+        }
+        
+        @keyframes correct {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            border-radius: 50%;
+            animation: fall 3s ease-in infinite;
+        }
+        
+        @keyframes fall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(600px) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <div id="confetti-container" class="fixed inset-0 pointer-events-none z-50"></div>
+    
+    <header class="bg-blue-600 text-white p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl md:text-3xl font-bold">分數探險家</h1>
+            <div class="flex items-center gap-4">
+                <div class="bg-white text-blue-600 px-3 py-1 rounded-full font-bold">
+                    分數: <span id="score">0</span>
+                </div>
+                <button id="restart-btn" class="bg-yellow-400 hover:bg-yellow-500 text-blue-800 px-3 py-1 rounded-full font-bold transition">
+                    重新開始
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <main class="container mx-auto flex-grow p-4">
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold text-blue-800 mb-4">遊戲說明</h2>
+            <p class="text-gray-700">將左邊的分數與右邊對應的圖形配對起來！點擊一個分數，再點擊一個圖形，看看你是否正確！</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-blue-100 rounded-xl p-6 shadow-md">
+                <h3 class="text-lg font-bold text-blue-800 mb-4">分數</h3>
+                <div id="fractions" class="grid grid-cols-2 gap-4">
+                    <!-- 分數選項會在這裡動態生成 -->
+                </div>
+            </div>
+            
+            <div class="bg-green-100 rounded-xl p-6 shadow-md">
+                <h3 class="text-lg font-bold text-green-800 mb-4">圖形</h3>
+                <div id="shapes" class="grid grid-cols-2 gap-4">
+                    <!-- 圖形選項會在這裡動態生成 -->
+                </div>
+            </div>
+        </div>
+        
+        <div id="result" class="mt-6 p-4 rounded-xl text-center text-xl font-bold hidden"></div>
+        
+        <div class="mt-8 bg-yellow-100 rounded-xl p-6 shadow-md">
+            <h2 class="text-xl font-bold text-yellow-800 mb-4">分數小知識</h2>
+            <p class="text-gray-700">分數是由分子和分母組成的。分母告訴我們整體被分成幾等份，分子告訴我們我們有幾份。例如，在 1/4 中，4 是分母，表示整體被分成 4 等份；1 是分子，表示我們有 1 份。</p>
+        </div>
+    </main>
+    
+    <div id="level-complete" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-40 hidden">
+        <div class="bg-white rounded-xl p-8 max-w-md text-center">
+            <h2 class="text-2xl font-bold text-blue-600 mb-4">太棒了！</h2>
+            <p class="text-xl mb-6">你完成了這一關！</p>
+            <div class="flex justify-center space-x-4">
+                <button id="next-level-btn" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full font-bold transition">
+                    下一關
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="bg-blue-800 text-white p-4 text-center">
+        <p>分數探險家 - 幫助孩子學習分數的有趣遊戲</p>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentLevel = 1;
+            let maxLevel = 3;
+            let score = 0;
+            let selectedFraction = null;
+            let matchedPairs = 0;
+            let totalPairs = 4;
+            
+            const fractionContainer = document.getElementById('fractions');
+            const shapesContainer = document.getElementById('shapes');
+            const scoreElement = document.getElementById('score');
+            const resultElement = document.getElementById('result');
+            const levelCompleteModal = document.getElementById('level-complete');
+            const nextLevelBtn = document.getElementById('next-level-btn');
+            const restartBtn = document.getElementById('restart-btn');
+            const confettiContainer = document.getElementById('confetti-container');
+            
+            // 初始化遊戲
+            initGame();
+            
+            function initGame() {
+                fractionContainer.innerHTML = '';
+                shapesContainer.innerHTML = '';
+                matchedPairs = 0;
+                resultElement.classList.add('hidden');
+                
+                let fractions = [];
+                
+                if (currentLevel === 1) {
+                    fractions = [
+                        { value: '1/2', text: '二分之一' },
+                        { value: '1/4', text: '四分之一' },
+                        { value: '3/4', text: '四分之三' },
+                        { value: '1/3', text: '三分之一' }
+                    ];
+                } else if (currentLevel === 2) {
+                    fractions = [
+                        { value: '2/3', text: '三分之二' },
+                        { value: '1/5', text: '五分之一' },
+                        { value: '2/5', text: '五分之二' },
+                        { value: '3/5', text: '五分之三' }
+                    ];
+                } else {
+                    fractions = [
+                        { value: '1/6', text: '六分之一' },
+                        { value: '5/6', text: '六分之五' },
+                        { value: '1/8', text: '八分之一' },
+                        { value: '3/8', text: '八分之三' }
+                    ];
+                }
+                
+                // 打亂順序
+                fractions = shuffleArray(fractions);
+                const shuffledShapes = shuffleArray([...fractions]);
+                
+                // 創建分數按鈕
+                fractions.forEach(fraction => {
+                    const fractionBtn = document.createElement('button');
+                    fractionBtn.className = 'fraction-btn bg-white hover:bg-blue-50 p-4 rounded-lg shadow text-center transition';
+                    fractionBtn.dataset.value = fraction.value;
+                    
+                    fractionBtn.innerHTML = `
+                        <div class="text-2xl font-bold text-blue-600">${fraction.value}</div>
+                        <div class="text-sm text-gray-600">${fraction.text}</div>
+                    `;
+                    
+                    fractionBtn.addEventListener('click', () => selectFraction(fraction.value));
+                    fractionContainer.appendChild(fractionBtn);
+                });
+                
+                // 創建圖形
+                shuffledShapes.forEach(fraction => {
+                    const shapeDiv = document.createElement('div');
+                    shapeDiv.className = 'fraction-shape bg-white p-4 rounded-lg shadow cursor-pointer';
+                    shapeDiv.dataset.value = fraction.value;
+                    
+                    const [numerator, denominator] = fraction.value.split('/').map(Number);
+                    
+                    // 創建分數圖形
+                    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    svg.setAttribute('viewBox', '0 0 100 100');
+                    svg.setAttribute('class', 'w-full h-32');
+                    
+                    if (denominator === 2) {
+                        // 二分之一的圖形
+                        svg.innerHTML = `
+                            <rect x="0" y="0" width="100" height="100" fill="#e5e5e5" stroke="#333" stroke-width="2" />
+                            <rect x="0" y="0" width="100" height="${100 * numerator / denominator}" fill="#60a5fa" stroke="#333" stroke-width="2" />
+                        `;
+                    } else if (denominator === 3) {
+                        // 三分之幾的圖形
+                        svg.innerHTML = `
+                            <rect x="0" y="0" width="100" height="100" fill="#e5e5e5" stroke="#333" stroke-width="2" />
+                            ${Array.from({length: numerator}).map((_, i) => 
+                                `<rect x="0" y="${i * (100/denominator)}" width="100" height="${100/denominator}" fill="#60a5fa" stroke="#333" stroke-width="2" />`
+                            ).join('')}
+                        `;
+                    } else if (denominator === 4) {
+                        // 四分之幾的圖形 (2x2 網格)
+                        svg.innerHTML = `
+                            <rect x="0" y="0" width="100" height="100" fill="#e5e5e5" stroke="#333" stroke-width="2" />
+                            ${Array.from({length: 4}).map((_, i) => {
+                                const row = Math.floor(i / 2);
+                                const col = i % 2;
+                                const fill = i < numerator ? '#60a5fa' : '#e5e5e5';
+                                return `<rect x="${col * 50}" y="${row * 50}" width="50" height="50" fill="${fill}" stroke="#333" stroke-width="2" />`;
+                            }).join('')}
+                        `;
+                    } else if (denominator === 5) {
+                        // 五分之幾的圖形
+                        svg.innerHTML = `
+                            <rect x="0" y="0" width="100" height="100" fill="#e5e5e5" stroke="#333" stroke-width="2" />
+                            ${Array.from({length: numerator}).map((_, i) => 
+                                `<rect x="0" y="${i * (100/denominator)}" width="100" height="${100/denominator}" fill="#60a5fa" stroke="#333" stroke-width="2" />`
+                            ).join('')}
+                        `;
+                    } else if (denominator === 6) {
+                        // 六分之幾的圖形 (3x2 網格)
+                        svg.innerHTML = `
+                            <rect x="0" y="0" width="100" height="100" fill="#e5e5e5" stroke="#333" stroke-width="2" />
+                            ${Array.from({length: 6}).map((_, i) => {
+                                const row = Math.floor(i / 3);
+                                const col = i % 3;
+                                const fill = i < numerator ? '#60a5fa' : '#e5e5e5';
+                                return `<rect x="${col * (100/3)}" y="${row * 50}" width="${100/3}" height="50" fill="${fill}" stroke="#333" stroke-width="2" />`;
+                            }).join('')}
+                        `;
+                    } else if (denominator === 8) {
+                        // 八分之幾的圖形 (4x2 網格)
+                        svg.innerHTML = `
+                            <rect x="0" y="0" width="100" height="100" fill="#e5e5e5" stroke="#333" stroke-width="2" />
+                            ${Array.from({length: 8}).map((_, i) => {
+                                const row = Math.floor(i / 4);
+                                const col = i % 4;
+                                const fill = i < numerator ? '#60a5fa' : '#e5e5e5';
+                                return `<rect x="${col * 25}" y="${row * 50}" width="25" height="50" fill="${fill}" stroke="#333" stroke-width="2" />`;
+                            }).join('')}
+                        `;
+                    }
+                    
+                    shapeDiv.appendChild(svg);
+                    shapeDiv.addEventListener('click', () => checkMatch(fraction.value));
+                    shapesContainer.appendChild(shapeDiv);
+                });
+            }
+            
+            function selectFraction(value) {
+                // 取消之前的選擇
+                document.querySelectorAll('.fraction-btn').forEach(btn => {
+                    btn.classList.remove('ring-4', 'ring-blue-500');
+                });
+                
+                // 選擇新的分數
+                const btn = document.querySelector(`.fraction-btn[data-value="${value}"]`);
+                btn.classList.add('ring-4', 'ring-blue-500');
+                selectedFraction = value;
+            }
+            
+            function checkMatch(shapeValue) {
+                if (!selectedFraction) {
+                    showResult('請先選擇一個分數！', 'warning');
+                    return;
+                }
+                
+                const shapeElement = document.querySelector(`.fraction-shape[data-value="${shapeValue}"]`);
+                
+                if (selectedFraction === shapeValue) {
+                    // 正確配對
+                    score += 10;
+                    scoreElement.textContent = score;
+                    
+                    shapeElement.classList.add('correct');
+                    shapeElement.style.opacity = '0.5';
+                    shapeElement.style.pointerEvents = 'none';
+                    
+                    const fractionBtn = document.querySelector(`.fraction-btn[data-value="${selectedFraction}"]`);
+                    fractionBtn.style.opacity = '0.5';
+                    fractionBtn.style.pointerEvents = 'none';
+                    fractionBtn.classList.remove('ring-4', 'ring-blue-500');
+                    
+                    selectedFraction = null;
+                    matchedPairs++;
+                    
+                    showResult('正確！', 'success');
+                    createConfetti(10);
+                    
+                    // 檢查是否完成所有配對
+                    if (matchedPairs === totalPairs) {
+                        setTimeout(() => {
+                            levelCompleteModal.classList.remove('hidden');
+                            createConfetti(50);
+                        }, 1000);
+                    }
+                } else {
+                    // 錯誤配對
+                    showResult('不對，再試一次！', 'error');
+                }
+            }
+            
+            function showResult(message, type) {
+                resultElement.textContent = message;
+                resultElement.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'bg-yellow-100', 'text-yellow-800');
+                
+                if (type === 'success') {
+                    resultElement.classList.add('bg-green-100', 'text-green-800');
+                } else if (type === 'error') {
+                    resultElement.classList.add('bg-red-100', 'text-red-800');
+                } else {
+                    resultElement.classList.add('bg-yellow-100', 'text-yellow-800');
+                }
+                
+                setTimeout(() => {
+                    resultElement.classList.add('hidden');
+                }, 2000);
+            }
+            
+            function createConfetti(count) {
+                const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+                
+                for (let i = 0; i < count; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = `${Math.random() * 100}%`;
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDuration = `${Math.random() * 2 + 2}s`;
+                    confetti.style.animationDelay = `${Math.random() * 0.5}s`;
+                    
+                    confettiContainer.appendChild(confetti);
+                    
+                    // 動畫結束後移除
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 3000);
+                }
+            }
+            
+            // 下一關按鈕
+            nextLevelBtn.addEventListener('click', () => {
+                if (currentLevel < maxLevel) {
+                    currentLevel++;
+                    levelCompleteModal.classList.add('hidden');
+                    initGame();
+                } else {
+                    // 遊戲全部完成
+                    levelCompleteModal.querySelector('h2').textContent = '恭喜！';
+                    levelCompleteModal.querySelector('p').textContent = `你完成了所有關卡！總分：${score}`;
+                    nextLevelBtn.textContent = '重新開始';
+                    nextLevelBtn.addEventListener('click', () => {
+                        currentLevel = 1;
+                        score = 0;
+                        scoreElement.textContent = score;
+                        levelCompleteModal.classList.add('hidden');
+                        initGame();
+                    }, { once: true });
+                }
+            });
+            
+            // 重新開始按鈕
+            restartBtn.addEventListener('click', () => {
+                currentLevel = 1;
+                score = 0;
+                scoreElement.textContent = score;
+                levelCompleteModal.classList.add('hidden');
+                initGame();
+            });
+            
+            // 輔助函數：打亂數組
+            function shuffleArray(array) {
+                const newArray = [...array];
+                for (let i = newArray.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+                }
+                return newArray;
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'935c75d764bc0744',t:'MTc0NTU2OTYzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
