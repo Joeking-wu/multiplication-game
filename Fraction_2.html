@@ -1,0 +1,751 @@
+﻿
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分數探險家</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0f9ff;
+        }
+        
+        .fraction-shape {
+            transition: all 0.3s ease;
+        }
+        
+        .fraction-shape:hover {
+            transform: scale(1.05);
+        }
+        
+        .fraction-shape.correct {
+            animation: correct 0.5s ease;
+        }
+        
+        @keyframes correct {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            border-radius: 50%;
+            animation: fall 3s ease-in infinite;
+        }
+        
+        @keyframes fall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(600px) rotate(360deg); opacity: 0; }
+        }
+        
+        .theme-selector {
+            transition: all 0.3s ease;
+        }
+        
+        .theme-selector:hover {
+            transform: translateY(-5px);
+        }
+        
+        .theme-selector.active {
+            border: 3px solid #3b82f6;
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <div id="confetti-container" class="fixed inset-0 pointer-events-none z-50"></div>
+    
+    <header class="bg-blue-600 text-white p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl md:text-3xl font-bold">分數探險家</h1>
+            <div class="flex items-center gap-4">
+                <div class="bg-white text-blue-600 px-3 py-1 rounded-full font-bold">
+                    分數: <span id="score">0</span>
+                </div>
+                <button id="restart-btn" class="bg-yellow-400 hover:bg-yellow-500 text-blue-800 px-3 py-1 rounded-full font-bold transition">
+                    重新開始
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <main class="container mx-auto flex-grow p-4">
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold text-blue-800 mb-4">遊戲說明</h2>
+            <p class="text-gray-700">將左邊的分數與右邊對應的圖形配對起來！點擊一個分數，再點擊一個圖形，看看你是否正確！</p>
+        </div>
+        
+        <div class="mb-6">
+            <h3 class="text-lg font-bold text-purple-800 mb-2">選擇主題</h3>
+            <div class="flex flex-wrap gap-4">
+                <div class="theme-selector active bg-white p-3 rounded-lg shadow-md cursor-pointer text-center" data-theme="shapes">
+                    <div class="flex justify-center items-center h-12 mb-2">
+                        <svg viewBox="0 0 100 100" class="w-10 h-10">
+                            <rect x="10" y="10" width="80" height="80" fill="#60a5fa" stroke="#333" stroke-width="2" />
+                            <circle cx="50" cy="50" r="25" fill="#f472b6" stroke="#333" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <div class="font-bold">幾何形狀</div>
+                </div>
+                <div class="theme-selector bg-white p-3 rounded-lg shadow-md cursor-pointer text-center" data-theme="pizza">
+                    <div class="flex justify-center items-center h-12 mb-2">
+                        <svg viewBox="0 0 100 100" class="w-10 h-10">
+                            <circle cx="50" cy="50" r="45" fill="#FFA500" stroke="#8B4513" stroke-width="2" />
+                            <path d="M50,50 L95,50 A45,45 0 0,0 50,5 Z" fill="#FF4500" stroke="#8B4513" stroke-width="1" />
+                        </svg>
+                    </div>
+                    <div class="font-bold">美味披薩</div>
+                </div>
+                <div class="theme-selector bg-white p-3 rounded-lg shadow-md cursor-pointer text-center" data-theme="chocolate">
+                    <div class="flex justify-center items-center h-12 mb-2">
+                        <svg viewBox="0 0 100 100" class="w-10 h-10">
+                            <rect x="10" y="10" width="80" height="80" fill="#8B4513" stroke="#5D3A1A" stroke-width="2" />
+                            <line x1="35" y1="10" x2="35" y2="90" stroke="#5D3A1A" stroke-width="2" />
+                            <line x1="65" y1="10" x2="65" y2="90" stroke="#5D3A1A" stroke-width="2" />
+                            <line x1="10" y1="35" x2="90" y2="35" stroke="#5D3A1A" stroke-width="2" />
+                            <line x1="10" y1="65" x2="90" y2="65" stroke="#5D3A1A" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <div class="font-bold">巧克力</div>
+                </div>
+                <div class="theme-selector bg-white p-3 rounded-lg shadow-md cursor-pointer text-center" data-theme="watermelon">
+                    <div class="flex justify-center items-center h-12 mb-2">
+                        <svg viewBox="0 0 100 100" class="w-10 h-10">
+                            <path d="M5,50 A45,45 0 0,1 95,50 L50,95 Z" fill="#ff6b6b" stroke="#333" stroke-width="2" />
+                            <path d="M15,50 A35,35 0 0,1 85,50 L50,85 Z" fill="#ff6b6b" stroke="#333" stroke-width="1" />
+                            <path d="M15,50 A35,35 0 0,1 85,50 L50,85 Z" fill="#ff6b6b" stroke="#333" stroke-width="1" />
+                        </svg>
+                    </div>
+                    <div class="font-bold">西瓜</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-blue-100 rounded-xl p-6 shadow-md">
+                <h3 class="text-lg font-bold text-blue-800 mb-4">分數</h3>
+                <div id="fractions" class="grid grid-cols-2 gap-4">
+                    <!-- 分數選項會在這裡動態生成 -->
+                </div>
+            </div>
+            
+            <div class="bg-green-100 rounded-xl p-6 shadow-md">
+                <h3 class="text-lg font-bold text-green-800 mb-4">圖形</h3>
+                <div id="shapes" class="grid grid-cols-2 gap-4">
+                    <!-- 圖形選項會在這裡動態生成 -->
+                </div>
+            </div>
+        </div>
+        
+        <div id="result" class="mt-6 p-4 rounded-xl text-center text-xl font-bold hidden"></div>
+        
+        <div class="mt-8 bg-yellow-100 rounded-xl p-6 shadow-md">
+            <h2 class="text-xl font-bold text-yellow-800 mb-4">分數小知識</h2>
+            <p class="text-gray-700">分數是由分子和分母組成的。分母告訴我們整體被分成幾等份，分子告訴我們我們有幾份。例如，在 1/4 中，4 是分母，表示整體被分成 4 等份；1 是分子，表示我們有 1 份。</p>
+        </div>
+    </main>
+    
+    <div id="level-complete" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-40 hidden">
+        <div class="bg-white rounded-xl p-8 max-w-md text-center">
+            <h2 class="text-2xl font-bold text-blue-600 mb-4">太棒了！</h2>
+            <p class="text-xl mb-6">你完成了這一關！</p>
+            <div class="flex justify-center space-x-4">
+                <button id="next-level-btn" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full font-bold transition">
+                    下一關
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="bg-blue-800 text-white p-4 text-center">
+        <p>分數探險家 - 幫助孩子學習分數的有趣遊戲</p>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentLevel = 1;
+            let maxLevel = 3;
+            let score = 0;
+            let selectedFraction = null;
+            let matchedPairs = 0;
+            let totalPairs = 4;
+            let currentTheme = 'shapes';
+            
+            const fractionContainer = document.getElementById('fractions');
+            const shapesContainer = document.getElementById('shapes');
+            const scoreElement = document.getElementById('score');
+            const resultElement = document.getElementById('result');
+            const levelCompleteModal = document.getElementById('level-complete');
+            const nextLevelBtn = document.getElementById('next-level-btn');
+            const restartBtn = document.getElementById('restart-btn');
+            const confettiContainer = document.getElementById('confetti-container');
+            const themeSelectors = document.querySelectorAll('.theme-selector');
+            
+            // 初始化遊戲
+            initGame();
+            
+            // 主題選擇器
+            themeSelectors.forEach(selector => {
+                selector.addEventListener('click', () => {
+                    themeSelectors.forEach(s => s.classList.remove('active'));
+                    selector.classList.add('active');
+                    currentTheme = selector.dataset.theme;
+                    initGame();
+                });
+            });
+            
+            function initGame() {
+                fractionContainer.innerHTML = '';
+                shapesContainer.innerHTML = '';
+                matchedPairs = 0;
+                resultElement.classList.add('hidden');
+                
+                let fractions = [];
+                
+                if (currentLevel === 1) {
+                    fractions = [
+                        { value: '1/2', text: '二分之一' },
+                        { value: '1/4', text: '四分之一' },
+                        { value: '3/4', text: '四分之三' },
+                        { value: '1/3', text: '三分之一' }
+                    ];
+                } else if (currentLevel === 2) {
+                    fractions = [
+                        { value: '2/3', text: '三分之二' },
+                        { value: '1/5', text: '五分之一' },
+                        { value: '2/5', text: '五分之二' },
+                        { value: '3/5', text: '五分之三' }
+                    ];
+                } else {
+                    fractions = [
+                        { value: '1/6', text: '六分之一' },
+                        { value: '5/6', text: '六分之五' },
+                        { value: '1/8', text: '八分之一' },
+                        { value: '3/8', text: '八分之三' }
+                    ];
+                }
+                
+                // 打亂順序
+                fractions = shuffleArray(fractions);
+                const shuffledShapes = shuffleArray([...fractions]);
+                
+                // 創建分數按鈕
+                fractions.forEach(fraction => {
+                    const fractionBtn = document.createElement('button');
+                    fractionBtn.className = 'fraction-btn bg-white hover:bg-blue-50 p-4 rounded-lg shadow text-center transition';
+                    fractionBtn.dataset.value = fraction.value;
+                    
+                    fractionBtn.innerHTML = `
+                        <div class="text-2xl font-bold text-blue-600">${fraction.value}</div>
+                        <div class="text-sm text-gray-600">${fraction.text}</div>
+                    `;
+                    
+                    fractionBtn.addEventListener('click', () => selectFraction(fraction.value));
+                    fractionContainer.appendChild(fractionBtn);
+                });
+                
+                // 創建圖形
+                shuffledShapes.forEach(fraction => {
+                    const shapeDiv = document.createElement('div');
+                    shapeDiv.className = 'fraction-shape bg-white p-4 rounded-lg shadow cursor-pointer';
+                    shapeDiv.dataset.value = fraction.value;
+                    
+                    const [numerator, denominator] = fraction.value.split('/').map(Number);
+                    
+                    // 創建分數圖形
+                    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    svg.setAttribute('viewBox', '0 0 100 100');
+                    svg.setAttribute('class', 'w-full h-32');
+                    
+                    // 根據主題創建不同的圖形
+                    if (currentTheme === 'shapes') {
+                        createShapesTheme(svg, numerator, denominator);
+                    } else if (currentTheme === 'pizza') {
+                        createPizzaTheme(svg, numerator, denominator);
+                    } else if (currentTheme === 'chocolate') {
+                        createChocolateTheme(svg, numerator, denominator);
+                    } else if (currentTheme === 'watermelon') {
+                        createWatermelonTheme(svg, numerator, denominator);
+                    }
+                    
+                    shapeDiv.appendChild(svg);
+                    shapeDiv.addEventListener('click', () => checkMatch(fraction.value));
+                    shapesContainer.appendChild(shapeDiv);
+                });
+            }
+            
+            function createShapesTheme(svg, numerator, denominator) {
+                // 隨機選擇形狀類型
+                const shapeTypes = ['rectangle', 'circle', 'triangle', 'mixed'];
+                const shapeType = shapeTypes[Math.floor(Math.random() * shapeTypes.length)];
+                
+                if (shapeType === 'rectangle' || (denominator === 3 && shapeType !== 'circle')) {
+                    // 長方形分割
+                    svg.innerHTML = `
+                        <rect x="5" y="5" width="90" height="90" fill="#e5e5e5" stroke="#333" stroke-width="2" rx="4" ry="4" />
+                    `;
+                    
+                    if (denominator === 2) {
+                        svg.innerHTML += `
+                            <rect x="5" y="5" width="90" height="${45 * numerator}" fill="#60a5fa" stroke="#333" stroke-width="2" rx="4" ry="4" />
+                        `;
+                    } else if (denominator === 3) {
+                        for (let i = 0; i < numerator; i++) {
+                            svg.innerHTML += `
+                                <rect x="5" y="${5 + i * 30}" width="90" height="30" fill="#60a5fa" stroke="#333" stroke-width="2" rx="2" ry="2" />
+                            `;
+                        }
+                    } else if (denominator === 4) {
+                        for (let i = 0; i < numerator; i++) {
+                            const row = Math.floor(i / 2);
+                            const col = i % 2;
+                            svg.innerHTML += `
+                                <rect x="${5 + col * 45}" y="${5 + row * 45}" width="45" height="45" fill="#60a5fa" stroke="#333" stroke-width="2" rx="2" ry="2" />
+                            `;
+                        }
+                    } else if (denominator === 5) {
+                        for (let i = 0; i < numerator; i++) {
+                            svg.innerHTML += `
+                                <rect x="5" y="${5 + i * 18}" width="90" height="18" fill="#60a5fa" stroke="#333" stroke-width="2" rx="2" ry="2" />
+                            `;
+                        }
+                    } else if (denominator === 6) {
+                        for (let i = 0; i < numerator; i++) {
+                            const row = Math.floor(i / 3);
+                            const col = i % 3;
+                            svg.innerHTML += `
+                                <rect x="${5 + col * 30}" y="${5 + row * 45}" width="30" height="45" fill="#60a5fa" stroke="#333" stroke-width="2" rx="2" ry="2" />
+                            `;
+                        }
+                    } else if (denominator === 8) {
+                        for (let i = 0; i < numerator; i++) {
+                            const row = Math.floor(i / 4);
+                            const col = i % 4;
+                            svg.innerHTML += `
+                                <rect x="${5 + col * 22.5}" y="${5 + row * 45}" width="22.5" height="45" fill="#60a5fa" stroke="#333" stroke-width="2" rx="1" ry="1" />
+                            `;
+                        }
+                    }
+                } else if (shapeType === 'circle') {
+                    // 圓形分割（披薩切片）
+                    svg.innerHTML = `
+                        <circle cx="50" cy="50" r="45" fill="#e5e5e5" stroke="#333" stroke-width="2" />
+                    `;
+                    
+                    const sliceAngle = 360 / denominator;
+                    for (let i = 0; i < numerator; i++) {
+                        const startAngle = i * sliceAngle;
+                        const endAngle = (i + 1) * sliceAngle;
+                        
+                        // 計算圓弧路徑
+                        const startRad = (startAngle - 90) * Math.PI / 180;
+                        const endRad = (endAngle - 90) * Math.PI / 180;
+                        
+                        const startX = 50 + 45 * Math.cos(startRad);
+                        const startY = 50 + 45 * Math.sin(startRad);
+                        const endX = 50 + 45 * Math.cos(endRad);
+                        const endY = 50 + 45 * Math.sin(endRad);
+                        
+                        // 大弧標誌 (sliceAngle > 180 ? 1 : 0)
+                        const largeArcFlag = sliceAngle > 180 ? 1 : 0;
+                        
+                        svg.innerHTML += `
+                            <path d="M 50 50 L ${startX} ${startY} A 45 45 0 ${largeArcFlag} 1 ${endX} ${endY} Z" 
+                                  fill="#60a5fa" stroke="#333" stroke-width="1" />
+                        `;
+                    }
+                } else if (shapeType === 'triangle') {
+                    // 三角形分割
+                    svg.innerHTML = `
+                        <polygon points="50,5 5,95 95,95" fill="#e5e5e5" stroke="#333" stroke-width="2" />
+                    `;
+                    
+                    if (denominator === 2) {
+                        if (numerator === 1) {
+                            svg.innerHTML += `
+                                <polygon points="50,5 5,95 50,95" fill="#60a5fa" stroke="#333" stroke-width="2" />
+                            `;
+                        }
+                    } else if (denominator === 4) {
+                        const sections = [
+                            "50,5 5,95 50,50",    // 左上
+                            "50,5 50,50 95,95",   // 右上
+                            "5,95 50,50 50,95",   // 左下
+                            "50,50 95,95 50,95"   // 右下
+                        ];
+                        
+                        for (let i = 0; i < numerator; i++) {
+                            svg.innerHTML += `
+                                <polygon points="${sections[i]}" fill="#60a5fa" stroke="#333" stroke-width="1" />
+                            `;
+                        }
+                    }
+                } else if (shapeType === 'mixed') {
+                    // 混合形狀
+                    if (denominator === 4) {
+                        svg.innerHTML = `
+                            <rect x="5" y="5" width="90" height="90" fill="#e5e5e5" stroke="#333" stroke-width="2" />
+                        `;
+                        
+                        const shapes = [
+                            `<rect x="5" y="5" width="45" height="45" fill="#60a5fa" stroke="#333" stroke-width="1" />`,
+                            `<rect x="50" y="5" width="45" height="45" fill="#60a5fa" stroke="#333" stroke-width="1" />`,
+                            `<circle cx="27.5" cy="72.5" r="22.5" fill="#60a5fa" stroke="#333" stroke-width="1" />`,
+                            `<circle cx="72.5" cy="72.5" r="22.5" fill="#60a5fa" stroke="#333" stroke-width="1" />`
+                        ];
+                        
+                        for (let i = 0; i < numerator; i++) {
+                            svg.innerHTML += shapes[i];
+                        }
+                    } else if (denominator === 6) {
+                        svg.innerHTML = `
+                            <rect x="5" y="5" width="90" height="90" fill="#e5e5e5" stroke="#333" stroke-width="2" />
+                        `;
+                        
+                        const shapes = [
+                            `<rect x="5" y="5" width="30" height="30" fill="#60a5fa" stroke="#333" stroke-width="1" />`,
+                            `<rect x="35" y="5" width="30" height="30" fill="#60a5fa" stroke="#333" stroke-width="1" />`,
+                            `<rect x="65" y="5" width="30" height="30" fill="#60a5fa" stroke="#333" stroke-width="1" />`,
+                            `<circle cx="20" cy="65" r="15" fill="#60a5fa" stroke="#333" stroke-width="1" />`,
+                            `<circle cx="50" cy="65" r="15" fill="#60a5fa" stroke="#333" stroke-width="1" />`,
+                            `<circle cx="80" cy="65" r="15" fill="#60a5fa" stroke="#333" stroke-width="1" />`
+                        ];
+                        
+                        for (let i = 0; i < numerator; i++) {
+                            svg.innerHTML += shapes[i];
+                        }
+                    }
+                }
+            }
+            
+            function createPizzaTheme(svg, numerator, denominator) {
+                // 披薩主題
+                svg.innerHTML = `
+                    <circle cx="50" cy="50" r="45" fill="#FFA500" stroke="#8B4513" stroke-width="2" />
+                    <circle cx="50" cy="50" r="40" fill="#FFCC80" stroke="#8B4513" stroke-width="1" />
+                `;
+                
+                // 添加一些點綴
+                for (let i = 0; i < 8; i++) {
+                    const angle = i * 45 * Math.PI / 180;
+                    const x = 50 + 25 * Math.cos(angle);
+                    const y = 50 + 25 * Math.sin(angle);
+                    svg.innerHTML += `
+                        <circle cx="${x}" cy="${y}" r="3" fill="#FF4500" />
+                    `;
+                }
+                
+                const sliceAngle = 360 / denominator;
+                for (let i = 0; i < numerator; i++) {
+                    const startAngle = i * sliceAngle;
+                    const endAngle = (i + 1) * sliceAngle;
+                    
+                    // 計算圓弧路徑
+                    const startRad = (startAngle - 90) * Math.PI / 180;
+                    const endRad = (endAngle - 90) * Math.PI / 180;
+                    
+                    const startX = 50 + 45 * Math.cos(startRad);
+                    const startY = 50 + 45 * Math.sin(startRad);
+                    const endX = 50 + 45 * Math.cos(endRad);
+                    const endY = 50 + 45 * Math.sin(endRad);
+                    
+                    // 大弧標誌 (sliceAngle > 180 ? 1 : 0)
+                    const largeArcFlag = sliceAngle > 180 ? 1 : 0;
+                    
+                    svg.innerHTML += `
+                        <path d="M 50 50 L ${startX} ${startY} A 45 45 0 ${largeArcFlag} 1 ${endX} ${endY} Z" 
+                              fill="#FF4500" fill-opacity="0.7" stroke="#8B4513" stroke-width="1" />
+                    `;
+                    
+                    // 添加一些點綴在選中的切片上
+                    const midRad = (startRad + endRad) / 2;
+                    const midX = 50 + 25 * Math.cos(midRad);
+                    const midY = 50 + 25 * Math.sin(midRad);
+                    
+                    svg.innerHTML += `
+                        <circle cx="${midX}" cy="${midY}" r="4" fill="#8B4513" />
+                    `;
+                }
+            }
+            
+            function createChocolateTheme(svg, numerator, denominator) {
+                // 巧克力主題
+                const blockWidth = 90;
+                const blockHeight = 90;
+                
+                svg.innerHTML = `
+                    <rect x="5" y="5" width="${blockWidth}" height="${blockHeight}" fill="#8B4513" stroke="#5D3A1A" stroke-width="2" rx="4" ry="4" />
+                `;
+                
+                let pieces = [];
+                
+                if (denominator === 2) {
+                    pieces = [
+                        { x: 5, y: 5, width: blockWidth, height: blockHeight / 2 },
+                        { x: 5, y: 5 + blockHeight / 2, width: blockWidth, height: blockHeight / 2 }
+                    ];
+                } else if (denominator === 3) {
+                    pieces = [
+                        { x: 5, y: 5, width: blockWidth, height: blockHeight / 3 },
+                        { x: 5, y: 5 + blockHeight / 3, width: blockWidth, height: blockHeight / 3 },
+                        { x: 5, y: 5 + 2 * blockHeight / 3, width: blockWidth, height: blockHeight / 3 }
+                    ];
+                } else if (denominator === 4) {
+                    pieces = [
+                        { x: 5, y: 5, width: blockWidth / 2, height: blockHeight / 2 },
+                        { x: 5 + blockWidth / 2, y: 5, width: blockWidth / 2, height: blockHeight / 2 },
+                        { x: 5, y: 5 + blockHeight / 2, width: blockWidth / 2, height: blockHeight / 2 },
+                        { x: 5 + blockWidth / 2, y: 5 + blockHeight / 2, width: blockWidth / 2, height: blockHeight / 2 }
+                    ];
+                } else if (denominator === 5) {
+                    pieces = [
+                        { x: 5, y: 5, width: blockWidth, height: blockHeight / 5 },
+                        { x: 5, y: 5 + blockHeight / 5, width: blockWidth, height: blockHeight / 5 },
+                        { x: 5, y: 5 + 2 * blockHeight / 5, width: blockWidth, height: blockHeight / 5 },
+                        { x: 5, y: 5 + 3 * blockHeight / 5, width: blockWidth, height: blockHeight / 5 },
+                        { x: 5, y: 5 + 4 * blockHeight / 5, width: blockWidth, height: blockHeight / 5 }
+                    ];
+                } else if (denominator === 6) {
+                    pieces = [
+                        { x: 5, y: 5, width: blockWidth / 3, height: blockHeight / 2 },
+                        { x: 5 + blockWidth / 3, y: 5, width: blockWidth / 3, height: blockHeight / 2 },
+                        { x: 5 + 2 * blockWidth / 3, y: 5, width: blockWidth / 3, height: blockHeight / 2 },
+                        { x: 5, y: 5 + blockHeight / 2, width: blockWidth / 3, height: blockHeight / 2 },
+                        { x: 5 + blockWidth / 3, y: 5 + blockHeight / 2, width: blockWidth / 3, height: blockHeight / 2 },
+                        { x: 5 + 2 * blockWidth / 3, y: 5 + blockHeight / 2, width: blockWidth / 3, height: blockHeight / 2 }
+                    ];
+                } else if (denominator === 8) {
+                    pieces = [
+                        { x: 5, y: 5, width: blockWidth / 4, height: blockHeight / 2 },
+                        { x: 5 + blockWidth / 4, y: 5, width: blockWidth / 4, height: blockHeight / 2 },
+                        { x: 5 + 2 * blockWidth / 4, y: 5, width: blockWidth / 4, height: blockHeight / 2 },
+                        { x: 5 + 3 * blockWidth / 4, y: 5, width: blockWidth / 4, height: blockHeight / 2 },
+                        { x: 5, y: 5 + blockHeight / 2, width: blockWidth / 4, height: blockHeight / 2 },
+                        { x: 5 + blockWidth / 4, y: 5 + blockHeight / 2, width: blockWidth / 4, height: blockHeight / 2 },
+                        { x: 5 + 2 * blockWidth / 4, y: 5 + blockHeight / 2, width: blockWidth / 4, height: blockHeight / 2 },
+                        { x: 5 + 3 * blockWidth / 4, y: 5 + blockHeight / 2, width: blockWidth / 4, height: blockHeight / 2 }
+                    ];
+                }
+                
+                // 添加分隔線
+                if (denominator === 2) {
+                    svg.innerHTML += `<line x1="5" y1="${5 + blockHeight / 2}" x2="${5 + blockWidth}" y2="${5 + blockHeight / 2}" stroke="#5D3A1A" stroke-width="2" />`;
+                } else if (denominator === 3) {
+                    svg.innerHTML += `
+                        <line x1="5" y1="${5 + blockHeight / 3}" x2="${5 + blockWidth}" y2="${5 + blockHeight / 3}" stroke="#5D3A1A" stroke-width="2" />
+                        <line x1="5" y1="${5 + 2 * blockHeight / 3}" x2="${5 + blockWidth}" y2="${5 + 2 * blockHeight / 3}" stroke="#5D3A1A" stroke-width="2" />
+                    `;
+                } else if (denominator === 4) {
+                    svg.innerHTML += `
+                        <line x1="${5 + blockWidth / 2}" y1="5" x2="${5 + blockWidth / 2}" y2="${5 + blockHeight}" stroke="#5D3A1A" stroke-width="2" />
+                        <line x1="5" y1="${5 + blockHeight / 2}" x2="${5 + blockWidth}" y2="${5 + blockHeight / 2}" stroke="#5D3A1A" stroke-width="2" />
+                    `;
+                } else if (denominator === 5) {
+                    for (let i = 1; i < 5; i++) {
+                        svg.innerHTML += `<line x1="5" y1="${5 + i * blockHeight / 5}" x2="${5 + blockWidth}" y2="${5 + i * blockHeight / 5}" stroke="#5D3A1A" stroke-width="2" />`;
+                    }
+                } else if (denominator === 6) {
+                    svg.innerHTML += `
+                        <line x1="${5 + blockWidth / 3}" y1="5" x2="${5 + blockWidth / 3}" y2="${5 + blockHeight}" stroke="#5D3A1A" stroke-width="2" />
+                        <line x1="${5 + 2 * blockWidth / 3}" y1="5" x2="${5 + 2 * blockWidth / 3}" y2="${5 + blockHeight}" stroke="#5D3A1A" stroke-width="2" />
+                        <line x1="5" y1="${5 + blockHeight / 2}" x2="${5 + blockWidth}" y2="${5 + blockHeight / 2}" stroke="#5D3A1A" stroke-width="2" />
+                    `;
+                } else if (denominator === 8) {
+                    for (let i = 1; i < 4; i++) {
+                        svg.innerHTML += `<line x1="${5 + i * blockWidth / 4}" y1="5" x2="${5 + i * blockWidth / 4}" y2="${5 + blockHeight}" stroke="#5D3A1A" stroke-width="2" />`;
+                    }
+                    svg.innerHTML += `<line x1="5" y1="${5 + blockHeight / 2}" x2="${5 + blockWidth}" y2="${5 + blockHeight / 2}" stroke="#5D3A1A" stroke-width="2" />`;
+                }
+                
+                // 高亮選中的部分
+                for (let i = 0; i < numerator; i++) {
+                    const piece = pieces[i];
+                    svg.innerHTML += `
+                        <rect x="${piece.x}" y="${piece.y}" width="${piece.width}" height="${piece.height}" 
+                              fill="#D2691E" stroke="#5D3A1A" stroke-width="1" rx="2" ry="2" />
+                    `;
+                }
+            }
+            
+            function createWatermelonTheme(svg, numerator, denominator) {
+                // 西瓜主題
+                svg.innerHTML = `
+                    <path d="M5,50 A45,45 0 0,1 95,50 L50,95 Z" fill="#4CAF50" stroke="#333" stroke-width="2" />
+                    <path d="M15,50 A35,35 0 0,1 85,50 L50,85 Z" fill="#ff6b6b" stroke="#333" stroke-width="1" />
+                `;
+                
+                // 添加西瓜籽
+                for (let i = 0; i < 12; i++) {
+                    const angle = (i * 30 + 15) * Math.PI / 180;
+                    const distance = 20 + Math.random() * 15;
+                    const x = 50 + distance * Math.cos(angle);
+                    const y = 50 + distance * Math.sin(angle);
+                    if (y < 85 && x > 15 && x < 85) {
+                        svg.innerHTML += `
+                            <ellipse cx="${x}" cy="${y}" rx="2" ry="3" fill="black" transform="rotate(${i * 30}, ${x}, ${y})" />
+                        `;
+                    }
+                }
+                
+                const sliceAngle = 90 / denominator;
+                for (let i = 0; i < numerator; i++) {
+                    const startAngle = i * sliceAngle;
+                    const endAngle = (i + 1) * sliceAngle;
+                    
+                    // 計算圓弧路徑
+                    const startRad = startAngle * Math.PI / 180;
+                    const endRad = endAngle * Math.PI / 180;
+                    
+                    const startX = 50 + 35 * Math.cos(startRad);
+                    const startY = 50 + 35 * Math.sin(startRad);
+                    const endX = 50 + 35 * Math.cos(endRad);
+                    const endY = 50 + 35 * Math.sin(endRad);
+                    
+                    svg.innerHTML += `
+                        <path d="M 50 50 L ${startX} ${startY} A 35 35 0 0 1 ${endX} ${endY} Z" 
+                              fill="#e53935" stroke="#333" stroke-width="1" />
+                    `;
+                }
+            }
+            
+            function selectFraction(value) {
+                // 取消之前的選擇
+                document.querySelectorAll('.fraction-btn').forEach(btn => {
+                    btn.classList.remove('ring-4', 'ring-blue-500');
+                });
+                
+                // 選擇新的分數
+                const btn = document.querySelector(`.fraction-btn[data-value="${value}"]`);
+                btn.classList.add('ring-4', 'ring-blue-500');
+                selectedFraction = value;
+            }
+            
+            function checkMatch(shapeValue) {
+                if (!selectedFraction) {
+                    showResult('請先選擇一個分數！', 'warning');
+                    return;
+                }
+                
+                const shapeElement = document.querySelector(`.fraction-shape[data-value="${shapeValue}"]`);
+                
+                if (selectedFraction === shapeValue) {
+                    // 正確配對
+                    score += 10;
+                    scoreElement.textContent = score;
+                    
+                    shapeElement.classList.add('correct');
+                    shapeElement.style.opacity = '0.5';
+                    shapeElement.style.pointerEvents = 'none';
+                    
+                    const fractionBtn = document.querySelector(`.fraction-btn[data-value="${selectedFraction}"]`);
+                    fractionBtn.style.opacity = '0.5';
+                    fractionBtn.style.pointerEvents = 'none';
+                    fractionBtn.classList.remove('ring-4', 'ring-blue-500');
+                    
+                    selectedFraction = null;
+                    matchedPairs++;
+                    
+                    showResult('正確！', 'success');
+                    createConfetti(10);
+                    
+                    // 檢查是否完成所有配對
+                    if (matchedPairs === totalPairs) {
+                        setTimeout(() => {
+                            levelCompleteModal.classList.remove('hidden');
+                            createConfetti(50);
+                        }, 1000);
+                    }
+                } else {
+                    // 錯誤配對
+                    showResult('不對，再試一次！', 'error');
+                }
+            }
+            
+            function showResult(message, type) {
+                resultElement.textContent = message;
+                resultElement.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'bg-yellow-100', 'text-yellow-800');
+                
+                if (type === 'success') {
+                    resultElement.classList.add('bg-green-100', 'text-green-800');
+                } else if (type === 'error') {
+                    resultElement.classList.add('bg-red-100', 'text-red-800');
+                } else {
+                    resultElement.classList.add('bg-yellow-100', 'text-yellow-800');
+                }
+                
+                setTimeout(() => {
+                    resultElement.classList.add('hidden');
+                }, 2000);
+            }
+            
+            function createConfetti(count) {
+                const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+                
+                for (let i = 0; i < count; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = `${Math.random() * 100}%`;
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDuration = `${Math.random() * 2 + 2}s`;
+                    confetti.style.animationDelay = `${Math.random() * 0.5}s`;
+                    
+                    confettiContainer.appendChild(confetti);
+                    
+                    // 動畫結束後移除
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 3000);
+                }
+            }
+            
+            // 下一關按鈕
+            nextLevelBtn.addEventListener('click', () => {
+                if (currentLevel < maxLevel) {
+                    currentLevel++;
+                    levelCompleteModal.classList.add('hidden');
+                    initGame();
+                } else {
+                    // 遊戲全部完成
+                    levelCompleteModal.querySelector('h2').textContent = '恭喜！';
+                    levelCompleteModal.querySelector('p').textContent = `你完成了所有關卡！總分：${score}`;
+                    nextLevelBtn.textContent = '重新開始';
+                    nextLevelBtn.addEventListener('click', () => {
+                        currentLevel = 1;
+                        score = 0;
+                        scoreElement.textContent = score;
+                        levelCompleteModal.classList.add('hidden');
+                        initGame();
+                    }, { once: true });
+                }
+            });
+            
+            // 重新開始按鈕
+            restartBtn.addEventListener('click', () => {
+                currentLevel = 1;
+                score = 0;
+                scoreElement.textContent = score;
+                levelCompleteModal.classList.add('hidden');
+                initGame();
+            });
+            
+            // 輔助函數：打亂數組
+            function shuffleArray(array) {
+                const newArray = [...array];
+                for (let i = newArray.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+                }
+                return newArray;
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'935c8cc2910d4a9e',t:'MTc0NTU3MDU3Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
