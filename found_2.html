@@ -1,0 +1,687 @@
+﻿
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>國小國字學習系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f0f9ff;
+        }
+        
+        .character-card {
+            transition: all 0.3s ease;
+        }
+        
+        .character-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .grade-tab.active {
+            background-color: #4f46e5;
+            color: white;
+        }
+        
+        .lesson-tab.active {
+            background-color: #4f46e5;
+            color: white;
+        }
+        
+        .character-display {
+            font-size: 120px;
+            line-height: 1;
+        }
+        
+        .file-drop-area {
+            border: 2px dashed #cbd5e1;
+            transition: all 0.3s ease;
+        }
+        
+        .file-drop-area:hover, .file-drop-area.active {
+            border-color: #4f46e5;
+            background-color: rgba(79, 70, 229, 0.05);
+        }
+        
+        .grade-tabs-container, .lesson-tabs-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        
+        .grade-tabs-container::-webkit-scrollbar, .lesson-tabs-container::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen">
+        <!-- 頁首 -->
+        <header class="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-6 px-4 shadow-lg">
+            <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center mb-4 md:mb-0">
+                    <svg class="w-10 h-10 mr-3" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 4.5V7.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M19.5 12H16.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M12 16.5V19.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M7.5 12H4.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M16.95 7.05L14.83 9.17" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M14.83 14.83L16.95 16.95" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M9.17 14.83L7.05 16.95" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M7.05 7.05L9.17 9.17" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        <circle cx="12" cy="12" r="3" stroke="white" stroke-width="2"/>
+                    </svg>
+                    <h1 class="text-2xl md:text-3xl font-bold">國字寶寶學習系統</h1>
+                </div>
+                <div class="flex space-x-2">
+                    <button id="importBtn" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-full text-sm font-medium transition">匯入生字</button>
+                    <button id="aboutBtn" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-full text-sm font-medium transition">關於系統</button>
+                    <button id="helpBtn" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-full text-sm font-medium transition">使用說明</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主要內容 -->
+        <main class="container mx-auto px-4 py-8">
+            <!-- 年級選擇 -->
+            <div class="flex justify-center mb-8">
+                <div class="grade-tabs-container">
+                    <div class="bg-white rounded-full p-1 shadow-md inline-flex">
+                        <button class="grade-tab active px-6 py-2 rounded-full text-lg font-medium whitespace-nowrap" data-grade="1">一年級</button>
+                        <button class="grade-tab px-6 py-2 rounded-full text-lg font-medium whitespace-nowrap" data-grade="2">二年級</button>
+                        <button class="grade-tab px-6 py-2 rounded-full text-lg font-medium whitespace-nowrap" data-grade="3">三年級</button>
+                        <button class="grade-tab px-6 py-2 rounded-full text-lg font-medium whitespace-nowrap" data-grade="4">四年級</button>
+                        <button class="grade-tab px-6 py-2 rounded-full text-lg font-medium whitespace-nowrap" data-grade="custom">自訂生字</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 搜尋欄 -->
+            <div class="max-w-xl mx-auto mb-8">
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="輸入國字或注音查詢..." class="w-full px-5 py-4 rounded-full border-2 border-purple-300 focus:border-purple-500 focus:outline-none text-lg shadow-sm">
+                    <button id="searchBtn" class="absolute right-2 top-2 bg-purple-600 hover:bg-purple-700 text-white rounded-full p-2 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 國字詳情 -->
+            <div id="characterDetail" class="hidden max-w-4xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
+                <div class="flex flex-col md:flex-row">
+                    <div class="bg-gradient-to-br from-blue-100 to-purple-100 p-8 flex items-center justify-center md:w-1/3">
+                        <div id="currentCharacter" class="character-display font-bold text-gray-800"></div>
+                    </div>
+                    <div class="p-8 md:w-2/3">
+                        <div class="mb-6">
+                            <h2 class="text-2xl font-bold text-gray-800 mb-4">字詞資訊</h2>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-sm text-gray-500">注音</p>
+                                    <p id="pronunciation" class="text-lg font-medium"></p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">年級</p>
+                                    <p id="grade" class="text-lg font-medium"></p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">課程</p>
+                                    <p id="lesson" class="text-lg font-medium"></p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">部首</p>
+                                    <p id="radical" class="text-lg font-medium"></p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">筆畫數</p>
+                                    <p id="strokeCount" class="text-lg font-medium"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-3">例詞</h3>
+                            <div id="exampleWords" class="bg-gray-50 rounded-lg p-4">
+                                <!-- 例詞將在這裡顯示 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 國字列表 -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-center mb-6" id="characterListTitle">一年級常用國字</h2>
+                <div id="characterGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    <!-- 國字卡片將在這裡動態生成 -->
+                </div>
+            </div>
+        </main>
+
+        <!-- 頁尾 -->
+        <footer class="bg-gray-800 text-white py-6 px-4">
+            <div class="container mx-auto text-center">
+                <p>© 2023 國字寶寶學習系統 - 專為國小一至四年級學生設計</p>
+            </div>
+        </footer>
+
+        <!-- 彈出視窗 - 匯入生字 -->
+        <div id="importModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-2xl p-8 max-w-md mx-4 w-full">
+                <h2 class="text-2xl font-bold mb-4">匯入生字</h2>
+                <p class="mb-4">請選擇或拖放一個文字檔案，格式為：</p>
+                <div class="bg-gray-100 p-3 rounded-lg mb-6 text-sm font-mono">
+                    <p>國字,注音,部首,筆畫數,年級,課程,例詞1,例詞2,...</p>
+                    <p>例如：木,ㄇㄨˋ,木,4,1,第三課,木頭,木材,木工</p>
+                </div>
+                
+                <div id="fileDropArea" class="file-drop-area rounded-lg p-8 text-center mb-6 cursor-pointer">
+                    <svg class="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                    <p class="mb-1">拖放文字檔案到此處，或</p>
+                    <label for="fileInput" class="text-purple-600 hover:text-purple-800 font-medium cursor-pointer">選擇檔案</label>
+                    <input type="file" id="fileInput" accept=".txt" class="hidden">
+                </div>
+                
+                <div id="fileInfo" class="hidden mb-6">
+                    <div class="flex items-center p-3 bg-green-50 rounded-lg">
+                        <svg class="w-6 h-6 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <div>
+                            <p id="fileName" class="font-medium"></p>
+                            <p id="characterCount" class="text-sm text-gray-500"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-3">
+                    <button class="close-modal px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition">取消</button>
+                    <button id="importFileBtn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>匯入</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 彈出視窗 - 關於系統 -->
+        <div id="aboutModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-2xl p-8 max-w-md mx-4">
+                <h2 class="text-2xl font-bold mb-4">關於國字寶寶學習系統</h2>
+                <p class="mb-4">本系統專為國小一至四年級學生設計，收錄教育部規定的基礎國字，幫助學生學習並鞏固所學的漢字。</p>
+                <p class="mb-4">系統特色：</p>
+                <ul class="list-disc pl-5 mb-6">
+                    <li>依年級分類國字</li>
+                    <li>完整的字詞資訊</li>
+                    <li>友善的搜尋功能</li>
+                    <li>支援自訂生字匯入</li>
+                </ul>
+                <div class="text-right">
+                    <button class="close-modal bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg">關閉</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 彈出視窗 - 使用說明 -->
+        <div id="helpModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-2xl p-8 max-w-md mx-4">
+                <h2 class="text-2xl font-bold mb-4">使用說明</h2>
+                <ol class="list-decimal pl-5 mb-6 space-y-2">
+                    <li>點選上方的年級標籤，選擇要查看的國字。</li>
+                    <li>在搜尋欄輸入國字或注音進行查詢。</li>
+                    <li>點擊任一國字卡片，查看詳細資訊。</li>
+                    <li>點擊「匯入生字」按鈕，可以從文字檔匯入自訂生字。</li>
+                </ol>
+                <h3 class="font-bold mb-2">匯入格式說明：</h3>
+                <p class="mb-4">文字檔中每行一個國字，格式為：</p>
+                <div class="bg-gray-100 p-3 rounded-lg mb-6 text-sm font-mono">
+                    <p>國字,注音,部首,筆畫數,年級,課程,例詞1,例詞2,...</p>
+                </div>
+                <div class="text-right">
+                    <button class="close-modal bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg">關閉</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 國字資料庫
+        const charactersData = {
+            1: [ // 一年級
+                { character: '一', pronunciation: 'ㄧ', radical: '一', strokeCount: 1, lesson: '第一課', examples: ['一個', '第一', '一起'] },
+                { character: '二', pronunciation: 'ㄦˋ', radical: '二', strokeCount: 2, lesson: '第一課', examples: ['二月', '二樓', '二手'] },
+                { character: '三', pronunciation: 'ㄙㄢ', radical: '一', strokeCount: 3, lesson: '第一課', examples: ['三角', '三明治', '三個'] },
+                { character: '人', pronunciation: 'ㄖㄣˊ', radical: '人', strokeCount: 2, lesson: '第二課', examples: ['人類', '人民', '人生'] },
+                { character: '大', pronunciation: 'ㄉㄚˋ', radical: '大', strokeCount: 3, lesson: '第二課', examples: ['大小', '大人', '大象'] },
+                { character: '小', pronunciation: 'ㄒㄧㄠˇ', radical: '小', strokeCount: 3, lesson: '第二課', examples: ['小孩', '小狗', '小貓'] },
+                { character: '中', pronunciation: 'ㄓㄨㄥ', radical: '丨', strokeCount: 4, lesson: '第三課', examples: ['中間', '中文', '中午'] },
+                { character: '山', pronunciation: 'ㄕㄢ', radical: '山', strokeCount: 3, lesson: '第三課', examples: ['山水', '山坡', '山洞'] },
+                { character: '水', pronunciation: 'ㄕㄨㄟˇ', radical: '水', strokeCount: 4, lesson: '第三課', examples: ['水果', '水杯', '水池'] },
+                { character: '火', pronunciation: 'ㄏㄨㄛˇ', radical: '火', strokeCount: 4, lesson: '第四課', examples: ['火車', '火柴', '火山'] },
+                { character: '木', pronunciation: 'ㄇㄨˋ', radical: '木', strokeCount: 4, lesson: '第四課', examples: ['木頭', '木材', '木工'] },
+                { character: '口', pronunciation: 'ㄎㄡˇ', radical: '口', strokeCount: 3, lesson: '第四課', examples: ['口水', '口味', '口袋'] },
+                { character: '手', pronunciation: 'ㄕㄡˇ', radical: '手', strokeCount: 4, lesson: '第五課', examples: ['手指', '手套', '手機'] },
+                { character: '心', pronunciation: 'ㄒㄧㄣ', radical: '心', strokeCount: 4, lesson: '第五課', examples: ['心臟', '開心', '小心'] },
+                { character: '日', pronunciation: 'ㄖˋ', radical: '日', strokeCount: 4, lesson: '第五課', examples: ['日子', '日記', '日出'] },
+                { character: '月', pronunciation: 'ㄩㄝˋ', radical: '月', strokeCount: 4, lesson: '第六課', examples: ['月亮', '月餅', '月曆'] },
+                { character: '文', pronunciation: 'ㄨㄣˊ', radical: '文', strokeCount: 4, lesson: '第六課', examples: ['文字', '中文', '作文'] },
+                { character: '王', pronunciation: 'ㄨㄤˊ', radical: '王', strokeCount: 4, lesson: '第六課', examples: ['國王', '王子', '王后'] }
+            ],
+            2: [ // 二年級
+                { character: '天', pronunciation: 'ㄊㄧㄢ', radical: '大', strokeCount: 4, lesson: '第一課', examples: ['天空', '天氣', '天天'] },
+                { character: '地', pronunciation: 'ㄉㄧˋ', radical: '土', strokeCount: 6, lesson: '第一課', examples: ['地球', '地方', '地上'] },
+                { character: '金', pronunciation: 'ㄐㄧㄣ', radical: '金', strokeCount: 8, lesson: '第一課', examples: ['金子', '金牌', '金魚'] },
+                { character: '土', pronunciation: 'ㄊㄨˇ', radical: '土', strokeCount: 3, lesson: '第二課', examples: ['土地', '土壤', '土石'] },
+                { character: '車', pronunciation: 'ㄔㄜ', radical: '車', strokeCount: 7, lesson: '第二課', examples: ['車子', '汽車', '火車'] },
+                { character: '雨', pronunciation: 'ㄩˇ', radical: '雨', strokeCount: 8, lesson: '第二課', examples: ['雨傘', '雨水', '下雨'] },
+                { character: '目', pronunciation: 'ㄇㄨˋ', radical: '目', strokeCount: 5, lesson: '第三課', examples: ['目標', '眼目', '目錄'] },
+                { character: '耳', pronunciation: 'ㄦˇ', radical: '耳', strokeCount: 6, lesson: '第三課', examples: ['耳朵', '耳環', '耳機'] },
+                { character: '門', pronunciation: 'ㄇㄣˊ', radical: '門', strokeCount: 8, lesson: '第三課', examples: ['門口', '大門', '門鈴'] },
+                { character: '風', pronunciation: 'ㄈㄥ', radical: '風', strokeCount: 9, lesson: '第四課', examples: ['風箏', '風雨', '風景'] },
+                { character: '花', pronunciation: 'ㄏㄨㄚ', radical: '艹', strokeCount: 7, lesson: '第四課', examples: ['花朵', '花園', '花瓶'] },
+                { character: '鳥', pronunciation: 'ㄋㄧㄠˇ', radical: '鳥', strokeCount: 11, lesson: '第四課', examples: ['小鳥', '鳥巢', '鳥類'] },
+                { character: '魚', pronunciation: 'ㄩˊ', radical: '魚', strokeCount: 11, lesson: '第五課', examples: ['魚兒', '金魚', '魚缸'] },
+                { character: '石', pronunciation: 'ㄕˊ', radical: '石', strokeCount: 5, lesson: '第五課', examples: ['石頭', '石油', '石像'] },
+                { character: '竹', pronunciation: 'ㄓㄨˊ', radical: '竹', strokeCount: 6, lesson: '第五課', examples: ['竹子', '竹筍', '竹林'] },
+                { character: '米', pronunciation: 'ㄇㄧˇ', radical: '米', strokeCount: 6, lesson: '第六課', examples: ['米飯', '米粒', '米糕'] },
+                { character: '羊', pronunciation: 'ㄧㄤˊ', radical: '羊', strokeCount: 6, lesson: '第六課', examples: ['羊毛', '山羊', '綿羊'] },
+                { character: '牛', pronunciation: 'ㄋㄧㄡˊ', radical: '牛', strokeCount: 4, lesson: '第六課', examples: ['牛奶', '牛肉', '水牛'] }
+            ],
+            3: [ // 三年級
+                { character: '學', pronunciation: 'ㄒㄩㄝˊ', radical: '子', strokeCount: 16, lesson: '第一課', examples: ['學校', '學生', '學習'] },
+                { character: '生', pronunciation: 'ㄕㄥ', radical: '生', strokeCount: 5, lesson: '第一課', examples: ['學生', '生活', '生日'] },
+                { character: '國', pronunciation: 'ㄍㄨㄛˊ', radical: '囗', strokeCount: 11, lesson: '第一課', examples: ['國家', '國旗', '國王'] },
+                { character: '家', pronunciation: 'ㄐㄧㄚ', radical: '宀', strokeCount: 10, lesson: '第二課', examples: ['家庭', '回家', '國家'] },
+                { character: '年', pronunciation: 'ㄋㄧㄢˊ', radical: '干', strokeCount: 6, lesson: '第二課', examples: ['年紀', '今年', '年輕'] },
+                { character: '多', pronunciation: 'ㄉㄨㄛ', radical: '夕', strokeCount: 6, lesson: '第二課', examples: ['多少', '很多', '多謝'] },
+                { character: '少', pronunciation: 'ㄕㄠˇ', radical: '小', strokeCount: 4, lesson: '第三課', examples: ['少年', '多少', '不少'] },
+                { character: '時', pronunciation: 'ㄕˊ', radical: '日', strokeCount: 10, lesson: '第三課', examples: ['時間', '時候', '小時'] },
+                { character: '間', pronunciation: 'ㄐㄧㄢ', radical: '門', strokeCount: 12, lesson: '第三課', examples: ['時間', '中間', '空間'] },
+                { character: '書', pronunciation: 'ㄕㄨ', radical: '曰', strokeCount: 10, lesson: '第四課', examples: ['書本', '讀書', '圖書'] },
+                { character: '見', pronunciation: 'ㄐㄧㄢˋ', radical: '見', strokeCount: 7, lesson: '第四課', examples: ['看見', '見面', '再見'] },
+                { character: '來', pronunciation: 'ㄌㄞˊ', radical: '木', strokeCount: 7, lesson: '第四課', examples: ['來去', '未來', '歡迎光臨'] },
+                { character: '去', pronunciation: 'ㄑㄩˋ', radical: '厶', strokeCount: 5, lesson: '第五課', examples: ['去年', '來去', '離去'] },
+                { character: '道', pronunciation: 'ㄉㄠˋ', radical: '辵', strokeCount: 12, lesson: '第五課', examples: ['道路', '知道', '大道'] },
+                { character: '路', pronunciation: 'ㄌㄨˋ', radical: '足', strokeCount: 13, lesson: '第五課', examples: ['道路', '馬路', '路燈'] },
+                { character: '車', pronunciation: 'ㄔㄜ', radical: '車', strokeCount: 7, lesson: '第六課', examples: ['汽車', '火車', '車站'] },
+                { character: '馬', pronunciation: 'ㄇㄚˇ', radical: '馬', strokeCount: 10, lesson: '第六課', examples: ['馬兒', '馬路', '馬上'] },
+                { character: '話', pronunciation: 'ㄏㄨㄚˋ', radical: '言', strokeCount: 13, lesson: '第六課', examples: ['說話', '電話', '中文'] }
+            ],
+            4: [ // 四年級
+                { character: '電', pronunciation: 'ㄉㄧㄢˋ', radical: '雨', strokeCount: 13, lesson: '第一課', examples: ['電話', '電視', '電腦'] },
+                { character: '視', pronunciation: 'ㄕˋ', radical: '見', strokeCount: 13, lesson: '第一課', examples: ['電視', '視力', '視線'] },
+                { character: '腦', pronunciation: 'ㄋㄠˇ', radical: '月', strokeCount: 19, lesson: '第一課', examples: ['電腦', '腦袋', '頭腦'] },
+                { character: '球', pronunciation: 'ㄑㄧㄡˊ', radical: '玉', strokeCount: 11, lesson: '第二課', examples: ['足球', '籃球', '地球'] },
+                { character: '網', pronunciation: 'ㄨㄤˇ', radical: '糸', strokeCount: 14, lesson: '第二課', examples: ['網路', '網站', '漁網'] },
+                { character: '站', pronunciation: 'ㄓㄢˋ', radical: '立', strokeCount: 10, lesson: '第二課', examples: ['車站', '網站', '站立'] },
+                { character: '海', pronunciation: 'ㄏㄞˇ', radical: '氵', strokeCount: 10, lesson: '第三課', examples: ['海洋', '海水', '大海'] },
+                { character: '洋', pronunciation: 'ㄧㄤˊ', radical: '氵', strokeCount: 9, lesson: '第三課', examples: ['海洋', '洋裝', '西洋'] },
+                { character: '船', pronunciation: 'ㄔㄨㄢˊ', radical: '舟', strokeCount: 11, lesson: '第三課', examples: ['輪船', '船隻', '船長'] },
+                { character: '飛', pronunciation: 'ㄈㄟ', radical: '飛', strokeCount: 9, lesson: '第四課', examples: ['飛機', '飛翔', '飛行'] },
+                { character: '機', pronunciation: 'ㄐㄧ', radical: '木', strokeCount: 16, lesson: '第四課', examples: ['飛機', '機器', '手機'] },
+                { character: '場', pronunciation: 'ㄔㄤˊ', radical: '土', strokeCount: 12, lesson: '第四課', examples: ['機場', '廣場', '場地'] },
+                { character: '園', pronunciation: 'ㄩㄢˊ', radical: '囗', strokeCount: 13, lesson: '第五課', examples: ['公園', '花園', '樂園'] },
+                { character: '動', pronunciation: 'ㄉㄨㄥˋ', radical: '力', strokeCount: 11, lesson: '第五課', examples: ['運動', '動物', '活動'] },
+                { character: '物', pronunciation: 'ㄨˋ', radical: '牛', strokeCount: 8, lesson: '第五課', examples: ['動物', '植物', '物品'] },
+                { character: '植', pronunciation: 'ㄓˊ', radical: '木', strokeCount: 12, lesson: '第六課', examples: ['植物', '種植', '植樹'] },
+                { character: '樹', pronunciation: 'ㄕㄨˋ', radical: '木', strokeCount: 16, lesson: '第六課', examples: ['樹木', '樹葉', '大樹'] },
+                { character: '葉', pronunciation: 'ㄧㄝˋ', radical: '艹', strokeCount: 12, lesson: '第六課', examples: ['樹葉', '葉子', '綠葉'] }
+            ],
+            custom: [] // 自訂生字
+        };
+
+        // 當前選擇的年級
+        let currentGrade = 1;
+        let currentLesson = 'all';
+
+        // DOM 元素
+        const characterGrid = document.getElementById('characterGrid');
+        const characterDetail = document.getElementById('characterDetail');
+        const currentCharacter = document.getElementById('currentCharacter');
+        const pronunciation = document.getElementById('pronunciation');
+        const grade = document.getElementById('grade');
+        const lesson = document.getElementById('lesson');
+        const radical = document.getElementById('radical');
+        const strokeCount = document.getElementById('strokeCount');
+        const exampleWords = document.getElementById('exampleWords');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const importBtn = document.getElementById('importBtn');
+        const aboutBtn = document.getElementById('aboutBtn');
+        const helpBtn = document.getElementById('helpBtn');
+        const importModal = document.getElementById('importModal');
+        const aboutModal = document.getElementById('aboutModal');
+        const helpModal = document.getElementById('helpModal');
+        const closeModalBtns = document.querySelectorAll('.close-modal');
+        const gradeTabs = document.querySelectorAll('.grade-tab');
+        const lessonTabsContainer = document.getElementById('lessonTabsContainer');
+        const fileDropArea = document.getElementById('fileDropArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const characterCount = document.getElementById('characterCount');
+        const importFileBtn = document.getElementById('importFileBtn');
+        const characterListTitle = document.getElementById('characterListTitle');
+
+        // 初始化頁面
+        function initPage() {
+            renderCharacterGrid(currentGrade);
+            setupEventListeners();
+        }
+
+        // 渲染國字網格
+        function renderCharacterGrid(grade) {
+            characterGrid.innerHTML = '';
+            
+            // 更新標題
+            if (grade === 'custom') {
+                characterListTitle.textContent = '自訂生字';
+                if (charactersData.custom.length === 0) {
+                    characterGrid.innerHTML = `
+                        <div class="col-span-full text-center py-10">
+                            <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <p class="text-lg text-gray-500">尚未匯入自訂生字</p>
+                            <button id="noCharactersImportBtn" class="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">匯入生字</button>
+                        </div>
+                    `;
+                    document.getElementById('noCharactersImportBtn').addEventListener('click', () => {
+                        importModal.classList.remove('hidden');
+                    });
+                    return;
+                }
+            } else {
+                const gradeNames = {
+                    1: '一年級',
+                    2: '二年級',
+                    3: '三年級',
+                    4: '四年級'
+                };
+                characterListTitle.textContent = `${gradeNames[grade]}常用國字`;
+            }
+            
+            charactersData[grade].forEach(charData => {
+                const card = document.createElement('div');
+                card.className = 'character-card bg-white rounded-xl shadow-md p-4 flex flex-col items-center cursor-pointer hover:bg-purple-50';
+                card.innerHTML = `
+                    <div class="text-4xl font-bold mb-2">${charData.character}</div>
+                    <div class="text-sm text-gray-500">${charData.pronunciation}</div>
+                `;
+                card.addEventListener('click', () => showCharacterDetail(charData, grade));
+                characterGrid.appendChild(card);
+            });
+        }
+
+        // 顯示國字詳情
+        function showCharacterDetail(charData, gradeValue) {
+            characterDetail.classList.remove('hidden');
+            currentCharacter.textContent = charData.character;
+            pronunciation.textContent = charData.pronunciation;
+            
+            // 設置年級顯示
+            if (gradeValue === 'custom') {
+                grade.textContent = charData.grade ? `${charData.grade}年級` : '自訂';
+            } else {
+                const gradeNames = {
+                    1: '一年級',
+                    2: '二年級',
+                    3: '三年級',
+                    4: '四年級'
+                };
+                grade.textContent = gradeNames[gradeValue];
+            }
+            
+            // 設置課程顯示
+            lesson.textContent = charData.lesson || '未分類';
+            
+            radical.textContent = charData.radical;
+            strokeCount.textContent = charData.strokeCount;
+            
+            // 顯示例詞
+            exampleWords.innerHTML = '';
+            if (charData.examples && charData.examples.length > 0) {
+                const exampleList = document.createElement('div');
+                exampleList.className = 'flex flex-wrap gap-2';
+                
+                charData.examples.forEach(example => {
+                    const exampleTag = document.createElement('span');
+                    exampleTag.className = 'bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm';
+                    exampleTag.textContent = example;
+                    exampleList.appendChild(exampleTag);
+                });
+                
+                exampleWords.appendChild(exampleList);
+            } else {
+                exampleWords.textContent = '無例詞';
+            }
+            
+            // 滾動到詳情區域
+            characterDetail.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 搜尋國字
+        function searchCharacter() {
+            const searchTerm = searchInput.value.trim();
+            if (!searchTerm) return;
+            
+            let found = false;
+            
+            // 搜尋所有年級的國字
+            const grades = [1, 2, 3, 4, 'custom'];
+            for (const g of grades) {
+                const result = charactersData[g].find(char => 
+                    char.character === searchTerm || char.pronunciation.includes(searchTerm)
+                );
+                
+                if (result) {
+                    // 切換到對應年級
+                    if (g !== currentGrade) {
+                        currentGrade = g;
+                        updateGradeTab();
+                        renderCharacterGrid(currentGrade);
+                    }
+                    
+                    showCharacterDetail(result, g);
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (!found) {
+                alert('找不到符合的國字，請嘗試其他關鍵字。');
+            }
+        }
+
+        // 更新年級標籤
+        function updateGradeTab() {
+            gradeTabs.forEach(tab => {
+                const grade = tab.dataset.grade;
+                if (grade == currentGrade) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+        }
+
+        // 處理文字檔匯入
+        function handleFileImport(file) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const lines = content.split('\n');
+                const importedChars = [];
+                
+                lines.forEach(line => {
+                    if (line.trim() === '') return;
+                    
+                    const parts = line.split(',');
+                    if (parts.length >= 6) {
+                        const charData = {
+                            character: parts[0].trim(),
+                            pronunciation: parts[1].trim(),
+                            radical: parts[2].trim(),
+                            strokeCount: parseInt(parts[3].trim()),
+                            grade: parts[4].trim(),
+                            lesson: parts[5].trim(),
+                            examples: parts.slice(6).map(ex => ex.trim()).filter(ex => ex !== '')
+                        };
+                        
+                        importedChars.push(charData);
+                    }
+                });
+                
+                if (importedChars.length > 0) {
+                    charactersData.custom = importedChars;
+                    
+                    // 如果當前是自訂標籤，重新渲染
+                    if (currentGrade === 'custom') {
+                        renderCharacterGrid('custom');
+                    }
+                    
+                    // 顯示匯入成功訊息
+                    alert(`成功匯入 ${importedChars.length} 個國字！`);
+                    importModal.classList.add('hidden');
+                } else {
+                    alert('無法解析檔案內容，請確認格式是否正確。');
+                }
+            };
+            
+            reader.onerror = function() {
+                alert('讀取檔案時發生錯誤。');
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // 設置事件監聽器
+        function setupEventListeners() {
+            // 年級標籤點擊事件
+            gradeTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    currentGrade = tab.dataset.grade;
+                    updateGradeTab();
+                    renderCharacterGrid(currentGrade);
+                    characterDetail.classList.add('hidden');
+                });
+            });
+            
+            // 搜尋按鈕
+            searchBtn.addEventListener('click', searchCharacter);
+            
+            // 搜尋輸入框回車事件
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    searchCharacter();
+                }
+            });
+            
+            // 匯入按鈕
+            importBtn.addEventListener('click', () => {
+                importModal.classList.remove('hidden');
+            });
+            
+            // 關於系統按鈕
+            aboutBtn.addEventListener('click', () => {
+                aboutModal.classList.remove('hidden');
+            });
+            
+            // 使用說明按鈕
+            helpBtn.addEventListener('click', () => {
+                helpModal.classList.remove('hidden');
+            });
+            
+            // 關閉彈出視窗按鈕
+            closeModalBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    importModal.classList.add('hidden');
+                    aboutModal.classList.add('hidden');
+                    helpModal.classList.add('hidden');
+                });
+            });
+            
+            // 點擊彈出視窗背景關閉
+            [importModal, aboutModal, helpModal].forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.classList.add('hidden');
+                    }
+                });
+            });
+            
+            // 檔案拖放區域事件
+            fileDropArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileDropArea.classList.add('active');
+            });
+            
+            fileDropArea.addEventListener('dragleave', () => {
+                fileDropArea.classList.remove('active');
+            });
+            
+            fileDropArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileDropArea.classList.remove('active');
+                
+                const file = e.dataTransfer.files[0];
+                if (file && file.type === 'text/plain') {
+                    displayFileInfo(file);
+                } else {
+                    alert('請選擇文字檔案 (.txt)');
+                }
+            });
+            
+            // 檔案選擇事件
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    displayFileInfo(file);
+                }
+            });
+            
+            // 匯入檔案按鈕
+            importFileBtn.addEventListener('click', () => {
+                const file = fileInput.files[0];
+                if (file) {
+                    handleFileImport(file);
+                }
+            });
+        }
+        
+        // 顯示檔案資訊
+        function displayFileInfo(file) {
+            fileName.textContent = file.name;
+            
+            // 讀取檔案內容以計算國字數量
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const lines = content.split('\n').filter(line => line.trim() !== '');
+                characterCount.textContent = `包含 ${lines.length} 個國字`;
+                
+                // 顯示檔案資訊並啟用匯入按鈕
+                fileInfo.classList.remove('hidden');
+                importFileBtn.disabled = false;
+            };
+            
+            reader.readAsText(file);
+            
+            // 將檔案設置到 input 元素
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+        }
+
+        // 初始化頁面
+        initPage();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9548c8d401328f12',t:'MTc1MDczMjAzMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
