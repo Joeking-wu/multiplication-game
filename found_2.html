@@ -29,6 +29,11 @@
             color: white;
         }
         
+        .lesson-tab.active {
+            background-color: #4f46e5;
+            color: white;
+        }
+        
         .character-display {
             font-size: 120px;
             line-height: 1;
@@ -44,13 +49,13 @@
             background-color: rgba(79, 70, 229, 0.05);
         }
         
-        .grade-tabs-container {
+        .grade-tabs-container, .lesson-tabs-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
         }
         
-        .grade-tabs-container::-webkit-scrollbar {
+        .grade-tabs-container::-webkit-scrollbar, .lesson-tabs-container::-webkit-scrollbar {
             display: none;
         }
     </style>
@@ -128,16 +133,16 @@
                                     <p id="grade" class="text-lg font-medium"></p>
                                 </div>
                                 <div>
+                                    <p class="text-sm text-gray-500">課程</p>
+                                    <p id="lesson" class="text-lg font-medium"></p>
+                                </div>
+                                <div>
                                     <p class="text-sm text-gray-500">部首</p>
                                     <p id="radical" class="text-lg font-medium"></p>
                                 </div>
                                 <div>
                                     <p class="text-sm text-gray-500">筆畫數</p>
                                     <p id="strokeCount" class="text-lg font-medium"></p>
-                                </div>
-				<div>
-                                    <p class="text-sm text-gray-500">筆畫數111</p>
-                                    <p id="strokeCount123" class="text-lg font-medium"></p>
                                 </div>
                             </div>
                         </div>
@@ -260,6 +265,7 @@
 
         // 當前選擇的年級
         let currentGrade = 1;
+        let currentLesson = 'all';
 
         // DOM 元素
         const characterGrid = document.getElementById('characterGrid');
@@ -267,6 +273,7 @@
         const currentCharacter = document.getElementById('currentCharacter');
         const pronunciation = document.getElementById('pronunciation');
         const grade = document.getElementById('grade');
+        const lesson = document.getElementById('lesson');
         const radical = document.getElementById('radical');
         const strokeCount = document.getElementById('strokeCount');
         const exampleWords = document.getElementById('exampleWords');
@@ -280,6 +287,7 @@
         const helpModal = document.getElementById('helpModal');
         const closeModalBtns = document.querySelectorAll('.close-modal');
         const gradeTabs = document.querySelectorAll('.grade-tab');
+        const lessonTabsContainer = document.getElementById('lessonTabsContainer');
         const fileDropArea = document.getElementById('fileDropArea');
         const fileInput = document.getElementById('fileInput');
         const fileInfo = document.getElementById('fileInfo');
@@ -356,6 +364,9 @@
                 };
                 grade.textContent = gradeNames[gradeValue];
             }
+            
+            // 設置課程顯示
+            lesson.textContent = charData.lesson || '未分類';
             
             radical.textContent = charData.radical;
             strokeCount.textContent = charData.strokeCount;
@@ -440,14 +451,15 @@
                     if (line.trim() === '') return;
                     
                     const parts = line.split(',');
-                    if (parts.length >= 5) {
+                    if (parts.length >= 6) {
                         const charData = {
                             character: parts[0].trim(),
                             pronunciation: parts[1].trim(),
                             radical: parts[2].trim(),
                             strokeCount: parseInt(parts[3].trim()),
                             grade: parts[4].trim(),
-                            examples: parts.slice(5).map(ex => ex.trim()).filter(ex => ex !== '')
+                            lesson: parts[5].trim(),
+                            examples: parts.slice(6).map(ex => ex.trim()).filter(ex => ex !== '')
                         };
                         
                         importedChars.push(charData);
