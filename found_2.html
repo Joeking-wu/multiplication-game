@@ -1,4 +1,4 @@
-﻿
+
 
 <!DOCTYPE html>
 <html lang="zh-TW">
@@ -29,11 +29,6 @@
             color: white;
         }
         
-        .lesson-tab.active {
-            background-color: #4f46e5;
-            color: white;
-        }
-        
         .character-display {
             font-size: 120px;
             line-height: 1;
@@ -49,13 +44,13 @@
             background-color: rgba(79, 70, 229, 0.05);
         }
         
-        .grade-tabs-container, .lesson-tabs-container {
+        .grade-tabs-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
         }
         
-        .grade-tabs-container::-webkit-scrollbar, .lesson-tabs-container::-webkit-scrollbar {
+        .grade-tabs-container::-webkit-scrollbar {
             display: none;
         }
     </style>
@@ -133,16 +128,16 @@
                                     <p id="grade" class="text-lg font-medium"></p>
                                 </div>
                                 <div>
-                                    <p class="text-sm text-gray-500">課程</p>
-                                    <p id="lesson" class="text-lg font-medium"></p>
-                                </div>
-                                <div>
                                     <p class="text-sm text-gray-500">部首</p>
                                     <p id="radical" class="text-lg font-medium"></p>
                                 </div>
                                 <div>
                                     <p class="text-sm text-gray-500">筆畫數</p>
                                     <p id="strokeCount" class="text-lg font-medium"></p>
+                                </div>
+				<div>
+                                    <p class="text-sm text-gray-500">筆畫數111</p>
+                                    <p id="strokeCount123" class="text-lg font-medium"></p>
                                 </div>
                             </div>
                         </div>
@@ -178,8 +173,8 @@
                 <h2 class="text-2xl font-bold mb-4">匯入生字</h2>
                 <p class="mb-4">請選擇或拖放一個文字檔案，格式為：</p>
                 <div class="bg-gray-100 p-3 rounded-lg mb-6 text-sm font-mono">
-                    <p>國字,注音,部首,筆畫數,年級,課程,例詞1,例詞2,...</p>
-                    <p>例如：木,ㄇㄨˋ,木,4,1,第三課,木頭,木材,木工</p>
+                    <p>國字,注音,部首,筆畫數,年級,例詞1,例詞2,...</p>
+                    <p>例如：木,ㄇㄨˋ,木,4,1,木頭,木材,木工</p>
                 </div>
                 
                 <div id="fileDropArea" class="file-drop-area rounded-lg p-8 text-center mb-6 cursor-pointer">
@@ -241,7 +236,7 @@
                 <h3 class="font-bold mb-2">匯入格式說明：</h3>
                 <p class="mb-4">文字檔中每行一個國字，格式為：</p>
                 <div class="bg-gray-100 p-3 rounded-lg mb-6 text-sm font-mono">
-                    <p>國字,注音,部首,筆畫數,年級,課程,例詞1,例詞2,...</p>
+                    <p>國字,注音,部首,筆畫數,年級,例詞1,例詞2,...</p>
                 </div>
                 <div class="text-right">
                     <button class="close-modal bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg">關閉</button>
@@ -263,69 +258,13 @@
             2: [ // 二年級
                 { character: '天', pronunciation: 'ㄊㄧㄢ', radical: '大', strokeCount: 4, lesson: '第一課', examples: ['天空', '天氣', '天天'] },
                 { character: '地', pronunciation: 'ㄉㄧˋ', radical: '土', strokeCount: 6, lesson: '第一課', examples: ['地球', '地方', '地上'] },
-                { character: '金', pronunciation: 'ㄐㄧㄣ', radical: '金', strokeCount: 8, lesson: '第一課', examples: ['金子', '金牌', '金魚'] },
-                { character: '土', pronunciation: 'ㄊㄨˇ', radical: '土', strokeCount: 3, lesson: '第二課', examples: ['土地', '土壤', '土石'] },
-                { character: '車', pronunciation: 'ㄔㄜ', radical: '車', strokeCount: 7, lesson: '第二課', examples: ['車子', '汽車', '火車'] },
-                { character: '雨', pronunciation: 'ㄩˇ', radical: '雨', strokeCount: 8, lesson: '第二課', examples: ['雨傘', '雨水', '下雨'] },
-                { character: '目', pronunciation: 'ㄇㄨˋ', radical: '目', strokeCount: 5, lesson: '第三課', examples: ['目標', '眼目', '目錄'] },
-                { character: '耳', pronunciation: 'ㄦˇ', radical: '耳', strokeCount: 6, lesson: '第三課', examples: ['耳朵', '耳環', '耳機'] },
-                { character: '門', pronunciation: 'ㄇㄣˊ', radical: '門', strokeCount: 8, lesson: '第三課', examples: ['門口', '大門', '門鈴'] },
-                { character: '風', pronunciation: 'ㄈㄥ', radical: '風', strokeCount: 9, lesson: '第四課', examples: ['風箏', '風雨', '風景'] },
-                { character: '花', pronunciation: 'ㄏㄨㄚ', radical: '艹', strokeCount: 7, lesson: '第四課', examples: ['花朵', '花園', '花瓶'] },
-                { character: '鳥', pronunciation: 'ㄋㄧㄠˇ', radical: '鳥', strokeCount: 11, lesson: '第四課', examples: ['小鳥', '鳥巢', '鳥類'] },
-                { character: '魚', pronunciation: 'ㄩˊ', radical: '魚', strokeCount: 11, lesson: '第五課', examples: ['魚兒', '金魚', '魚缸'] },
-                { character: '石', pronunciation: 'ㄕˊ', radical: '石', strokeCount: 5, lesson: '第五課', examples: ['石頭', '石油', '石像'] },
-                { character: '竹', pronunciation: 'ㄓㄨˊ', radical: '竹', strokeCount: 6, lesson: '第五課', examples: ['竹子', '竹筍', '竹林'] },
-                { character: '米', pronunciation: 'ㄇㄧˇ', radical: '米', strokeCount: 6, lesson: '第六課', examples: ['米飯', '米粒', '米糕'] },
-                { character: '羊', pronunciation: 'ㄧㄤˊ', radical: '羊', strokeCount: 6, lesson: '第六課', examples: ['羊毛', '山羊', '綿羊'] },
-                { character: '牛', pronunciation: 'ㄋㄧㄡˊ', radical: '牛', strokeCount: 4, lesson: '第六課', examples: ['牛奶', '牛肉', '水牛'] }
-            ],
-            3: [ // 三年級
-                { character: '學', pronunciation: 'ㄒㄩㄝˊ', radical: '子', strokeCount: 16, lesson: '第一課', examples: ['學校', '學生', '學習'] },
-                { character: '生', pronunciation: 'ㄕㄥ', radical: '生', strokeCount: 5, lesson: '第一課', examples: ['學生', '生活', '生日'] },
-                { character: '國', pronunciation: 'ㄍㄨㄛˊ', radical: '囗', strokeCount: 11, lesson: '第一課', examples: ['國家', '國旗', '國王'] },
-                { character: '家', pronunciation: 'ㄐㄧㄚ', radical: '宀', strokeCount: 10, lesson: '第二課', examples: ['家庭', '回家', '國家'] },
-                { character: '年', pronunciation: 'ㄋㄧㄢˊ', radical: '干', strokeCount: 6, lesson: '第二課', examples: ['年紀', '今年', '年輕'] },
-                { character: '多', pronunciation: 'ㄉㄨㄛ', radical: '夕', strokeCount: 6, lesson: '第二課', examples: ['多少', '很多', '多謝'] },
-                { character: '少', pronunciation: 'ㄕㄠˇ', radical: '小', strokeCount: 4, lesson: '第三課', examples: ['少年', '多少', '不少'] },
-                { character: '時', pronunciation: 'ㄕˊ', radical: '日', strokeCount: 10, lesson: '第三課', examples: ['時間', '時候', '小時'] },
-                { character: '間', pronunciation: 'ㄐㄧㄢ', radical: '門', strokeCount: 12, lesson: '第三課', examples: ['時間', '中間', '空間'] },
-                { character: '書', pronunciation: 'ㄕㄨ', radical: '曰', strokeCount: 10, lesson: '第四課', examples: ['書本', '讀書', '圖書'] },
-                { character: '見', pronunciation: 'ㄐㄧㄢˋ', radical: '見', strokeCount: 7, lesson: '第四課', examples: ['看見', '見面', '再見'] },
-                { character: '來', pronunciation: 'ㄌㄞˊ', radical: '木', strokeCount: 7, lesson: '第四課', examples: ['來去', '未來', '歡迎光臨'] },
-                { character: '去', pronunciation: 'ㄑㄩˋ', radical: '厶', strokeCount: 5, lesson: '第五課', examples: ['去年', '來去', '離去'] },
-                { character: '道', pronunciation: 'ㄉㄠˋ', radical: '辵', strokeCount: 12, lesson: '第五課', examples: ['道路', '知道', '大道'] },
-                { character: '路', pronunciation: 'ㄌㄨˋ', radical: '足', strokeCount: 13, lesson: '第五課', examples: ['道路', '馬路', '路燈'] },
-                { character: '車', pronunciation: 'ㄔㄜ', radical: '車', strokeCount: 7, lesson: '第六課', examples: ['汽車', '火車', '車站'] },
-                { character: '馬', pronunciation: 'ㄇㄚˇ', radical: '馬', strokeCount: 10, lesson: '第六課', examples: ['馬兒', '馬路', '馬上'] },
-                { character: '話', pronunciation: 'ㄏㄨㄚˋ', radical: '言', strokeCount: 13, lesson: '第六課', examples: ['說話', '電話', '中文'] }
-            ],
-            4: [ // 四年級
-                { character: '電', pronunciation: 'ㄉㄧㄢˋ', radical: '雨', strokeCount: 13, lesson: '第一課', examples: ['電話', '電視', '電腦'] },
-                { character: '視', pronunciation: 'ㄕˋ', radical: '見', strokeCount: 13, lesson: '第一課', examples: ['電視', '視力', '視線'] },
-                { character: '腦', pronunciation: 'ㄋㄠˇ', radical: '月', strokeCount: 19, lesson: '第一課', examples: ['電腦', '腦袋', '頭腦'] },
-                { character: '球', pronunciation: 'ㄑㄧㄡˊ', radical: '玉', strokeCount: 11, lesson: '第二課', examples: ['足球', '籃球', '地球'] },
-                { character: '網', pronunciation: 'ㄨㄤˇ', radical: '糸', strokeCount: 14, lesson: '第二課', examples: ['網路', '網站', '漁網'] },
-                { character: '站', pronunciation: 'ㄓㄢˋ', radical: '立', strokeCount: 10, lesson: '第二課', examples: ['車站', '網站', '站立'] },
-                { character: '海', pronunciation: 'ㄏㄞˇ', radical: '氵', strokeCount: 10, lesson: '第三課', examples: ['海洋', '海水', '大海'] },
-                { character: '洋', pronunciation: 'ㄧㄤˊ', radical: '氵', strokeCount: 9, lesson: '第三課', examples: ['海洋', '洋裝', '西洋'] },
-                { character: '船', pronunciation: 'ㄔㄨㄢˊ', radical: '舟', strokeCount: 11, lesson: '第三課', examples: ['輪船', '船隻', '船長'] },
-                { character: '飛', pronunciation: 'ㄈㄟ', radical: '飛', strokeCount: 9, lesson: '第四課', examples: ['飛機', '飛翔', '飛行'] },
-                { character: '機', pronunciation: 'ㄐㄧ', radical: '木', strokeCount: 16, lesson: '第四課', examples: ['飛機', '機器', '手機'] },
-                { character: '場', pronunciation: 'ㄔㄤˊ', radical: '土', strokeCount: 12, lesson: '第四課', examples: ['機場', '廣場', '場地'] },
-                { character: '園', pronunciation: 'ㄩㄢˊ', radical: '囗', strokeCount: 13, lesson: '第五課', examples: ['公園', '花園', '樂園'] },
-                { character: '動', pronunciation: 'ㄉㄨㄥˋ', radical: '力', strokeCount: 11, lesson: '第五課', examples: ['運動', '動物', '活動'] },
-                { character: '物', pronunciation: 'ㄨˋ', radical: '牛', strokeCount: 8, lesson: '第五課', examples: ['動物', '植物', '物品'] },
-                { character: '植', pronunciation: 'ㄓˊ', radical: '木', strokeCount: 12, lesson: '第六課', examples: ['植物', '種植', '植樹'] },
-                { character: '樹', pronunciation: 'ㄕㄨˋ', radical: '木', strokeCount: 16, lesson: '第六課', examples: ['樹木', '樹葉', '大樹'] },
-                { character: '葉', pronunciation: 'ㄧㄝˋ', radical: '艹', strokeCount: 12, lesson: '第六課', examples: ['樹葉', '葉子', '綠葉'] }
+                { character: '金', pronunciation: 'ㄐㄧㄣ', radical: '金', strokeCount: 8, lesson: '第一課', examples: ['金子', '金牌', '金魚'] }
             ],
             custom: [] // 自訂生字
         };
 
         // 當前選擇的年級
         let currentGrade = 1;
-        let currentLesson = 'all';
 
         // DOM 元素
         const characterGrid = document.getElementById('characterGrid');
@@ -333,7 +272,6 @@
         const currentCharacter = document.getElementById('currentCharacter');
         const pronunciation = document.getElementById('pronunciation');
         const grade = document.getElementById('grade');
-        const lesson = document.getElementById('lesson');
         const radical = document.getElementById('radical');
         const strokeCount = document.getElementById('strokeCount');
         const exampleWords = document.getElementById('exampleWords');
@@ -347,7 +285,6 @@
         const helpModal = document.getElementById('helpModal');
         const closeModalBtns = document.querySelectorAll('.close-modal');
         const gradeTabs = document.querySelectorAll('.grade-tab');
-        const lessonTabsContainer = document.getElementById('lessonTabsContainer');
         const fileDropArea = document.getElementById('fileDropArea');
         const fileInput = document.getElementById('fileInput');
         const fileInfo = document.getElementById('fileInfo');
@@ -424,9 +361,6 @@
                 };
                 grade.textContent = gradeNames[gradeValue];
             }
-            
-            // 設置課程顯示
-            lesson.textContent = charData.lesson || '未分類';
             
             radical.textContent = charData.radical;
             strokeCount.textContent = charData.strokeCount;
@@ -511,15 +445,14 @@
                     if (line.trim() === '') return;
                     
                     const parts = line.split(',');
-                    if (parts.length >= 6) {
+                    if (parts.length >= 5) {
                         const charData = {
                             character: parts[0].trim(),
                             pronunciation: parts[1].trim(),
                             radical: parts[2].trim(),
                             strokeCount: parseInt(parts[3].trim()),
                             grade: parts[4].trim(),
-                            lesson: parts[5].trim(),
-                            examples: parts.slice(6).map(ex => ex.trim()).filter(ex => ex !== '')
+                            examples: parts.slice(5).map(ex => ex.trim()).filter(ex => ex !== '')
                         };
                         
                         importedChars.push(charData);
