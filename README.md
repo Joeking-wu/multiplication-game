@@ -12,5 +12,5 @@ index.html 乘法計算，一位數的乘法計算，可透過每題的時間長
 
 Zhuyinlearninggame.html 注音練習。[注音練習](https://joeking-wu.github.io/multiplication-game/Zhuyinlearninggame.html).
 
-found_2.html 生字查詢功能。[注音練習](https://joeking-wu.github.io/multiplication-game/found_2.html).
+found_2.html 生字查詢功能。[生字查詢](https://joeking-wu.github.io/multiplication-game/found_2.html).
 
