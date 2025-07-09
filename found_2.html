@@ -93,8 +93,8 @@
             <div class="flex justify-center mb-8">
                 <div class="grade-tabs-container">
                     <div class="bg-white rounded-full p-1 shadow-md inline-flex">
-                        <button class="grade-tab active px-6 py-2 rounded-full text-lg font-medium whitespace-nowrap" data-grade="1">一年級</button>
-                        <button class="grade-tab px-6 py-2 rounded-full text-lg font-medium whitespace-nowrap" data-grade="2">二年級</button>
+                        <button class="grade-tab active px-6 py-2 rounded-full text-lg font-medium whitespace-nowrap" data-grade="1">一年級(上)</button>
+                        <button class="grade-tab px-6 py-2 rounded-full text-lg font-medium whitespace-nowrap" data-grade="2">一年級(下)</button>
                         <button class="grade-tab px-6 py-2 rounded-full text-lg font-medium whitespace-nowrap" data-grade="3">三年級</button>
                         <button class="grade-tab px-6 py-2 rounded-full text-lg font-medium whitespace-nowrap" data-grade="4">四年級</button>
                         <button class="grade-tab px-6 py-2 rounded-full text-lg font-medium whitespace-nowrap" data-grade="custom">自訂生字</button>
@@ -253,7 +253,7 @@
     <script>
         // 國字資料庫
         const charactersData = {
-	 1: [ // 一年級
+	 1: [ // 一年級(上)
 { character: '拍', pronunciation: 'ㄆㄞ', radical: '手', strokeCount: 8, lesson: '第一課', examples: ['拍手', '球拍', '拍打'] },
 { character: '手', pronunciation: 'ㄕㄡˇ', radical: '手', strokeCount: 4, lesson: '第一課', examples: ['左手', '手掌', '手心'] },
 { character: '左', pronunciation: 'ㄗㄨㄛˇ', radical: '工', strokeCount: 5, lesson: '第一課', examples: ['左邊', '左右', '左轉'] },
@@ -395,8 +395,8 @@
                 }
             } else {
                 const gradeNames = {
-                    1: '一年級',
-                    2: '二年級',
+                    1: '一年級(上)',
+                    2: '一年級(下)',
                     3: '三年級',
                     4: '四年級'
                 };
@@ -426,8 +426,8 @@
                 grade.textContent = charData.grade ? `${charData.grade}年級` : '自訂';
             } else {
                 const gradeNames = {
-                    1: '一年級',
-                    2: '二年級',
+                    1: '一年級(上)',
+                    2: '一年級(下)',
                     3: '三年級',
                     4: '四年級'
                 };
