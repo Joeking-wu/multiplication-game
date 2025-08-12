@@ -284,6 +284,7 @@
                         <th>姓名</th>
                         <th>答對題數</th>
                         <th>用時</th>
+                        <th>日期</th>
                     </tr>
                 </thead>
                 <tbody id="leaderboardBody">
@@ -609,11 +610,14 @@ const allQuestions = generateGameData1();
         
         function saveScore(name, correctAnswers, time) {
             let scores = JSON.parse(localStorage.getItem('mathGameScores') || '[]');
+            const now = new Date();
+            const dateString = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}`;
+            
             scores.push({
                 name: name,
                 correct: correctAnswers,
                 time: time,
-                date: new Date().toLocaleDateString()
+                date: dateString
             });
             localStorage.setItem('mathGameScores', JSON.stringify(scores));
         }
@@ -647,6 +651,7 @@ const allQuestions = generateGameData1();
                     <td>${score.name}</td>
                     <td>${score.correct}/12</td>
                     <td>${formatTime(score.time)}</td>
+                    <td>${score.date}</td>
                 `;
                 tbody.appendChild(row);
             });
