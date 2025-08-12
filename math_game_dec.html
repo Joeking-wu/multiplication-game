@@ -611,7 +611,7 @@ const allQuestions = generateGameData1();
         }
         
         function saveScore(name, correctAnswers, time) {
-            let scores = JSON.parse(localStorage.getItem('mathGameScores') || '[]');
+            let scores = JSON.parse(localStorage.getItem('mathGameScores_dec') || '[]');
 	    const now = new Date();
             const dateString = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}`;
             
@@ -621,11 +621,11 @@ const allQuestions = generateGameData1();
                 time: time,
                 date: dateString
             });
-            localStorage.setItem('mathGameScores', JSON.stringify(scores));
+            localStorage.setItem('mathGameScores_dec', JSON.stringify(scores));
         }
         
         function updateLeaderboard() {
-            let scores = JSON.parse(localStorage.getItem('mathGameScores') || '[]');
+            let scores = JSON.parse(localStorage.getItem('mathGameScores_dec') || '[]');
             
             // 排序：先按答對題數降序，再按時間升序
             scores.sort((a, b) => {
