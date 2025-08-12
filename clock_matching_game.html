@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10以內減法連線遊戲</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .title {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .timer {
+            color: #e74c3c;
+        }
+        
+        .score {
+            color: #27ae60;
+        }
+        
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin: 30px 0;
+            min-height: 400px;
+        }
+
+        .clocks-column, .texts-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .clock-item, .text-item {
+            background: #f8f9fa;
+            border: 3px solid #74b9ff;
+            border-radius: 15px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .clock-item:hover, .text-item:hover {
+            transform: scale(1.05);
+            border-color: #0984e3;
+            box-shadow: 0 5px 15px rgba(116, 185, 255, 0.4);
+        }
+
+        .clock-item.selected, .text-item.selected {
+            border-color: #e17055;
+            background: #ffe8e1;
+            transform: scale(1.1);
+        }
+
+        .clock-item.matched, .text-item.matched {
+            border-color: #00b894;
+            background: #d4edda;
+            animation: matchSuccess 0.6s ease;
+        }
+
+        .clock {
+            width: 80px;
+            height: 80px;
+            border: 4px solid #2d3436;
+            border-radius: 50%;
+            position: relative;
+            background: white;
+            margin: 0 auto;
+        }
+
+        .clock-center {
+            width: 8px;
+            height: 8px;
+            background: #2d3436;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+        }
+
+        .hour-hand {
+            width: 3px;
+            height: 25px;
+            background: #2d3436;
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        .minute-hand {
+            width: 2px;
+            height: 35px;
+            background: #636e72;
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        .clock-numbers {
+            font-size: 9px;
+            font-weight: bold;
+            color: #2d3436;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .clock-number {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        .number-12 { top: 3px; left: 50%; transform: translateX(-50%); }
+        .number-1 { top: 8px; right: 18px; }
+        .number-2 { top: 18px; right: 8px; }
+        .number-3 { right: 3px; top: 50%; transform: translateY(-50%); }
+        .number-4 { bottom: 18px; right: 8px; }
+        .number-5 { bottom: 8px; right: 18px; }
+        .number-6 { bottom: 3px; left: 50%; transform: translateX(-50%); }
+        .number-7 { bottom: 8px; left: 18px; }
+        .number-8 { bottom: 18px; left: 8px; }
+        .number-9 { left: 3px; top: 50%; transform: translateY(-50%); }
+        .number-10 { top: 18px; left: 8px; }
+        .number-11 { top: 8px; left: 18px; }
+
+        .text-item {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2d3436;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .correct {
+            border-color: #27ae60 !important;
+            background: linear-gradient(45deg, #27ae60, #2ecc71) !important;
+            color: white !important;
+            animation: pulse 0.5s ease-in-out;
+        }
+        
+        .incorrect {
+            border-color: #e74c3c !important;
+            background: linear-gradient(45deg, #e74c3c, #c0392b) !important;
+            color: white !important;
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .name-input {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .name-input input {
+            padding: 10px 15px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin: 0 10px;
+        }
+        
+        .leaderboard {
+            margin-top: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+        }
+        
+        .leaderboard h3 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .leaderboard table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .leaderboard th, .leaderboard td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .leaderboard th {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            font-weight: bold;
+        }
+        
+        .leaderboard tr:hover {
+            background: #e9ecef;
+        }
+        
+        .rank-1 { color: #f39c12; font-weight: bold; }
+        .rank-2 { color: #95a5a6; font-weight: bold; }
+        .rank-3 { color: #cd7f32; font-weight: bold; }
+        
+        .start-screen {
+            text-align: center;
+            padding: 50px 0;
+        }
+        
+        .start-screen h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .start-screen p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🧮 減法連線遊戲</h1>
+        </div>
+        
+        <div id="startScreen" class="start-screen">
+            <h2>歡迎來到減法連線遊戲！</h2>
+            <p>請輸入您的姓名開始遊戲</p>
+            <input type="text" id="playerName" placeholder="請輸入姓名" style="padding: 10px 15px; font-size: 1.1em; border: 2px solid #ddd; border-radius: 10px; margin: 0 10px;">
+            <button class="btn btn-primary" onclick="startGame()">開始遊戲</button>
+        </div>
+        
+        <div id="gameScreen" style="display: none;">
+            <div class="game-info">
+                <div class="timer">⏰ 時間: <span id="timer">00:00</span></div>
+		<div class="message" id="message">開始配對！</div>
+                <div class="score">✅ 已配對: <span id="matched">0</span> / 6</div>
+            </div>
+            
+            <div class="game-area">
+                <div class="clocks-column" id="clocksColumn"></div>
+            	<div class="texts-column" id="textsColumn"></div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-success" id="finishBtn" onclick="finishGame()">完成遊戲</button>
+            </div>
+        </div>
+        
+        <div class="leaderboard">
+            <h3>🏆 排行榜 (前10名)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>排名</th>
+                        <th>姓名</th>
+                        <th>答對題數</th>
+                        <th>用時</th>
+                        <th>日期</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // 生成所有可能的時間
+        function generateAllTimes() {
+            const allTimes = [];
+            
+            // 生成所有整點 (1點到12點)
+            for (let hour = 1; hour <= 12; hour++) {
+                const hourAngle = (hour % 12) * 30; // 每小時30度
+                allTimes.push({
+                    time: `${hour}:00`,
+                    text: `${hour}點`,
+                    hourAngle: hourAngle,
+                    minuteAngle: 0
+                });
+            }
+            
+            // 生成所有半點 (1點半到12點半)
+            for (let hour = 1; hour <= 12; hour++) {
+                const hourAngle = (hour % 12) * 30 + 15; // 整點位置 + 15度(半小時)
+                allTimes.push({
+                    time: `${hour}:30`,
+                    text: `${hour}點半`,
+                    hourAngle: hourAngle,
+                    minuteAngle: 180 // 分針指向6 (180度)
+                });
+            }
+            
+            return allTimes;
+        }
+
+        // 從所有時間中隨機選擇6個不重複的時間
+        function getRandomTimes() {
+            const allTimes = generateAllTimes();
+            const selectedTimes = [];
+            
+            // 隨機選擇6個不同的時間
+            while (selectedTimes.length < 6) {
+                const randomIndex = Math.floor(Math.random() * allTimes.length);
+                const selectedTime = allTimes[randomIndex];
+                
+                // 確保不重複選擇
+                if (!selectedTimes.some(time => time.time === selectedTime.time)) {
+                    selectedTimes.push(selectedTime);
+                }
+            }
+            
+            return selectedTimes;
+        }
+
+        let selectedClock = null;
+        let selectedText = null;
+        let matchedPairs = 0;
+        let currentGameData = [];
+        let gameStartTime = null;
+        let playerName = '';
+        let timerInterval = null;
+
+        function createClock(data, index) {
+            return `
+                <div class="clock-item" data-time="${data.time}" data-index="${index}" onclick="selectClock(this)">
+                    <div class="clock">
+                        <div class="clock-numbers">
+                            <div class="clock-number number-12">12</div>
+                            <div class="clock-number number-1">1</div>
+                            <div class="clock-number number-2">2</div>
+                            <div class="clock-number number-3">3</div>
+                            <div class="clock-number number-4">4</div>
+                            <div class="clock-number number-5">5</div>
+                            <div class="clock-number number-6">6</div>
+                            <div class="clock-number number-7">7</div>
+                            <div class="clock-number number-8">8</div>
+                            <div class="clock-number number-9">9</div>
+                            <div class="clock-number number-10">10</div>
+                            <div class="clock-number number-11">11</div>
+                        </div>
+                        <div class="hour-hand" style="transform: translateX(-50%) rotate(${data.hourAngle}deg);"></div>
+                        <div class="minute-hand" style="transform: translateX(-50%) rotate(${data.minuteAngle}deg);"></div>
+                        <div class="clock-center"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createText(data, index) {
+            return `
+                <div class="text-item" data-time="${data.time}" data-index="${index}" onclick="selectText(this)">
+                    ${data.text}
+                </div>
+            `;
+        }
+
+        function shuffle(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+	function selectClock(element) {
+            if (element.classList.contains('matched') || !playerName) return;
+            
+            
+            // 清除之前選中的時鐘
+            document.querySelectorAll('.clock-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            selectedClock = element;
+            element.classList.add('selected');
+            
+            setMessage('很好！現在選擇對應的時間文字');
+            
+            if (selectedText) {
+                checkMatch();
+            }
+        }
+
+        function selectText(element) {
+            if (element.classList.contains('matched') || !playerName) return;
+            
+            
+            // 清除之前選中的文字
+            document.querySelectorAll('.text-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            selectedText = element;
+            element.classList.add('selected');
+            
+            setMessage('很好！現在選擇對應的時鐘');
+            
+            if (selectedClock) {
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            const clockTime = selectedClock.dataset.time;
+            const textTime = selectedText.dataset.time;
+            
+            if (clockTime === textTime) {
+                // 配對成功
+                selectedClock.classList.remove('selected');
+                selectedText.classList.remove('selected');
+                selectedClock.classList.add('matched');
+                selectedText.classList.add('matched');
+                
+                matchedPairs++;
+                updateScore();
+                setMessage('太棒了！配對成功！ 🎉');
+                
+                selectedClock = null;
+                selectedText = null;
+                
+                if (matchedPairs === currentGameData.length) {
+setMessage('🎊 恭喜你！全部配對完成！你真棒！ 🎊');
+// 完成所有題目
+                            finishGame();
+                }
+            } else {
+                // 配對失敗
+                setMessage('再試試看！這兩個不配對 😊');
+                setTimeout(() => {
+                    selectedClock.classList.remove('selected');
+                    selectedText.classList.remove('selected');
+                    selectedClock = null;
+                    selectedText = null;
+                    setMessage('點選時鐘和對應的時間文字來配對！');
+                }, 1500);
+            }
+        }
+
+	function updateScore() {
+            document.getElementById('matched').textContent = matchedPairs;
+        }
+
+ 	function setMessage(msg) {
+            const messageElement = document.getElementById('message');
+            messageElement.textContent = msg;
+            messageElement.classList.remove('celebration');
+        }
+
+        function startGame() {
+            const nameInput = document.getElementById('playerName');
+            if (!nameInput.value.trim()) {
+                alert('請輸入您的姓名！');
+                return;
+            }
+            
+            playerName = nameInput.value.trim();
+
+            // 每次遊戲都隨機產生新的題目
+            currentGameData = getRandomTimes();
+            
+            const shuffledClocks = shuffle(currentGameData);
+            const shuffledTexts = shuffle(currentGameData);
+            
+            const clocksColumn = document.getElementById('clocksColumn');
+            const textsColumn = document.getElementById('textsColumn');
+            
+            clocksColumn.innerHTML = shuffledClocks.map((data, index) => createClock(data, index)).join('');
+            textsColumn.innerHTML = shuffledTexts.map((data, index) => createText(data, index)).join('');
+            
+            matchedPairs = 0;
+            selectedClock = null;
+            selectedText = null;
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            
+            startTime = Date.now();
+            startTimer();
+        }
+        
+        function startTimer() {
+            timerInterval = setInterval(function() {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('timer').textContent = 
+                    String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+            }, 1000);
+        }
+
+        
+        function finishGame() {
+            clearInterval(timerInterval);
+            const endTime = Date.now();
+            const totalTime = Math.floor((endTime - startTime) / 1000);
+
+            // 保存成績
+            saveScore(playerName, matchedPairs, totalTime);
+
+            // 顯示結果
+            //alert(`遊戲結束！\n答對題數: ${score}/12\n用時: ${formatTime(totalTime)}`);
+
+            // 更新排行榜
+            updateLeaderboard();
+
+            // 重置遊戲
+            resetGame();
+
+        }
+        
+        function saveScore(name, correctAnswers, time) {
+            let scores = JSON.parse(localStorage.getItem('mathGameScores_time') || '[]');
+	    const now = new Date();
+            const dateString = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}`;
+
+            scores.push({
+                name: name,
+                correct: correctAnswers,
+                time: time,
+                date: dateString
+            });
+            localStorage.setItem('mathGameScores_time', JSON.stringify(scores));
+        }
+        
+        function updateLeaderboard() {
+            let scores = JSON.parse(localStorage.getItem('mathGameScores_time') || '[]');
+            
+            // 排序：先按答對題數降序，再按時間升序
+            scores.sort((a, b) => {
+                if (b.correct !== a.correct) {
+                    return b.correct - a.correct;
+                }
+                return a.time - b.time;
+            });
+            
+            // 只顯示前10名
+            scores = scores.slice(0, 10);
+            
+            const tbody = document.getElementById('leaderboardBody');
+            tbody.innerHTML = '';
+            
+            scores.forEach((score, index) => {
+                const row = document.createElement('tr');
+                let rankClass = '';
+                if (index === 0) rankClass = 'rank-1';
+                else if (index === 1) rankClass = 'rank-2';
+                else if (index === 2) rankClass = 'rank-3';
+                
+                row.innerHTML = `
+                    <td class="${rankClass}">${index + 1}</td>
+                    <td>${score.name}</td>
+                    <td>${score.correct}/6</td>
+                    <td>${formatTime(score.time)}</td>
+	            <td>${score.date}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return String(minutes).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+        }
+        
+        function resetGame() {
+            matchedPairs = 0;
+            selectedClock = null;
+            selectedText = null;
+            score = 0;
+
+            //gameData = []; // 重置遊戲數據，下次開始時會重新生成
+            document.getElementById('matched').textContent = '0';
+            document.getElementById('timer').textContent = '00:00';
+            document.getElementById('playerName').value = '';
+ 
+            document.getElementById('startScreen').style.display = 'block';
+            document.getElementById('gameScreen').style.display = 'none';
+
+        }
+        
+        // 初始化排行榜
+        updateLeaderboard();
+    </script>
+</body>
+</html>
