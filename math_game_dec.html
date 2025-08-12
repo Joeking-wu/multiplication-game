@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10以內減法連線遊戲</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .title {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .timer {
+            color: #e74c3c;
+        }
+        
+        .page-info {
+            color: #3498db;
+        }
+        
+        .score {
+            color: #27ae60;
+        }
+        
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin: 30px 0;
+            min-height: 400px;
+        }
+        
+        .questions, .answers {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .question, .answer {
+            padding: 15px 20px;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.4em;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .question {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+        }
+        
+        .answer {
+            background: linear-gradient(45deg, #ffeaea, #ffcccb);
+        }
+
+        .question:hover, .answer:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        
+        .question.selected {
+            border-color: #3498db;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .answer.selected {
+            border-color: #3498db;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .correct {
+            border-color: #27ae60 !important;
+            background: linear-gradient(45deg, #27ae60, #2ecc71) !important;
+            color: white !important;
+            animation: pulse 0.5s ease-in-out;
+        }
+        
+        .incorrect {
+            border-color: #e74c3c !important;
+            background: linear-gradient(45deg, #e74c3c, #c0392b) !important;
+            color: white !important;
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .name-input {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .name-input input {
+            padding: 10px 15px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin: 0 10px;
+        }
+        
+        .leaderboard {
+            margin-top: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+        }
+        
+        .leaderboard h3 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .leaderboard table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .leaderboard th, .leaderboard td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .leaderboard th {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            font-weight: bold;
+        }
+        
+        .leaderboard tr:hover {
+            background: #e9ecef;
+        }
+        
+        .rank-1 { color: #f39c12; font-weight: bold; }
+        .rank-2 { color: #95a5a6; font-weight: bold; }
+        .rank-3 { color: #cd7f32; font-weight: bold; }
+        
+        .start-screen {
+            text-align: center;
+            padding: 50px 0;
+        }
+        
+        .start-screen h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .start-screen p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🧮 減法連線遊戲</h1>
+        </div>
+        
+        <div id="startScreen" class="start-screen">
+            <h2>歡迎來到減法連線遊戲！</h2>
+            <p>請輸入您的姓名開始遊戲</p>
+            <input type="text" id="playerName" placeholder="請輸入姓名" style="padding: 10px 15px; font-size: 1.1em; border: 2px solid #ddd; border-radius: 10px; margin: 0 10px;">
+            <button class="btn btn-primary" onclick="startGame()">開始遊戲</button>
+        </div>
+        
+        <div id="gameScreen" style="display: none;">
+            <div class="game-info">
+                <div class="timer">⏰ 時間: <span id="timer">00:00</span></div>
+                <div class="page-info">📄 第 <span id="currentPage">1</span> 頁 / 共 3 頁</div>
+                <div class="score">✅ 答對: <span id="score">0</span> / 12</div>
+            </div>
+            
+            <div class="game-area">
+                <div class="questions" id="questions"></div>
+                <div class="answers" id="answers"></div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="prevBtn" onclick="previousPage()" disabled>上一頁</button>
+                <button class="btn btn-primary" id="nextBtn" onclick="nextPage()">下一頁</button>
+                <button class="btn btn-success" id="finishBtn" onclick="finishGame()" style="display: none;">完成遊戲</button>
+            </div>
+        </div>
+        
+        <div class="leaderboard">
+            <h3>🏆 排行榜 (前10名)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>排名</th>
+                        <th>姓名</th>
+                        <th>答對題數</th>
+                        <th>用時</th>
+                        <th>日期</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+function generateGameData1() {
+    const allQuestions = [];
+    const totalQuestions = 12; // 總題數
+    const perGroup = 4;         // 每組不重複答案的題數
+    const maxNum = 10;           // 最大數字
+    const minNum = 1;           // 最大數字
+    const maxSum = 0;          // 總和上限
+
+    for (let group = 0; group < totalQuestions / perGroup; group++) {
+        // 先生成所有合法題目
+        const candidates = [];
+        for (let num1 = 10; num1 >= minNum; num1--) {
+            for (let num2 = 1; num2 <= maxNum; num2++) {
+                if (num1 - num2 >= maxSum) {
+                    candidates.push({
+                        question: `${num1} - ${num2}`,
+                        answer: num1 - num2
+                    });
+                }
+            }
+        }
+
+        // 洗牌（Fisher-Yates 演算法）
+        for (let i = candidates.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+        }
+
+        // 選出本組不重複答案的題目
+        const usedAnswers = new Set();
+        for (let i = 0; i < candidates.length && usedAnswers.size < perGroup; i++) {
+            const q = candidates[i];
+            if (!usedAnswers.has(q.answer)) {
+                allQuestions.push(q);
+                usedAnswers.add(q.answer);
+            }
+        }
+    }
+
+    return allQuestions;
+}
+        // 隨機生成遊戲數據
+        function generateGameData() {
+            const gameData = [];
+const allQuestions = generateGameData1();
+            // 分配到三頁，每頁4題
+            for (let page = 0; page < 3; page++) {
+                const startIndex = page * 4;
+                const pageQuestions = [];
+                const pageCorrectAnswers = [];
+                const pageAllAnswers = [];
+                
+                // 獲取當前頁的4個題目
+                for (let i = 0; i < 4; i++) {
+                    const questionData = allQuestions[startIndex + i];
+                    pageQuestions.push(questionData.question);
+                    pageCorrectAnswers.push(questionData.answer);
+                }
+                
+                // 添加正確答案到選項中
+                pageAllAnswers.push(...pageCorrectAnswers);
+                
+                // 添加2個干擾項答案（10以內且不與正確答案重複）
+                const availableDistractors = [];
+                for (let i = 0; i <= 10; i++) { // 0到10的數字作為干擾項
+                    if (!pageCorrectAnswers.includes(i)) {
+                        availableDistractors.push(i);
+                    }
+                }
+                
+                // 隨機選擇2個干擾項
+                while (pageAllAnswers.length < 6 && availableDistractors.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * availableDistractors.length);
+                    const distractor = availableDistractors.splice(randomIndex, 1)[0];
+                    pageAllAnswers.push(distractor);
+                }
+                
+                gameData.push({
+                    questions: pageQuestions,
+                    correctAnswers: pageCorrectAnswers,
+                    allAnswers: pageAllAnswers
+                });
+            }
+            
+            return gameData;
+        }
+        
+        let gameData = [];
+        
+        let currentPage = 0;
+        let selectedQuestion = null;
+        let selectedAnswer = null;
+        let score = 0;
+        let startTime = null;
+        let timerInterval = null;
+        let playerName = '';
+        let pageAnswers = [[], [], []]; // 記錄每頁的答題情況
+        
+        function startGame() {
+            const nameInput = document.getElementById('playerName');
+            if (!nameInput.value.trim()) {
+                alert('請輸入您的姓名！');
+                return;
+            }
+            
+            playerName = nameInput.value.trim();
+            
+            // 生成隨機題目
+            gameData = generateGameData();
+            
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            
+            startTime = Date.now();
+            startTimer();
+            loadPage(0);
+        }
+        
+        function startTimer() {
+            timerInterval = setInterval(function() {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('timer').textContent = 
+                    String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+            }, 1000);
+        }
+        
+        function loadPage(pageIndex) {
+            currentPage = pageIndex;
+            const data = gameData[pageIndex];
+            
+            // 更新頁面信息
+            document.getElementById('currentPage').textContent = pageIndex + 1;
+            
+            // 清空選擇
+            selectedQuestion = null;
+            selectedAnswer = null;
+            
+            // 生成題目
+            const questionsContainer = document.getElementById('questions');
+            questionsContainer.innerHTML = '';
+            data.questions.forEach((question, index) => {
+                const div = document.createElement('div');
+                div.className = 'question';
+                div.textContent = question;
+                div.onclick = () => selectQuestion(index);
+                
+                // 檢查是否已經答對
+                if (pageAnswers[pageIndex][index] === true) {
+                    div.classList.add('correct');
+                    div.onclick = null;
+                }
+                
+                questionsContainer.appendChild(div);
+            });
+            
+            // 生成答案（打亂順序）
+            const answersContainer = document.getElementById('answers');
+            answersContainer.innerHTML = '';
+            const shuffledAnswers = [...data.allAnswers].sort(() => Math.random() - 0.5);
+            shuffledAnswers.forEach((answer, index) => {
+                const div = document.createElement('div');
+                div.className = 'answer';
+                div.textContent = answer;
+                div.onclick = () => selectAnswer(answer);
+                answersContainer.appendChild(div);
+            });
+            
+            // 更新按鈕狀態
+            document.getElementById('prevBtn').disabled = pageIndex === 0;
+            document.getElementById('nextBtn').style.display = pageIndex === 2 ? 'none' : 'inline-block';
+            document.getElementById('finishBtn').style.display = pageIndex === 2 ? 'inline-block' : 'none';
+        }
+        
+        function selectQuestion(index) {
+            // 如果已經答對，不能重新選擇
+            if (pageAnswers[currentPage][index] === true) return;
+            
+            // 清除之前的選擇
+            document.querySelectorAll('.question').forEach(q => q.classList.remove('selected'));
+            
+            // 選擇當前題目
+            selectedQuestion = index;
+            document.querySelectorAll('.question')[index].classList.add('selected');
+            
+            // 清除答案選擇
+            selectedAnswer = null;
+            document.querySelectorAll('.answer').forEach(a => a.classList.remove('selected'));
+        }
+        
+        function selectAnswer(answer) {
+            // 清除之前的選擇
+            document.querySelectorAll('.answer').forEach(a => a.classList.remove('selected'));
+            
+            // 選擇當前答案
+            selectedAnswer = answer;
+            document.querySelectorAll('.answer').forEach(a => {
+                if (a.textContent == answer) {
+                    a.classList.add('selected');
+                }
+            });
+            
+            // 如果已經選擇了題目，進行配對
+            if (selectedQuestion !== null) {
+                checkAnswer();
+            }
+        }
+        
+        function checkAnswer() {
+            const correctAnswer = gameData[currentPage].correctAnswers[selectedQuestion];
+            const questionElement = document.querySelectorAll('.question')[selectedQuestion];
+            const answerElements = document.querySelectorAll('.answer');
+            let selectedAnswerElement = null;
+            
+            answerElements.forEach(a => {
+                if (a.textContent == selectedAnswer) {
+                    selectedAnswerElement = a;
+                }
+            });
+            
+            if (selectedAnswer === correctAnswer) {
+                // 答對了
+                questionElement.classList.remove('selected');
+                questionElement.classList.add('correct');
+                selectedAnswerElement.classList.remove('selected');
+                selectedAnswerElement.classList.add('correct');
+                
+                // 禁用已答對的題目和答案
+                questionElement.onclick = null;
+                selectedAnswerElement.onclick = null;
+                
+                // 記錄答對
+                pageAnswers[currentPage][selectedQuestion] = true;
+                score++;
+                document.getElementById('score').textContent = score;
+                
+                // 檢查是否完成當前頁面所有題目
+                const currentPageCorrect = pageAnswers[currentPage].filter(answer => answer === true).length;
+                if (currentPageCorrect === 4) {
+                    // 完成當前頁面，自動換到下一頁
+                    setTimeout(() => {
+                        if (currentPage < 2) {
+                            // 顯示頁面完成提示
+                            const pageCompleteMsg = document.createElement('div');
+                            pageCompleteMsg.style.cssText = `
+                                position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                                background: linear-gradient(45deg, #27ae60, #2ecc71); color: white;
+                                padding: 20px 40px; border-radius: 15px; font-size: 1.5em;
+                                box-shadow: 0 10px 20px rgba(0,0,0,0.3); z-index: 1000;
+                            `;
+                            pageCompleteMsg.textContent = `第${currentPage + 1}頁完成！即將進入下一頁...`;
+                            document.body.appendChild(pageCompleteMsg);
+                            
+                            setTimeout(() => {
+                                document.body.removeChild(pageCompleteMsg);
+                                loadPage(currentPage + 1);
+                            }, 1500);
+                        } else {
+                            // 完成所有題目
+                            finishGame();
+                        }
+                    }, 500);
+                }
+                
+            } else {
+                // 答錯了
+                questionElement.classList.add('incorrect');
+                selectedAnswerElement.classList.add('incorrect');
+                
+                // 記錄答錯
+                pageAnswers[currentPage][selectedQuestion] = false;
+                
+                // 1秒後恢復
+                setTimeout(() => {
+                    questionElement.classList.remove('incorrect', 'selected');
+                    selectedAnswerElement.classList.remove('incorrect', 'selected');
+                }, 1000);
+            }
+            
+            // 重置選擇
+            selectedQuestion = null;
+            selectedAnswer = null;
+        }
+        
+        function previousPage() {
+            if (currentPage > 0) {
+                loadPage(currentPage - 1);
+            }
+        }
+        
+        function nextPage() {
+            if (currentPage < 2) {
+                loadPage(currentPage + 1);
+            }
+        }
+        
+        function finishGame() {
+            clearInterval(timerInterval);
+            const endTime = Date.now();
+            const totalTime = Math.floor((endTime - startTime) / 1000);
+            
+            // 保存成績
+            saveScore(playerName, score, totalTime);
+            
+            // 顯示結果
+            alert(`遊戲結束！\n答對題數: ${score}/12\n用時: ${formatTime(totalTime)}`);
+            
+            // 更新排行榜
+            updateLeaderboard();
+            
+            // 重置遊戲
+            resetGame();
+        }
+        
+        function saveScore(name, correctAnswers, time) {
+            let scores = JSON.parse(localStorage.getItem('mathGameScores') || '[]');
+	    const now = new Date();
+            const dateString = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}`;
+            
+            scores.push({
+                name: name,
+                correct: correctAnswers,
+                time: time,
+                date: dateString
+            });
+            localStorage.setItem('mathGameScores', JSON.stringify(scores));
+        }
+        
+        function updateLeaderboard() {
+            let scores = JSON.parse(localStorage.getItem('mathGameScores') || '[]');
+            
+            // 排序：先按答對題數降序，再按時間升序
+            scores.sort((a, b) => {
+                if (b.correct !== a.correct) {
+                    return b.correct - a.correct;
+                }
+                return a.time - b.time;
+            });
+            
+            // 只顯示前10名
+            scores = scores.slice(0, 10);
+            
+            const tbody = document.getElementById('leaderboardBody');
+            tbody.innerHTML = '';
+            
+            scores.forEach((score, index) => {
+                const row = document.createElement('tr');
+                let rankClass = '';
+                if (index === 0) rankClass = 'rank-1';
+                else if (index === 1) rankClass = 'rank-2';
+                else if (index === 2) rankClass = 'rank-3';
+                
+                row.innerHTML = `
+                    <td class="${rankClass}">${index + 1}</td>
+                    <td>${score.name}</td>
+                    <td>${score.correct}/12</td>
+                    <td>${formatTime(score.time)}</td>
+	            <td>${score.date}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return String(minutes).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+        }
+        
+        function resetGame() {
+            currentPage = 0;
+            selectedQuestion = null;
+            selectedAnswer = null;
+            score = 0;
+            pageAnswers = [[], [], []];
+            gameData = []; // 重置遊戲數據，下次開始時會重新生成
+            document.getElementById('score').textContent = '0';
+            document.getElementById('timer').textContent = '00:00';
+            document.getElementById('playerName').value = '';
+            
+            document.getElementById('startScreen').style.display = 'block';
+            document.getElementById('gameScreen').style.display = 'none';
+        }
+        
+        // 初始化排行榜
+        updateLeaderboard();
+    </script>
+</body>
+</html>
