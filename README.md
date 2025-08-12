@@ -16,4 +16,6 @@ Zhuyinlearninggame.html 注音練習。[注音練習](https://joeking-wu.github.
 
 found_2.html 生字查詢功能。[生字查詢](https://joeking-wu.github.io/multiplication-game/found_2.html).
 
-add.html 加法計算，一位(10)。[加法計算排名](https://joeking-wu.github.io/multiplication-game/math_game_add.html).
+math_game_add.html 加法計算，一位(10)。[加法計算排名](https://joeking-wu.github.io/multiplication-game/math_game_add.html).
+
+math_game_dec.html 減法計算，一位(10)。[減法計算排名](https://joeking-wu.github.io/multiplication-game/math_game_dec.html).
