@@ -19,3 +19,5 @@ found_2.html 生字查詢功能。[生字查詢](https://joeking-wu.github.io/mu
 math_game_add.html 加法計算，一位(10)。[加法計算排名](https://joeking-wu.github.io/multiplication-game/math_game_add.html).
 
 math_game_dec.html 減法計算，一位(10)。[減法計算排名](https://joeking-wu.github.io/multiplication-game/math_game_dec.html).
+
+clock_matching_game.html 時鐘幾點，整點與半點練習。[時鐘幾點排名](https://joeking-wu.github.io/multiplication-game/clock_matching_game.html).
