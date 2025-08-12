@@ -403,7 +403,7 @@
             const selectedTimes = [];
             
             // 隨機選擇6個不同的時間
-            while (selectedTimes.length < 6) {
+            while (selectedTimes.length < 5) {
                 const randomIndex = Math.floor(Math.random() * allTimes.length);
                 const selectedTime = allTimes[randomIndex];
                 
@@ -653,7 +653,7 @@ setMessage('🎊 恭喜你！全部配對完成！你真棒！ 🎊');
                 row.innerHTML = `
                     <td class="${rankClass}">${index + 1}</td>
                     <td>${score.name}</td>
-                    <td>${score.correct}/6</td>
+                    <td>${score.correct}/5</td>
                     <td>${formatTime(score.time)}</td>
 	            <td>${score.date}</td>
                 `;
