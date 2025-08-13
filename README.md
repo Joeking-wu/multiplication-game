@@ -1,6 +1,6 @@
 # multiplication-game
 
-透過AI生產程式碼，再進行調整成需要的格式。
+透過AI生產程式碼，再進行調整成需要的格式，ChatGPT，canva，claude。
 
 add.html 加法計算，一位、二位、三位數加法計算(10、100、1000)。[加法計算](https://joeking-wu.github.io/multiplication-game/add.html).
 
