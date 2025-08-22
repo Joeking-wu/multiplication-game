@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>小朋友珠算入門｜互動式學習</title>
+  <style>
+    :root{
+      --bg:#f7fafc;--card:#ffffff;--ink:#1a202c;--muted:#4a5568;--accent:#2563eb;--ok:#16a34a;--bad:#dc2626;--beam:#2d3748;--bead:#f59e0b;--bead2:#fbbf24;
+    }
+    html,body{height:100%;}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Noto Sans",sans-serif;background:var(--bg);color:var(--ink);}    
+    .container{max-width:1100px;margin:0 auto;padding:16px 16px 64px;}
+    .title{font-size:28px;font-weight:800;letter-spacing:.5px;}
+    .subtitle{color:var(--muted);margin-top:6px}
+    .row{display:flex;gap:16px;flex-wrap:wrap;}
+    .card{background:var(--card);border-radius:18px;box-shadow:0 6px 20px rgba(0,0,0,.08);padding:16px;}
+    .card.pad-lg{padding:20px 24px}
+    .grow{flex:1 1 480px}
+    .side{flex:1 1 280px}
+    .controls{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+    button,select{appearance:none;border:0;border-radius:12px;padding:10px 14px;background:#edf2f7;color:#111;cursor:pointer;font-weight:700}
+    button.primary{background:var(--accent);color:#fff}
+    button.good{background:var(--ok);color:#fff}
+    button.bad{background:var(--bad);color:#fff}
+    button.ghost{background:transparent;border:2px dashed #cbd5e1}
+    button:active{transform:translateY(1px)}
+    .hint{font-size:14px;color:var(--muted)}
+
+    /* Abacus */
+    .abacus{display:flex;gap:14px;align-items:flex-start;justify-content:center;padding:18px;background:linear-gradient(180deg,#fefefe,#f3f4f6);border-radius:18px;border:1px solid #e5e7eb}
+    .rod{position:relative;width:70px;height:360px;display:flex;flex-direction:column;align-items:center;}
+    .rod-label{font-weight:800;margin-top:6px;color:var(--muted)}
+    .frame{position:relative;width:52px;height:320px;border-radius:14px;background:#fff;box-shadow:inset 0 0 0 2px #e5e7eb;display:flex;flex-direction:column;justify-content:space-between;padding:8px 0}
+    .beam{position:absolute;left:6px;right:6px;top:120px;height:8px;background:var(--beam);border-radius:4px;box-shadow:0 2px 4px rgba(0,0,0,.25)}
+    .upper,.lower{position:relative;display:flex;flex-direction:column;align-items:center;gap:12px;padding:8px 0}
+    .upper{height:140px;}
+    .lower{height:140px;}
+    .bead{width:42px;height:26px;border-radius:999px;background:linear-gradient(180deg,var(--bead),var(--bead2));box-shadow:inset 0 -2px 0 rgba(0,0,0,.15),0 2px 4px rgba(0,0,0,.2);transition:transform .15s ease,opacity .15s ease}
+    .bead:hover{filter:brightness(1.05)}
+    .bead.disabled{opacity:.35;pointer-events:none}
+    .upper .bead{position:absolute;left:50%;transform:translate(-50%,0)}
+    .upper .bead.active{transform:translate(-50%,70px)} /* toward beam */
+    .lower .bead{position:absolute;left:50%;transform:translate(-50%,0)}
+    /* four lower bead resting slots */
+    .lower .b0{top:0}
+    .lower .b1{top:36px}
+    .lower .b2{top:72px}
+    .lower .b3{top:108px}
+    /* active ones move up towards beam */
+    .lower .bead.toward{transform:translate(-50%,-38px)}
+
+    .valueBar{display:flex;gap:8px;align-items:center;margin-top:8px}
+    .value{font-size:28px;font-weight:900}
+    .pill{border-radius:999px;padding:6px 10px;background:#e5e7eb;font-weight:700}
+
+    .section-title{font-size:18px;font-weight:800;margin:6px 0 10px}
+    .question{font-size:22px;font-weight:900}
+    .feedback{min-height:28px;font-weight:800}
+    .stars{font-size:20px}
+    .list{margin:8px 0 0 16px;color:var(--muted)}
+    .kbd{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;background:#111;color:#fff;border-radius:8px;padding:2px 6px}
+    .footer{margin-top:24px;color:var(--muted);font-size:12px}
+    .toggle{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:12px;background:#eef2ff;font-weight:700}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">🧮 小朋友珠算入門</div>
+    <div class="subtitle">從玩算盤開始的 10 分鐘互動學習。上珠 = 5、下珠 = 1；向橫檔靠近就「算數」。</div>
+
+    <div class="row" style="margin-top:12px">
+      <div class="card grow pad-lg">
+        <div class="section-title">練習模式</div>
+        <div class="controls">
+          <select id="mode">
+            <option value="free">自由練習（撥出任何數字）</option>
+            <option value="digit">數字 0–9（單檔）</option>
+            <option value="add_nocarry">加法（不進位）</option>
+            <option value="sub_noborrow">減法（不借位）</option>
+            <option value="add">加法（含進位）</option>
+            <option value="sub">減法（含借位）</option>
+            <option value="quiz">限時小測驗</option>
+          </select>
+          <select id="columns">
+            <option value="3">3 檔（個十百）</option>
+            <option value="4" selected>4 檔（個十百千）</option>
+            <option value="5">5 檔（到萬）</option>
+          </select>
+          <select id="range">
+            <option value="9">範圍：0–9</option>
+            <option value="20" selected>0–20</option>
+            <option value="50">0–50</option>
+            <option value="99">0–99</option>
+          </select>
+          <button class="primary" id="newQ">出新題</button>
+          <button id="check">檢查答案</button>
+          <button class="ghost" id="reset">全部清空</button>
+        </div>
+        <div class="question" id="question">（自由練習：自己撥撥看）</div>
+        <div class="valueBar">
+          <span class="pill">目前數字</span>
+          <span class="value" id="total">0</span>
+          <span class="pill" id="placeHint">個｜十｜百｜千</span>
+        </div>
+        <div class="abacus" id="abacus"></div>
+        <div class="feedback" id="feedback"></div>
+      </div>
+
+      <div class="card side pad-lg">
+        <div class="section-title">如何看算盤</div>
+        <div class="list">
+          <p>・每一檔有 <b>上珠 1 顆 = 5</b>，<b>下珠 4 顆 = 1</b>。<br>・珠子<strong>向橫檔靠近</strong>就算進去。</p>
+          <p>・例如：<br>　上珠靠近 + 下珠 2 顆 → 5 + 2 = 7。<br>　下珠 4 顆 → 4；再加 1 就要進位。</p>
+        </div>
+        <div class="section-title">操作小技巧</div>
+        <div class="list">
+          <p>・點一下<b>上珠</b>切換 0/5。<br>・點一下<b>下珠</b>可設定 0–4 顆靠近。<br>・按 <span class="kbd">R</span> 清空，<span class="kbd">Enter</span> 檢查。</p>
+        </div>
+        <div class="section-title">你的表現</div>
+        <div>⭐ 連續答對：<span id="streak">0</span></div>
+        <div class="stars" id="stars">☆☆☆☆☆</div>
+      </div>
+    </div>
+
+    <div class="footer">© 2025 小小珠算練習｜單一 HTML 檔，離線可用。</div>
+  </div>
+
+<script>
+(function(){
+  const els = {
+    abacus: document.getElementById('abacus'),
+    total: document.getElementById('total'),
+    question: document.getElementById('question'),
+    feedback: document.getElementById('feedback'),
+    mode: document.getElementById('mode'),
+    cols: document.getElementById('columns'),
+    range: document.getElementById('range'),
+    placeHint: document.getElementById('placeHint'),
+    stars: document.getElementById('stars'),
+    streak: document.getElementById('streak')
+  }
+
+  let rods = [];
+  let colCount = +els.cols.value;
+  let target = null; // question target (number or {a,b,op})
+  let quizTimer = null, timeLeft = 60, quizScore = 0;
+  let streak = +(localStorage.getItem('abacus_streak')||0);
+  updateStreak(0);
+
+  function placesLabel(n){
+    const names = ['個','十','百','千','萬','十萬'];
+    return names.slice(0,n).reverse().join('｜');
+  }
+
+  function buildAbacus(){
+    colCount = +els.cols.value;
+    els.abacus.innerHTML='';
+    rods = [];
+    
+    // Create rods in visual order (highest place value on right)
+    for(let i = colCount - 1; i >= 0; i--){
+      const rod = document.createElement('div');
+      rod.className='rod';
+      const frame = document.createElement('div');
+      frame.className='frame';
+      const beam = document.createElement('div');
+      beam.className='beam';
+
+      const upper = document.createElement('div');
+      upper.className='upper';
+      const upperBead = document.createElement('div');
+      upperBead.className='bead';
+      upper.appendChild(upperBead);
+
+      const lower = document.createElement('div');
+      lower.className='lower';
+      const lowerBeads=[];
+      for(let b=0;b<4;b++){
+        const lb = document.createElement('div');
+        lb.className=`bead b${b}`;
+        lower.appendChild(lb);
+        lowerBeads.push(lb);
+      }
+
+      frame.appendChild(upper);frame.appendChild(lower);frame.appendChild(beam);
+      rod.appendChild(frame);
+      const label=document.createElement('div');
+      label.className='rod-label';
+      label.textContent=['個','十','百','千','萬','十萬'][i]||'';
+      rod.appendChild(label);
+      els.abacus.appendChild(rod); // append in order
+
+      const state = {upper:0, lower:0, upperEl:upperBead, lowerEls:lowerBeads};
+      rods[i] = state; // store in correct logical position
+
+      // interactions - bind to correct rod index
+      upperBead.addEventListener('click',()=>{
+        rods[i].upper = rods[i].upper?0:1; render();
+      });
+      lowerBeads.forEach((lb,idx)=>{
+        lb.addEventListener('click',()=>{
+          // clicking idx: if idx < current -> set to idx (turn off one); else set to idx+1
+          rods[i].lower = (idx+1<=rods[i].lower)? idx : (idx+1);
+          render();
+        });
+      });
+    }
+    els.placeHint.textContent = placesLabel(colCount);
+    render();
+  }
+
+  function valueOf(){
+    let sum=0, pow=1;
+    for(let i=0;i<rods.length;i++){
+      const v = rods[i].upper*5 + rods[i].lower;
+      sum += v*pow; pow*=10;
+    }
+    return sum;
+  }
+
+  function setFromNumber(n){
+    // set rods to represent n (0..)
+    for(let i=0;i<rods.length;i++){
+      const digit = n%10; n=Math.floor(n/10);
+      rods[i].upper = digit>=5?1:0;
+      rods[i].lower = digit>=5? digit-5 : digit;
+    }
+    render();
+  }
+
+  function clearAll(){
+    rods.forEach(r=>{r.upper=0;r.lower=0});
+    render();
+  }
+
+  function render(){
+    rods.forEach(r=>{
+      r.upperEl.classList.toggle('active', !!r.upper);
+      r.lowerEls.forEach((lb,i)=>{
+        const toward = i < r.lower; // i: 0 close to beam
+        lb.classList.toggle('toward', toward);
+      })
+    });
+    els.total.textContent = valueOf();
+  }
+
+  function rng(max){return Math.floor(Math.random()*(max+1));}
+  function nonCarryPair(max){
+    // pick a,b so that ones digit doesn't overflow & within range
+    let a=rng(max),b=rng(max);
+    const a1=a%10, b1=b%10;
+    if(a1+b1>9){ // adjust b
+      b -= (a1+b1-9);
+    }
+    if(b<0) b=0;
+    return [a,b];
+  }
+  function nonBorrowPair(max){
+    let a=rng(max),b=rng(max);
+    if((a%10)<(b%10)){ [a,b]=[b,a]; }
+    if(a<b){ [a,b]=[b,a]; }
+    return [a,b];
+  }
+
+  function newQuestion(){
+    const mode = els.mode.value;
+    const max = +els.range.value;
+    let text='';
+    if(mode==='free'){
+      target=null; text='（自由練習：自己撥撥看）';
+      els.feedback.textContent='';
+      return els.question.textContent=text;
+    }
+    if(mode==='digit'){
+      target = rng(9);
+      text = `撥出： ${target}`;
+      setFromNumber(0);
+    } else if(mode==='add_nocarry'){
+      const [a,b]=nonCarryPair(max);
+      target = {a,b,op:'+'};
+      text = `計算： ${a} + ${b}`;
+      setFromNumber(a);
+    } else if(mode==='sub_noborrow'){
+      const [a,b]=nonBorrowPair(max);
+      target = {a,b,op:'-'};
+      text = `計算： ${a} - ${b}`;
+      setFromNumber(a);
+    } else if(mode==='add'){
+      const a=rng(max), b=rng(max);
+      target = {a,b,op:'+'};
+      text = `計算： ${a} + ${b}`;
+      setFromNumber(a);
+    } else if(mode==='sub'){
+      let a=rng(max), b=rng(max); if(a<b) [a,b]=[b,a];
+      target = {a,b,op:'-'};
+      text = `計算： ${a} - ${b}`;
+      setFromNumber(a);
+    } else if(mode==='quiz'){
+      timeLeft=60; quizScore=0; text=`⏱️ 60 秒小測驗開始！請盡量答題。當前得分：${quizScore}`;
+      if(quizTimer) clearInterval(quizTimer);
+      quizTimer=setInterval(()=>{
+        timeLeft--; 
+        if(timeLeft<=0){
+          clearInterval(quizTimer); quizTimer=null;
+          els.question.textContent=`⏱️ 時間到！得分：${quizScore}`;
+          els.feedback.innerHTML='';
+        } else {
+          if(target===null || typeof target==='number') newQuestion();
+        }
+      },1000);
+      // fallthrough to generate a quiz item
+      const types=['digit','add_nocarry','sub_noborrow','add','sub'];
+      const pick=types[Math.floor(Math.random()*types.length)];
+      els.mode.value=pick; const t = newQuestion(); els.mode.value='quiz';
+      return t;
+    }
+    els.feedback.textContent='';
+    els.question.textContent=text;
+  }
+
+  function expectedAnswer(){
+    if(target===null) return null;
+    if(typeof target==='number') return target;
+    if(target.op==='+') return target.a + target.b;
+    return target.a - target.b;
+  }
+
+  function updateStreak(delta){
+    streak = Math.max(0, streak + delta);
+    localStorage.setItem('abacus_streak', String(streak));
+    els.streak.textContent = streak;
+    const maxStars=5;
+    const filled = Math.min(maxStars, Math.floor(streak/3));
+    els.stars.textContent = '★★★★★'.slice(0,filled) + '☆☆☆☆☆'.slice(filled,5);
+  }
+
+  function check(){
+    if(els.mode.value==='free'){ els.feedback.textContent='自由練習不用檢查喔！'; return; }
+    const got = valueOf();
+    const want = expectedAnswer();
+    if(want===null) return;
+    if(got===want){
+      els.feedback.innerHTML = '🎉 <span style="color:var(--ok)"><b>答對！</b></span>';
+      updateStreak(1);
+      if(els.mode.value==='quiz'){ quizScore++; els.question.textContent=`⏱️ ${timeLeft}s｜得分：${quizScore}`; newQuestion(); return; }
+      setTimeout(()=>newQuestion(), 400);
+    } else {
+      els.feedback.innerHTML = `😅 <span style="color:var(--bad)"><b>再試試看！</b></span> 正確是 <b>${want}</b>`;
+      updateStreak(-1);
+    }
+  }
+
+  // wire controls
+  document.getElementById('newQ').addEventListener('click', newQuestion);
+  document.getElementById('check').addEventListener('click', check);
+  document.getElementById('reset').addEventListener('click', ()=>{clearAll(); els.feedback.textContent='';});
+  els.mode.addEventListener('change', ()=>{ if(els.mode.value!=='quiz' && quizTimer){clearInterval(quizTimer); quizTimer=null;} newQuestion(); });
+  els.cols.addEventListener('change', ()=>{ buildAbacus(); newQuestion(); });
+  els.range.addEventListener('change', ()=>{ newQuestion(); });
+
+  window.addEventListener('keydown',(e)=>{
+    if(e.key==='Enter') check();
+    if(e.key.toLowerCase()==='r') { clearAll(); }
+  });
+
+  // init
+  buildAbacus();
+  newQuestion();
+})();
+</script>
+</body>
+</html>
