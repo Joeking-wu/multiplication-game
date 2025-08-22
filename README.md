@@ -21,3 +21,5 @@ math_game_add.html 加法計算，一位(10)。[加法計算排名](https://joek
 math_game_dec.html 減法計算，一位(10)。[減法計算排名](https://joeking-wu.github.io/multiplication-game/math_game_dec.html).
 
 clock_matching_game.html 時鐘幾點，整點與半點練習。[時鐘幾點排名](https://joeking-wu.github.io/multiplication-game/clock_matching_game.html).
+
+Abacus.html 小朋友珠算入門練習。[小朋友珠算入門](https://joeking-wu.github.io/multiplication-game/Abacus.html).
