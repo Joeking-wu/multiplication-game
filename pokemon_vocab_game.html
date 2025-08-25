@@ -21,7 +21,7 @@
             color: #333;
         }
 
-        .game-container {
+        .main-container {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
@@ -37,6 +37,78 @@
             margin-bottom: 30px;
             font-size: 2.5em;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 首頁介面樣式 */
+        .start-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .start-page h2 {
+            font-size: 2em;
+            color: #2d3748;
+            margin-bottom: 20px;
+        }
+
+        .start-page .buttons {
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        /* 查詢介面樣式 */
+        .search-container {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .search-container h2 {
+            font-size: 2em;
+            color: #2d3748;
+        }
+        
+        .search-input-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #searchInput {
+            padding: 10px 15px;
+            font-size: 1.2em;
+            border-radius: 10px;
+            border: 2px solid #cbd5e0;
+            width: 200px;
+            text-align: center;
+        }
+        
+        #searchResult {
+            text-align: left;
+            margin-top: 20px;
+            background: #f0f4f8;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        .result-item {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        
+        .result-item strong {
+            color: #3182ce;
+        }
+
+        /* 遊戲介面樣式 */
+        .game-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
         }
 
         .pokemon-section {
@@ -82,46 +154,39 @@
         #pokemonDetails p {
             margin: 5px 0;
         }
-
-        /* 調整 ID 的字體大小 */
+        
         .pokemon-details-item {
             font-weight: bold;
-            font-size: 1.2em; 
+            font-size: 1.2em;
         }
 
-        /* 調整屬性的字體大小 */
         .type-badge {
             display: inline-block;
             padding: 2px 10px;
             border-radius: 15px;
-            font-size: 1.1em; /* 這裡的字體加大 */
+            font-size: 1.1em;
             font-weight: bold;
             color: white;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
             margin: 0 4px;
-            min-width: 55px; /* 寬度稍微增加以適應字體大小 */
+            min-width: 55px;
             text-align: center;
         }
         
         /* 各種屬性顏色的設定 */
-.type-badge-一般 { background-color: #a0a0a0; }
-.type-badge-火 { background-color: #ff3700; }
-.type-badge-水 { background-color: #0094e5; }
-.type-badge-電 { background-color: #e4b700; }
-.type-badge-草 { background-color: #92bf19; }
-.type-badge-冰 { background-color: #00b7ee; }
-.type-badge-格鬥 { background-color: #c85500; }
-.type-badge-毒 { background-color: #be78be; }
-.type-badge-地面 { background-color: #cca142; }
-.type-badge-飛行 { background-color: #79bcd7; }
-.type-badge-超能力 { background-color: #dc78c8; }
-.type-badge-蟲 { background-color: #32b432; }
-.type-badge-岩石 { background-color: #a07850; }
-.type-badge-幽靈 { background-color: #8c78f0; }
-.type-badge-龍 { background-color: #3c64c8; }
-.type-badge-惡 { background-color: #646464; }
-.type-badge-鋼 { background-color: #96b4dc; }
-.type-badge-妖精 { background-color: #ff7eb8; }
+        .type-badge-草 { background-color: #7AC74C; }
+        .type-badge-毒 { background-color: #A33EA1; }
+        .type-badge-火 { background-color: #EE8130; }
+        .type-badge-水 { background-color: #6390F0; }
+        .type-badge-電 { background-color: #F7D02C; }
+        .type-badge-岩石 { background-color: #B6A136; }
+        .type-badge-地面 { background-color: #E2BF65; }
+        .type-badge-龍 { background-color: #6F35FC; }
+        .type-badge-飛行 { background-color: #A98FF3; }
+        .type-badge-普通 { background-color: #A8A77A; }
+        .type-badge-鋼 { background-color: #B7B7CE; }
+        .type-badge-超能力 { background-color: #F95587; }
+        .type-badge-妖精 { background-color: #D685AD; }
 
         .pokemon-image {
             width: 200px;
@@ -314,6 +379,11 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
+        
+        button.small-btn {
+            padding: 8px 15px;
+            font-size: 0.9em;
+        }
 
         .primary-btn {
             background: linear-gradient(135deg, #48bb78, #38a169);
@@ -327,6 +397,11 @@
 
         .info-btn {
             background: linear-gradient(135deg, #4299e1, #3182ce);
+            color: white;
+        }
+        
+        .active-filter-btn {
+            background: linear-gradient(135deg, #3182ce, #4299e1);
             color: white;
         }
 
@@ -368,6 +443,12 @@
         .word-detail {
             margin: 10px 0;
             font-size: 1.1em;
+        }
+        
+        .word-detail .grade {
+            font-size: 0.9em;
+            color: #718096;
+            margin-top: 5px;
         }
 
         .examples {
@@ -584,9 +665,309 @@
             width: 100%;
         }
 
+        /* 查詢結果的寶可夢列表樣式 */
+        .related-pokemons {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #cbd5e0;
+        }
+        
+        .related-pokemons h4 {
+            font-size: 1.5em;
+            color: #4a5568;
+            margin-bottom: 15px;
+        }
+        
+        .pokemon-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .pokemon-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #fff;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 150px;
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+
+        .pokemon-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .pokemon-card img {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        .pokemon-card p {
+            margin: 0;
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #2d3748;
+        }
+
+        .pokemon-card .id {
+            font-size: 0.9em;
+            color: #718096;
+        }
+        
+        /* 年級按鈕樣式 */
+        .grade-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .grade-buttons button {
+            background-color: #a0aec0;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .grade-buttons button:hover {
+            background-color: #718096;
+            transform: translateY(-1px);
+        }
+        
+        /* 查詢介面的分類顯示按鈕 */
+        .filter-vocab-buttons {
+            display: none; /* 預設隱藏 */
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-vocab-buttons button {
+            background-color: #a0aec0;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+        
+        .filter-vocab-buttons button.active {
+            background-color: #3182ce;
+        }
+        
+        /* 生字列表樣式 */
+        .vocab-list-container {
+            margin-top: 20px;
+        }
+        
+        .vocab-list-container h3 {
+            font-size: 1.5em;
+            color: #4a5568;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #cbd5e0;
+            padding-bottom: 10px;
+        }
+        
+        .vocab-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .vocab-list-item {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            background-color: #e2e8f0;
+            color: #2d3748;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .vocab-list-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* 寶可夢相關生字底色 */
+        .pokemon-related {
+            background-color: #ffc107;
+            color: white;
+        }
+        
+        .pokemon-related:hover {
+            background-color: #e6b200;
+        }
+        
+        /* 課別顯示的樣式 */
+        .lesson-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        
+        .lesson-group h4 {
+            font-size: 1.3em;
+            color: #3182ce;
+            border-bottom: 1px solid #cbd5e0;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .lesson-group .vocab-list {
+            justify-content: flex-start;
+        }
+        
+        /* 新增生字測驗樣式 */
+        .quiz-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .quiz-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .quiz-card {
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+
+        .quiz-question {
+            font-size: 2.5em;
+            color: #2d3748;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .quiz-input-group {
+            display: flex;
+            align-items: center; /* 調整為水平對齊 */
+            gap: 10px; /* 增加間距 */
+        }
+
+        .quiz-input-group .character-input {
+            width: 80px;
+            height: 80px;
+            font-size: 2em;
+        }
+        
+        .quiz-input-group .pronunciation-hint {
+            font-size: 1.5em;
+            color: #4299e1;
+            font-weight: bold;
+            min-width: 50px;
+        }
+
+        .quiz-result-message {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 1.3em;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .quiz-result-message.show {
+            display: block;
+        }
+        
+        .quiz-result-message.wrong {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+        }
+        
+        .quiz-result-summary {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        .quiz-record-list {
+            background: #f0f4f8;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .quiz-record-list h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #cbd5e0;
+            padding-bottom: 10px;
+        }
+
+        .quiz-record-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .quiz-record-list li {
+            padding: 8px 0;
+            border-bottom: 1px dashed #e2e8f0;
+            font-size: 1em;
+            color: #4a5568;
+        }
+        
+        .quiz-record-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .quiz-record-list li strong {
+            color: #3182ce;
+        }
+        
+        .quiz-hint-info {
+            background: #e6fffa;
+            border: 2px solid #4fd1c7;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+            display: none;
+        }
+        
+        .quiz-hint-info.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
         /* RWD 樣式 */
         @media (max-width: 768px) {
-            .game-container {
+            .main-container {
                 padding: 20px;
                 width: 95%;
             }
@@ -633,46 +1014,64 @@
             .records-calendar-container {
                 width: 100%;
             }
+
+            .pokemon-list {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <h1>🎮 寶可夢生字學習遊戲</h1>
-        
-        <div class="score-section">
-            <div class="score-item">
-                🏆 分數: <span id="score">0</span>
-            </div>
-            <div class="score-item">
-                ✅ 正確: <span id="correct">0</span>
-            </div>
-            <div class="score-item">
-                ❌ 錯誤: <span id="wrong">0</span>
+    <div class="main-container">
+        <h1>🎮 寶可夢生字學習系統</h1>
+
+        <div class="start-page" id="startPage">
+            <h2>歡迎來到寶可夢生字學習！</h2>
+            <p>請選擇你想要進行的功能：</p>
+            <div class="buttons">
+                <button class="primary-btn" onclick="startGame()">▶️ 寶可夢遊戲</button>
+                <button class="secondary-btn" onclick="startQuiz()">📝 生字出題</button>
+                <button class="info-btn" onclick="showSearchPage()">🔍 查詢生字系統</button>
             </div>
         </div>
 
-        <div class="pokemon-section">
-            <div class="main-content">
-                <div class="pokemon-image" id="pokemonImage">🔥</div>
-                <div class="info-and-name">
-                    <div id="pokemonDetails"></div>
-                    <div class="pokemon-name" id="pokemonName"></div>
+        <div class="game-container" id="gameContainer">
+            <div class="score-section">
+                <div class="score-item">
+                    🏆 分數: <span id="score">0</span>
+                </div>
+                <div class="score-item">
+                    ✅ 正確: <span id="correct">0</span>
+                </div>
+                <div class="score-item">
+                    ❌ 錯誤: <span id="wrong">0</span>
                 </div>
             </div>
-        </div>
 
-        <div class="completion-message" id="completionMessage"></div>
+            <div class="pokemon-section">
+                <div class="main-content">
+                    <div class="pokemon-image" id="pokemonImage">🔥</div>
+                    <div class="info-and-name">
+                        <div id="pokemonDetails"></div>
+                        <div class="pokemon-name" id="pokemonName"></div>
+                    </div>
+                </div>
+            </div>
 
-        <div class="word-info" id="wordInfo"></div>
+            <div class="completion-message" id="completionMessage"></div>
+            <div class="word-info" id="wordInfo"></div>
 
-        <div class="buttons">
-            <button class="secondary-btn" onclick="submitAndNext()">➤ 下一個</button>
-            <button class="info-btn" onclick="showHint()">💡 顯示提示</button>
-            <button class="info-btn" onclick="toggleRecords()">📋 查看記錄</button>
+            <div class="buttons">
+                <button class="secondary-btn" onclick="submitAndNext()">➤ 下一個</button>
+                <button class="info-btn" onclick="showHint()">💡 顯示提示</button>
+                <button class="info-btn" onclick="toggleRecords()">📋 查看記錄</button>
+            </div>
+            <button class="info-btn" onclick="showStartPage()" style="margin-top: 20px;">🏠 返回首頁</button>
         </div>
 
         <div class="records-container" id="recordsContainer">
+            <button class="info-btn" onclick="showStartPage()" style="margin-bottom: 20px;">🏠 返回首頁</button>
             <div class="records-content">
                 <div class="records-calendar-container">
                     <div class="calendar-header">
@@ -709,12 +1108,102 @@
                 </div>
             </div>
         </div>
+
+        <div class="search-container" id="searchContainer">
+            <h2>🔍 查詢生字系統</h2>
+            <div class="search-input-group">
+                <input type="text" id="searchInput" placeholder="請輸入一個生字" maxlength="1">
+                <button class="info-btn" onclick="searchVocabulary()">查詢</button>
+            </div>
+
+            <div class="grade-buttons" id="gradeButtons">
+                <button class="info-btn" onclick="showGradeVocab('1')">一年級(上)</button>
+                <button class="info-btn" onclick="showGradeVocab('2')">一年級(下)</button>
+                <button class="info-btn" onclick="showGradeVocab('3')">二年級(上)</button>
+                <button class="info-btn" onclick="showGradeVocab('4')">二年級(下)</button>
+            </div>
+            
+            <div id="searchResult"></div>
+            
+            <div class="vocab-list-container" id="vocabListContainer" style="display: none;">
+                <h3 id="vocabListTitle"></h3>
+                <div class="filter-vocab-buttons" id="filterVocabButtons">
+                    <button class="small-btn active" id="showAllBtn" onclick="showAllVocab()">全部生字</button>
+                    <button class="small-btn" id="showByLessonBtn" onclick="showVocabByLesson()">依課別顯示</button>
+                </div>
+                <div class="vocab-list" id="vocabList"></div>
+            </div>
+
+            <button class="info-btn" onclick="showStartPage()">🏠 返回首頁</button>
+        </div>
+        
+        <div class="quiz-container" id="quizContainer">
+            <div class="quiz-header">
+                <div class="score-item">題目：<span id="quiz-progress">0</span> / 20</div>
+                <div class="score-item">分數：<span id="quiz-score">0</span></div>
+            </div>
+            
+            <div class="quiz-card">
+                <p>請填寫空格中的字，讓詞語完整：</p>
+                <div class="quiz-question" id="quiz-question"></div>
+                <div class="quiz-result-message" id="quiz-result-message"></div>
+                <div class="quiz-hint-info" id="quiz-hint-info"></div>
+            </div>
+            
+            <div class="buttons" id="quiz-buttons">
+                <button class="primary-btn" onclick="nextQuizQuestion()">下一題</button>
+                <button class="info-btn" onclick="showQuizHint()">💡 提示</button>
+            </div>
+            
+            <div class="buttons">
+                <button class="info-btn" onclick="showQuizRecords()">📋 查看記錄</button>
+                <button class="info-btn" onclick="showStartPage()">🏠 返回首頁</button>
+            </div>
+            
+        </div>
+        
+        <div class="records-container" id="quizRecordsContainer" style="display: none;">
+            <div class="records-content">
+                <div class="records-calendar-container">
+                    <div class="calendar-header">
+                        <button onclick="changeQuizMonth(-1)">&#9664;</button>
+                        <h4 id="quiz-calendar-month-year"></h4>
+                        <button onclick="changeQuizMonth(1)">&#9654;</button>
+                    </div>
+                    <div class="calendar-grid" id="quiz-calendar-grid">
+                        <div class="day-header">日</div>
+                        <div class="day-header">一</div>
+                        <div class="day-header">二</div>
+                        <div class="day-header">三</div>
+                        <div class="day-header">四</div>
+                        <div class="day-header">五</div>
+                        <div class="day-header">六</div>
+                    </div>
+                </div>
+                <div class="record-list-section">
+                    <div class="filter-controls">
+                        <p id="quiz-records-title" style="font-weight: bold; font-size: 1.1em; color: #4a5568;">所有測驗記錄</p>
+                        <button onclick="displayAllQuizRecords()" id="quiz-show-all-btn" style="display: none;">返回日期列表</button>
+                    </div>
+                    <div class="quiz-record-list">
+                        <h3 id="quiz-list-title">📋 測驗回合列表</h3>
+                        <ul id="quiz-records-list"></ul>
+                        <div class="pagination-controls" id="quizPagination"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="buttons">
+                <button class="info-btn" onclick="showStartPage()">🏠 返回首頁</button>
+            </div>
+        </div>
+
     </div>
 
     <script>
         // 生字資料庫
-        const vocabulary = [
-            { character: '拍', pronunciation: 'ㄆㄞ', radical: '手', strokeCount: 8, lesson: '第一課', examples: ['拍手', '球拍', '拍打'] },
+        const vocabulary = {
+ 1: [ // 一年級(上)
+{ character: '拍', pronunciation: 'ㄆㄞ', radical: '手', strokeCount: 8, lesson: '第一課', examples: ['拍手', '球拍', '拍打'] },
 { character: '手', pronunciation: 'ㄕㄡˇ', radical: '手', strokeCount: 4, lesson: '第一課', examples: ['左手', '手掌', '手心'] },
 { character: '左', pronunciation: 'ㄗㄨㄛˇ', radical: '工', strokeCount: 5, lesson: '第一課', examples: ['左邊', '左右', '左轉'] },
 { character: '右', pronunciation: 'ㄧㄡˋ', radical: '口', strokeCount: 5, lesson: '第一課', examples: ['右手', '向右', '左右'] },
@@ -787,7 +1276,9 @@
 { character: '朵', pronunciation: 'ㄉㄨㄛˇ', radical: '木', strokeCount: 6, lesson: '第六課', examples: ['花朵', '大快朵頤', '一朵'] },
 { character: '從', pronunciation: 'ㄘㄨㄥˊ', radical: '彳', strokeCount: 11, lesson: '第六課', examples: ['從頭', '從事', '從來'] },
 { character: '頭', pronunciation: 'ㄊㄡˊ', radical: '頁', strokeCount: 16, lesson: '第六課', examples: ['頭痛', '頭髮', '頭腦'] },
-{ character: '那', pronunciation: 'ㄋㄚˋ', radical: '邑', strokeCount: 7, lesson: '第六課', examples: ['那麼', '那裡', '那兒'] },
+{ character: '那', pronunciation: 'ㄋㄚˋ', radical: '邑', strokeCount: 7, lesson: '第六課', examples: ['那麼', '那裡', '那兒'] }
+            ],
+            2: [ // 一年級(下)
 { character: '要', pronunciation: 'ㄧㄠˋ', radical: '襾', strokeCount: 9, lesson: '第一課', examples: ['要件', '要是', '要緊'] },
 { character: '靜', pronunciation: 'ㄐㄧㄥˋ', radical: '青', strokeCount: 16, lesson: '第一課', examples: ['安靜', '靜電', '靜態'] },
 { character: '天', pronunciation: 'ㄊㄧㄢ', radical: '大', strokeCount: 4, lesson: '第一課', examples: ['天空', '天氣', '天堂'] },
@@ -975,8 +1466,11 @@
 { character: '幫', pronunciation: 'ㄅㄤ', radical: '巾', strokeCount: 17, lesson: '第十二課', examples: ['幫忙', '幫助', '幫手'] },
 { character: '加', pronunciation: 'ㄐㄧㄚ', radical: '力', strokeCount: 5, lesson: '第十二課', examples: ['加油', '加分', '加入'] },
 { character: '油', pronunciation: 'ㄧㄡˊ', radical: '水', strokeCount: 8, lesson: '第十二課', examples: ['好吧', '是吧', '對吧'] },
-{ character: '慢', pronunciation: 'ㄇㄢˋ', radical: '心', strokeCount: 14, lesson: '第十二課', examples: ['快慢', '慢車道', '慢吞吞'] },
-{ character: '年', pronunciation: 'ㄋㄧㄢˊ', radical: '干', strokeCount: 6, lesson: '第一課', examples: ['過年', '年級', '年輕'] },
+{ character: '慢', pronunciation: 'ㄇㄢˋ', radical: '心', strokeCount: 14, lesson: '第十二課', examples: ['快慢', '慢車道', '慢吞吞'] }
+
+            ],
+            3: [ // 二年級(上)
+               { character: '年', pronunciation: 'ㄋㄧㄢˊ', radical: '干', strokeCount: 6, lesson: '第一課', examples: ['過年', '年級', '年輕'] },
 { character: '希', pronunciation: 'ㄒㄧ', radical: '巾', strokeCount: 7, lesson: '第一課', examples: ['希望', '希罕', '希奇'] },
 { character: '望', pronunciation: 'ㄨㄤˋ', radical: '月', strokeCount: 11, lesson: '第一課', examples: ['望遠鏡', '望塵莫及', '望見'] },
 { character: '坐', pronunciation: 'ㄗㄨㄛˋ', radical: '土', strokeCount: 7, lesson: '第一課', examples: ['坐位', '坐牢', '坐下'] },
@@ -1191,7 +1685,9 @@
 { character: '貨', pronunciation: 'ㄏㄨㄛˋ', radical: '貝', strokeCount: 11, lesson: '第十二課', examples: ['貨物', '年貨', '貨運'] },
 { character: '期', pronunciation: 'ㄑㄧˊ', radical: '月', strokeCount: 12, lesson: '第十二課', examples: ['期待', '期限', '期盼'] },
 { character: '敬', pronunciation: 'ㄐㄧㄥˋ', radical: '攴', strokeCount: 13, lesson: '第十二課', examples: ['敬佩', '敬上', '敬禮'] },
-{ character: '孫', pronunciation: 'ㄙㄨㄣ', radical: '子', strokeCount: 10, lesson: '第十二課', examples: ['孫子', '孫女', '孫中山'] },
+{ character: '孫', pronunciation: 'ㄙㄨㄣ', radical: '子', strokeCount: 10, lesson: '第十二課', examples: ['孫子', '孫女', '孫中山'] }
+            ],
+            4: [ // 二年級(下)
 { character: '顏', pronunciation: 'ㄙㄨㄣ', radical: '頁', strokeCount: 18, lesson: '第一課', examples: ['顏色', '顏面', '顏料'] },
 { character: '塘', pronunciation: 'ㄙㄨㄣ', radical: '土', strokeCount: 13, lesson: '第一課', examples: ['池塘', '水塘', '錢塘'] },
 { character: '蔚', pronunciation: 'ㄙㄨㄣ', radical: '艸', strokeCount: 15, lesson: '第一課', examples: ['蔚藍', '蔚為', '蔚為奇觀'] },
@@ -1406,8 +1902,9 @@
 { character: '倒', pronunciation: 'ㄉㄠˋ', radical: '人', strokeCount: 10, lesson: '第十二課', examples:['倒進', '倒掉', '倒灌'] },
 { character: '量', pronunciation: 'ㄌㄧㄤˋ', radical: '里', strokeCount: 12, lesson: '第十二課', examples:['分量', '量產', '量表'] },
 { character: '底', pronunciation: 'ㄉㄧˇ', radical: '广', strokeCount: 8, lesson: '第十二課', examples:['到底', '底部', '底價'] }
-        ];
-
+            ]
+        };
+        
         // 寶可夢資料（包含中文名字、API編號和屬性）
         const pokemons = [
 { id: 1, name: '妙蛙種子', type1: '草', type2: '毒' },
@@ -2435,6 +2932,7 @@
 { id: 1023, name: '鐵頭殼', type1: '鋼', type2: '超能力' },
 { id: 1024, name: '太樂巴戈斯_普通形態', type1: '一般', type2: 'Null' },
 { id: 1025, name: '桃歹郎', type1: '毒', type2: '幽靈' }
+
         ];
 
         let currentPokemon = null;
@@ -2445,32 +2943,57 @@
         let wrongCount = 0;
         let hintShown = false;
 
-        // 儲存記錄的資料結構變更為 { 'YYYY-MM-DD': { correct: [], wrong: [] } }
         let recordsByDate = {};
         
         const recordsPerPage = 10;
         let correctCurrentPage = 1;
         let wrongCurrentPage = 1;
 
-        // 日曆相關變數
         let currentDate = new Date();
         let selectedDate = null;
+        
+        let currentGrade = null;
+        
+        // 生字出題功能相關變數
+        let quizVocabList = [];
+        let currentQuizIndex = 0;
+        let quizTotalScore = 0;
+        let quizHintUsed = false;
+        let currentQuizRecord = [];
+        const QUIZ_COUNT = 20;
+        
+        let quizRecordsByDate = {};
+        let quizDate = new Date();
+        let selectedQuizDate = null;
+        let quizCurrentPage = 1;
 
-        function createVocabMap() {
-            const map = {};
-            vocabulary.forEach(item => {
-                map[item.character] = item;
+        // 將所有生字攤平，方便查詢和隨機選取
+        let allVocab = [];
+        let vocabMap = {};
+        for (const grade in vocabulary) {
+            vocabulary[grade].forEach(item => {
+                const vocabItem = { ...item, grade: grade };
+                allVocab.push(vocabItem);
+                vocabMap[item.character] = vocabItem;
             });
-            return map;
         }
-
-        const vocabMap = createVocabMap();
+        
         const vocabChars = Object.keys(vocabMap);
-
+        
         const filteredPokemons = pokemons.filter(p => {
             return p.name.split('').some(char => vocabMap[char]);
         });
         
+        // 建立一個 map 來快速查詢哪些字跟寶可夢有關
+        const pokemonRelatedVocab = {};
+        filteredPokemons.forEach(p => {
+            p.name.split('').forEach(char => {
+                if (vocabMap[char]) {
+                    pokemonRelatedVocab[char] = true;
+                }
+            });
+        });
+
         if (filteredPokemons.length === 0) {
             console.error("錯誤：沒有任何寶可夢的名字包含生字資料庫中的字。請檢查你的寶可夢和生字資料庫。");
         }
@@ -2480,12 +3003,72 @@
             if (storedRecords) {
                 recordsByDate = JSON.parse(storedRecords);
             }
+            
+            const storedQuizRecords = localStorage.getItem('quizRecordsByDate');
+            if (storedQuizRecords) {
+                quizRecordsByDate = JSON.parse(storedQuizRecords);
+            }
         }
 
-        function initGame() {
-            console.log('遊戲初始化中...');
+        function initApp() {
             loadRecords();
+            showStartPage();
+        }
+        
+        function hideAllPages() {
+            document.getElementById('startPage').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'none';
+            document.getElementById('searchContainer').style.display = 'none';
+            document.getElementById('recordsContainer').classList.remove('show');
+            document.getElementById('quizContainer').style.display = 'none';
+            document.getElementById('quizRecordsContainer').style.display = 'none';
+        }
+
+        function showStartPage() {
+            hideAllPages();
+            document.getElementById('startPage').style.display = 'flex';
+        }
+
+        function startGame() {
+            hideAllPages();
+            document.getElementById('gameContainer').style.display = 'flex';
             nextPokemon();
+        }
+        
+        function showSearchPage() {
+            hideAllPages();
+            document.getElementById('searchContainer').style.display = 'flex';
+            document.getElementById('searchResult').innerHTML = '';
+            document.getElementById('searchInput').value = '';
+            document.getElementById('vocabListContainer').style.display = 'none';
+            document.getElementById('filterVocabButtons').style.display = 'none';
+        }
+        
+        function startQuiz() {
+            hideAllPages();
+            document.getElementById('quizContainer').style.display = 'flex';
+            currentQuizIndex = 0;
+            quizTotalScore = 0;
+            quizHintUsed = false;
+            currentQuizRecord = [];
+            
+            // 重新顯示按鈕
+            document.querySelectorAll('#quiz-buttons button').forEach(btn => btn.style.display = 'inline-block');
+            
+            // 隨機選出 20 個有詞語的生字
+            const quizVocabs = allVocab.filter(v => v.examples && v.examples.length > 0);
+            
+            if (quizVocabs.length < QUIZ_COUNT) {
+                alert(`生字庫中可出題的生字不足 ${QUIZ_COUNT} 個，請新增更多詞語。`);
+                showStartPage();
+                return;
+            }
+            
+            // 隨機打亂生字列表
+            quizVocabList = shuffleArray(quizVocabs).slice(0, QUIZ_COUNT);
+            
+            updateQuizProgress();
+            nextQuizQuestion();
         }
 
         function nextPokemon() {
@@ -2652,7 +3235,6 @@
             const dateString = now.toISOString().split('T')[0];
             const timeString = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
             
-            // 確保當天的記錄物件存在
             if (!recordsByDate[dateString]) {
                 recordsByDate[dateString] = { correct: [], wrong: [] };
             }
@@ -2684,9 +3266,7 @@
             
             localStorage.setItem('recordsByDate', JSON.stringify(recordsByDate));
             
-            // 如果目前正在顯示記錄，就更新它
             if (document.getElementById('recordsContainer').classList.contains('show')) {
-                // 如果目前是日曆篩選模式，且今天有記錄，就更新今天
                 if (selectedDate && selectedDate.toISOString().split('T')[0] === dateString) {
                      displayDateRecords(dateString);
                 } else {
@@ -2695,15 +3275,17 @@
             }
         }
 
-        // 顯示或隱藏記錄
         function toggleRecords() {
             const recordsContainer = document.getElementById('recordsContainer');
+            const gameContainer = document.getElementById('gameContainer');
             const isVisible = recordsContainer.classList.contains('show');
             if (isVisible) {
                 recordsContainer.classList.remove('show');
+                gameContainer.style.display = 'flex';
             } else {
+                gameContainer.style.display = 'none';
                 recordsContainer.classList.add('show');
-                selectedDate = null; // 重設選擇日期
+                selectedDate = null;
                 renderCalendar(currentDate);
                 displayAllRecords();
             }
@@ -2713,7 +3295,6 @@
             document.getElementById('show-all-btn').style.display = 'none';
             document.getElementById('records-title').textContent = '所有記錄';
             
-            // 從 recordsByDate 物件中取得所有記錄
             let correctRecords = [];
             let wrongRecords = [];
             const dates = Object.keys(recordsByDate).sort().reverse();
@@ -2739,7 +3320,6 @@
             displayRecords('correct', correctRecords, page);
             displayRecords('wrong', wrongRecords, page);
             
-            // 更新日曆上的 active-day 樣式
             const allDays = document.querySelectorAll('.day');
             allDays.forEach(day => day.classList.remove('active-day'));
             const clickedDay = document.querySelector(`.day[data-date="${date}"]`);
@@ -2826,35 +3406,72 @@
                 hintDiv.textContent = vocabItem.pronunciation;
             });
             
-            showWordInfo();
+            showWordInfo(vocabMap[inputs[0].dataset.answer]);
             hintShown = true;
         }
 
-        function showWordInfo() {
+        function showWordInfo(vocabItem) {
+            const searchResultDiv = document.getElementById('searchResult');
             const wordInfoDiv = document.getElementById('wordInfo');
-            const inputs = document.querySelectorAll('.character-input');
-            let infoHTML = '<h3>📚 生字詳細信息</h3>';
             
-            inputs.forEach(input => {
-                const char = input.dataset.answer;
-                const vocabItem = vocabMap[char];
-                
-                infoHTML += `
-                    <div class="word-detail">
-                        <strong>字：${vocabItem.character}</strong> | 
-                        注音：${vocabItem.pronunciation} | 
-                        部首：${vocabItem.radical} | 
-                        筆畫：${vocabItem.strokeCount} | 
-                        課程：${vocabItem.lesson}
+            // 清空兩個可能的顯示區域
+            searchResultDiv.innerHTML = '';
+            wordInfoDiv.innerHTML = '';
+            
+            const resultHTML = `
+                <div class="word-detail">
+                    <p class="result-item"><strong>字：</strong>${vocabItem.character}</p>
+                    <p class="result-item"><strong>注音：</strong>${vocabItem.pronunciation}</p>
+                    <p class="result-item"><strong>部首：</strong>${vocabItem.radical}</p>
+                    <p class="result-item"><strong>筆畫：</strong>${vocabItem.strokeCount}</p>
+                    <p class="result-item"><strong>年級：</strong>${getGradeText(vocabItem.grade)} (${vocabItem.lesson})</p>
+                    <p class="result-item"><strong>相關詞彙：</strong>
                         <div class="examples">
                             ${vocabItem.examples.map(ex => `<span class="example">${ex}</span>`).join('')}
                         </div>
-                    </div>
-                `;
-            });
+                    </p>
+                </div>
+            `;
             
-            wordInfoDiv.innerHTML = infoHTML;
-            wordInfoDiv.classList.add('show');
+            // 找出名字中包含這個生字的寶可夢
+            const relatedPokemons = pokemons.filter(p => p.name.includes(vocabItem.character));
+
+            let pokemonHTML = '';
+            if (relatedPokemons.length > 0) {
+                pokemonHTML += `<div class="related-pokemons"><h4>相關寶可夢</h4><div class="pokemon-list">`;
+                relatedPokemons.forEach(p => {
+                    const formattedId = String(p.id).padStart(4, '0');
+                    pokemonHTML += `
+                        <div class="pokemon-card">
+                            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.id}.png" alt="${p.name}">
+                            <p>${p.name}</p>
+                            <p class="id">#${formattedId}</p>
+                        </div>
+                    `;
+                });
+                pokemonHTML += `</div></div>`;
+            }
+
+            // 根據不同模式顯示在不同區域
+            if (document.getElementById('searchContainer').style.display === 'flex') {
+                searchResultDiv.innerHTML = resultHTML + pokemonHTML;
+                searchResultDiv.style.display = 'block';
+            } else {
+                wordInfoDiv.innerHTML = resultHTML + pokemonHTML;
+                wordInfoDiv.classList.add('show');
+            }
+        }
+        
+        function getGradeText(grade) {
+            switch(grade) {
+                case '1': return '一年級(上)';
+                case '2': return '一年級(下)';
+                case '3': return '二年級(上)';
+                case '4': return '二年級(下)';
+                case '5': return '三年級(上)';
+                case '6': return '三年級(下)';
+                default: return '未知年級';
+            }
         }
 
         function updateScore() {
@@ -2885,14 +3502,12 @@
             const firstDay = new Date(year, month, 1).getDay();
             const lastDay = new Date(year, month + 1, 0).getDate();
             
-            // 填補上個月的空白
             for (let i = 0; i < firstDay; i++) {
                 const emptyDay = document.createElement('div');
                 emptyDay.classList.add('day', 'empty-day');
                 calendarGrid.appendChild(emptyDay);
             }
             
-            // 填入本月日期
             for (let i = 1; i <= lastDay; i++) {
                 const day = document.createElement('div');
                 day.classList.add('day');
@@ -2919,17 +3534,457 @@
             currentDate.setMonth(currentDate.getMonth() + offset);
             renderCalendar(currentDate);
         }
+        
+        // 查詢功能
+        function searchVocabulary() {
+            const searchInput = document.getElementById('searchInput');
+            const searchResultDiv = document.getElementById('searchResult');
+            const searchTerm = searchInput.value.trim();
+            searchResultDiv.innerHTML = '';
+            document.getElementById('vocabListContainer').style.display = 'none';
 
+            if (searchTerm.length === 0) {
+                searchResultDiv.innerHTML = '<p>請輸入一個生字進行查詢。</p>';
+                return;
+            }
+
+            const vocabItem = vocabMap[searchTerm];
+            if (vocabItem) {
+                showWordInfo(vocabItem);
+            } else {
+                searchResultDiv.innerHTML = '<p>很抱歉，在生字庫中找不到這個字。</p>';
+            }
+        }
+        
+        // 顯示年級生字列表
+        function showGradeVocab(grade) {
+            document.getElementById('searchResult').innerHTML = '';
+            document.getElementById('searchInput').value = '';
+            
+            currentGrade = grade;
+            
+            const vocabListContainer = document.getElementById('vocabListContainer');
+            const vocabListTitle = document.getElementById('vocabListTitle');
+            
+            vocabListContainer.style.display = 'block';
+            document.getElementById('filterVocabButtons').style.display = 'flex';
+            
+            vocabListTitle.textContent = `${getGradeText(grade)} 生字`;
+            
+            // 預設顯示全部生字
+            showAllVocab();
+        }
+        
+        function showAllVocab() {
+            const vocabList = document.getElementById('vocabList');
+            vocabList.innerHTML = '';
+            
+            // 更新按鈕狀態
+            document.getElementById('showAllBtn').classList.add('active');
+            document.getElementById('showByLessonBtn').classList.remove('active');
+            
+            if (vocabulary[currentGrade]) {
+                const allVocabInGrade = vocabulary[currentGrade];
+                renderVocabList(allVocabInGrade, vocabList);
+            }
+        }
+        
+        function showVocabByLesson() {
+            const vocabListContainer = document.getElementById('vocabListContainer');
+            const vocabList = document.getElementById('vocabList');
+            vocabList.innerHTML = '';
+            
+            // 更新按鈕狀態
+            document.getElementById('showAllBtn').classList.remove('active');
+            document.getElementById('showByLessonBtn').classList.add('active');
+
+            if (vocabulary[currentGrade]) {
+                const vocabByLesson = {};
+                vocabulary[currentGrade].forEach(item => {
+                    if (!vocabByLesson[item.lesson]) {
+                        vocabByLesson[item.lesson] = [];
+                    }
+                    vocabByLesson[item.lesson].push(item);
+                });
+                
+                for (const lesson in vocabByLesson) {
+                    const lessonGroup = document.createElement('div');
+                    lessonGroup.classList.add('lesson-group');
+                    
+                    const lessonTitle = document.createElement('h4');
+                    lessonTitle.textContent = lesson;
+                    lessonGroup.appendChild(lessonTitle);
+                    
+                    const lessonList = document.createElement('div');
+                    lessonList.classList.add('vocab-list');
+                    renderVocabList(vocabByLesson[lesson], lessonList);
+                    lessonGroup.appendChild(lessonList);
+                    
+                    vocabList.appendChild(lessonGroup);
+                }
+            }
+        }
+        
+        function renderVocabList(vocabArray, parentElement) {
+            vocabArray.forEach(item => {
+                const vocabItemDiv = document.createElement('div');
+                vocabItemDiv.classList.add('vocab-list-item');
+                vocabItemDiv.textContent = item.character;
+                
+                if (pokemonRelatedVocab[item.character]) {
+                    vocabItemDiv.classList.add('pokemon-related');
+                }
+                
+                vocabItemDiv.addEventListener('click', () => {
+                    document.getElementById('searchInput').value = item.character;
+                    searchVocabulary();
+                });
+                
+                parentElement.appendChild(vocabItemDiv);
+            });
+        }
+        
+        // 隨機打亂陣列
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        // 生字出題功能
+        function nextQuizQuestion() {
+            const quizResultDiv = document.getElementById('quiz-result-message');
+            const hintInfoDiv = document.getElementById('quiz-hint-info');
+            
+            if (currentQuizIndex > 0) {
+                evaluateQuizAnswer();
+            }
+            
+            if (currentQuizIndex >= quizVocabList.length) {
+                endQuiz();
+                return;
+            }
+            
+            const currentVocab = quizVocabList[currentQuizIndex];
+            const exampleWord = currentVocab.examples[Math.floor(Math.random() * currentVocab.examples.length)];
+            
+            let isFound = false;
+            let questionHTML = '';
+            for (let i = 0; i < exampleWord.length; i++) {
+                const char = exampleWord[i];
+                if (char === currentVocab.character && !isFound) {
+                    questionHTML += `
+                        <div class="quiz-input-group">
+                            <input type="text" class="character-input" maxlength="1" data-answer="${currentVocab.character}" data-example="${exampleWord}">
+                            <span class="pronunciation-hint">${vocabMap[currentVocab.character].pronunciation}</span>
+                        </div>
+                    `;
+                    isFound = true;
+                } else {
+                    questionHTML += `<span class="normal-character">${char}</span>`;
+                }
+            }
+            
+            document.getElementById('quiz-question').innerHTML = questionHTML;
+            quizResultDiv.style.display = 'none';
+            quizHintUsed = false;
+            hintInfoDiv.style.display = 'none';
+
+            currentQuizIndex++;
+            updateQuizProgress();
+            
+            const input = document.querySelector('#quizContainer .character-input');
+            if (input) {
+                input.focus();
+            }
+        }
+        
+        function evaluateQuizAnswer() {
+            const input = document.querySelector('#quizContainer .character-input');
+            const quizResultDiv = document.getElementById('quiz-result-message');
+            
+            if (!input) return;
+
+            const isCorrect = input.value === input.dataset.answer;
+            let scoreForQuestion;
+            if (isCorrect) {
+                scoreForQuestion = quizHintUsed ? 5 : 10;
+            } else {
+                scoreForQuestion = 0;
+            }
+            quizTotalScore += scoreForQuestion;
+            
+            currentQuizRecord.push({
+                question: input.dataset.example,
+                answer: input.dataset.answer,
+                yourAnswer: input.value,
+                isCorrect: isCorrect,
+                hintUsed: quizHintUsed,
+                score: scoreForQuestion
+            });
+            
+            if (isCorrect) {
+                input.classList.add('correct');
+                input.classList.remove('wrong');
+                quizResultDiv.textContent = `🎉 答對了！你獲得了 ${scoreForQuestion} 分！`;
+                quizResultDiv.classList.remove('wrong');
+            } else {
+                input.classList.add('wrong');
+                input.classList.remove('correct');
+                quizResultDiv.textContent = `❌ 答錯了！正確答案是「${input.dataset.answer}」。`;
+                quizResultDiv.classList.add('wrong');
+            }
+            quizResultDiv.classList.add('show');
+        }
+
+        function showQuizHint() {
+            const input = document.querySelector('#quizContainer .character-input');
+            const hintInfoDiv = document.getElementById('quiz-hint-info');
+            
+            if (!input) return;
+
+            const char = input.dataset.answer;
+            const vocabItem = vocabMap[char];
+            
+            if (vocabItem) {
+                 const hintHTML = `
+                    <div class="word-detail">
+                        <p class="result-item"><strong>注音：</strong>${vocabItem.pronunciation}</p>
+                        <p class="result-item"><strong>部首：</strong>${vocabItem.radical}</p>
+                        <p class="result-item"><strong>筆畫：</strong>${vocabItem.strokeCount}</p>
+                        <p class="result-item"><strong>相關詞彙：</strong>
+                            <div class="examples">
+                                ${vocabItem.examples.map(ex => `<span class="example">${ex}</span>`).join('')}
+                            </div>
+                        </p>
+                    </div>
+                `;
+                hintInfoDiv.innerHTML = hintHTML;
+                hintInfoDiv.style.display = 'block';
+                quizHintUsed = true;
+            }
+        }
+
+        function endQuiz() {
+            const quizQuestionDiv = document.getElementById('quiz-question');
+            const quizResultDiv = document.getElementById('quiz-result-message');
+            const hintInfoDiv = document.getElementById('quiz-hint-info');
+            
+            const now = new Date();
+            const dateString = now.toISOString().split('T')[0];
+            const timeString = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+            
+            if (!quizRecordsByDate[dateString]) {
+                quizRecordsByDate[dateString] = [];
+            }
+            
+            quizRecordsByDate[dateString].unshift({
+                totalScore: quizTotalScore,
+                time: timeString,
+                details: currentQuizRecord
+            });
+            
+            localStorage.setItem('quizRecordsByDate', JSON.stringify(quizRecordsByDate));
+            
+            quizResultDiv.classList.remove('show');
+            hintInfoDiv.style.display = 'none';
+            quizQuestionDiv.innerHTML = `<p class="quiz-result-summary">測驗結束！你的總分數是：${quizTotalScore} 分！</p>`;
+            
+            // 隱藏按鈕
+            document.querySelectorAll('#quiz-buttons button').forEach(btn => btn.style.display = 'none');
+        }
+        
+        function showQuizRecords() {
+            hideAllPages();
+            document.getElementById('quizRecordsContainer').style.display = 'flex';
+            document.getElementById('quiz-show-all-btn').style.display = 'none';
+            selectedQuizDate = null;
+            renderQuizCalendar(quizDate);
+            displayAllQuizRecords();
+        }
+        
+        function renderQuizCalendar(date) {
+            const calendarGrid = document.getElementById('quiz-calendar-grid');
+            const monthYearTitle = document.getElementById('quiz-calendar-month-year');
+            calendarGrid.innerHTML = `
+                <div class="day-header">日</div>
+                <div class="day-header">一</div>
+                <div class="day-header">二</div>
+                <div class="day-header">三</div>
+                <div class="day-header">四</div>
+                <div class="day-header">五</div>
+                <div class="day-header">六</div>
+            `;
+            
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            
+            monthYearTitle.textContent = `${year}年 ${month + 1}月`;
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const lastDay = new Date(year, month + 1, 0).getDate();
+            
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.classList.add('day', 'empty-day');
+                calendarGrid.appendChild(emptyDay);
+            }
+            
+            for (let i = 1; i <= lastDay; i++) {
+                const day = document.createElement('div');
+                day.classList.add('day');
+                day.textContent = i;
+                
+                const dayDate = new Date(year, month, i);
+                const dateString = dayDate.toISOString().split('T')[0];
+                day.dataset.date = dateString;
+                
+                if (quizRecordsByDate[dateString] && quizRecordsByDate[dateString].length > 0) {
+                    day.classList.add('has-record');
+                    day.addEventListener('click', () => displayQuizRecordsForDate(dateString));
+                }
+                
+                if (selectedQuizDate && dateString === selectedQuizDate.toISOString().split('T')[0]) {
+                    day.classList.add('active-day');
+                }
+                
+                calendarGrid.appendChild(day);
+            }
+        }
+        
+        function changeQuizMonth(offset) {
+            quizDate.setMonth(quizDate.getMonth() + offset);
+            renderQuizCalendar(quizDate);
+        }
+        
+        function displayAllQuizRecords() {
+            document.getElementById('quiz-records-title').textContent = '所有測驗記錄';
+            document.getElementById('quiz-list-title').textContent = '📋 測驗回合列表';
+            document.getElementById('quiz-show-all-btn').style.display = 'none';
+            
+            const listElement = document.getElementById('quiz-records-list');
+            listElement.innerHTML = '';
+
+            const dates = Object.keys(quizRecordsByDate).sort().reverse();
+            
+            if (dates.length === 0) {
+                listElement.innerHTML = `<li>尚無記錄</li>`;
+                return;
+            }
+
+            dates.forEach(date => {
+                const recordList = quizRecordsByDate[date];
+                if (recordList.length > 0) {
+                    const dateHeader = document.createElement('li');
+                    dateHeader.innerHTML = `<strong>${date}</strong>`;
+                    dateHeader.style.marginTop = '10px';
+                    listElement.appendChild(dateHeader);
+
+                    recordList.forEach((rec, index) => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                            測驗回合 ${recordList.length - index} (${rec.time}) - <strong>總分: ${rec.totalScore}</strong>
+                        `;
+                        li.style.cursor = 'pointer';
+                        li.style.borderBottom = '1px solid #e2e8f0';
+                        li.addEventListener('click', () => displayQuizRoundDetails(date, recordList.length - 1 - index));
+                        listElement.appendChild(li);
+                    });
+                }
+            });
+        }
+        
+        function displayQuizRecordsForDate(date) {
+            selectedQuizDate = new Date(date);
+            document.getElementById('quiz-records-title').textContent = `${date} 的記錄`;
+            document.getElementById('quiz-list-title').textContent = '📋 測驗回合列表';
+            document.getElementById('quiz-show-all-btn').style.display = 'inline-block';
+            
+            const listElement = document.getElementById('quiz-records-list');
+            listElement.innerHTML = '';
+            
+            const recordList = quizRecordsByDate[date] || [];
+
+            if (recordList.length === 0) {
+                listElement.innerHTML = `<li>當日尚無記錄</li>`;
+                return;
+            }
+
+            recordList.forEach((rec, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    測驗回合 ${recordList.length - index} (${rec.time}) - <strong>總分: ${rec.totalScore}</strong>
+                `;
+                li.style.cursor = 'pointer';
+                li.addEventListener('click', () => displayQuizRoundDetails(date, recordList.length - 1 - index));
+                listElement.appendChild(li);
+            });
+            
+            const allDays = document.querySelectorAll('#quiz-calendar-grid .day');
+            allDays.forEach(day => day.classList.remove('active-day'));
+            const clickedDay = document.querySelector(`#quiz-calendar-grid .day[data-date="${date}"]`);
+            if (clickedDay) {
+                clickedDay.classList.add('active-day');
+            }
+        }
+        
+        function displayQuizRoundDetails(date, index) {
+            const record = quizRecordsByDate[date][index];
+            if (!record || !record.details) return;
+            
+            const totalRoundCount = quizRecordsByDate[date].length;
+            const roundNumber = totalRoundCount - index;
+
+            document.getElementById('quiz-records-title').textContent = `${date} - 測驗回合 ${roundNumber}`;
+            document.getElementById('quiz-list-title').textContent = `📋 詳細作答過程 (總分: ${record.totalScore})`;
+            document.getElementById('quiz-show-all-btn').style.display = 'inline-block';
+
+            const listElement = document.getElementById('quiz-records-list');
+            listElement.innerHTML = '';
+            
+            record.details.forEach((detail, i) => {
+                const li = document.createElement('li');
+                let statusIcon = detail.isCorrect ? '✅' : '❌';
+                let hintText = detail.hintUsed ? '💡 (有提示)' : '';
+                let recordText = `
+                    ${i + 1}. 
+                    ${statusIcon} 
+                    <strong>題目:</strong> ${detail.question} 
+                    <strong>輸入:</strong> ${detail.yourAnswer} 
+                    <strong>答案:</strong> ${detail.answer} 
+                    <strong>分數:</strong> ${detail.score} ${hintText}
+                `;
+                li.innerHTML = recordText;
+                listElement.appendChild(li);
+            });
+        }
+
+        function updateQuizProgress() {
+            document.getElementById('quiz-progress').textContent = currentQuizIndex;
+            document.getElementById('quiz-score').textContent = quizTotalScore;
+        }
+        
+        // 共用鍵盤事件
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                submitAndNext();
-            } else if (e.key === ' ') {
-                e.preventDefault();
-                submitAndNext();
+            // 寶可夢遊戲模式
+            if (document.getElementById('gameContainer').style.display === 'flex') {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    submitAndNext();
+                }
+            }
+            // 生字測驗模式
+            if (document.getElementById('quizContainer').style.display === 'flex') {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    nextQuizQuestion();
+                }
             }
         });
 
-        initGame();
+        initApp();
     </script>
 </body>
 </html>
