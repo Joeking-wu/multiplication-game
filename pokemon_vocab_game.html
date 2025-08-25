@@ -1465,7 +1465,7 @@
 { character: '吧', pronunciation: 'ㄅㄚ˙', radical: '口', strokeCount: 7, lesson: '第十二課', examples: ['好吧', '是吧', '對吧'] },
 { character: '幫', pronunciation: 'ㄅㄤ', radical: '巾', strokeCount: 17, lesson: '第十二課', examples: ['幫忙', '幫助', '幫手'] },
 { character: '加', pronunciation: 'ㄐㄧㄚ', radical: '力', strokeCount: 5, lesson: '第十二課', examples: ['加油', '加分', '加入'] },
-{ character: '油', pronunciation: 'ㄧㄡˊ', radical: '水', strokeCount: 8, lesson: '第十二課', examples: ['好吧', '是吧', '對吧'] },
+{ character: '油', pronunciation: 'ㄧㄡˊ', radical: '水', strokeCount: 8, lesson: '第十二課', examples: ['油井', '加油', '油條'] },
 { character: '慢', pronunciation: 'ㄇㄢˋ', radical: '心', strokeCount: 14, lesson: '第十二課', examples: ['快慢', '慢車道', '慢吞吞'] }
 
             ],
@@ -3659,10 +3659,12 @@
             const hintInfoDiv = document.getElementById('quiz-hint-info');
             
             if (currentQuizIndex > 0) {
+                // 如果已經不是第一題，先處理上一題的作答
                 evaluateQuizAnswer();
             }
-            
+
             if (currentQuizIndex >= quizVocabList.length) {
+                // 如果題目已全部作答完畢，結束測驗
                 endQuiz();
                 return;
             }
@@ -3780,9 +3782,11 @@
                 quizRecordsByDate[dateString] = [];
             }
             
-            quizRecordsByDate[dateString].unshift({
+            // 將時間戳記加入紀錄，方便排序
+            quizRecordsByDate[dateString].push({
                 totalScore: quizTotalScore,
                 time: timeString,
+                timestamp: now.getTime(),
                 details: currentQuizRecord
             });
             
@@ -3875,7 +3879,7 @@
             }
 
             dates.forEach(date => {
-                const recordList = quizRecordsByDate[date];
+                const recordList = quizRecordsByDate[date].slice().sort((a, b) => a.timestamp - b.timestamp);
                 if (recordList.length > 0) {
                     const dateHeader = document.createElement('li');
                     dateHeader.innerHTML = `<strong>${date}</strong>`;
@@ -3885,11 +3889,11 @@
                     recordList.forEach((rec, index) => {
                         const li = document.createElement('li');
                         li.innerHTML = `
-                            測驗回合 ${recordList.length - index} (${rec.time}) - <strong>總分: ${rec.totalScore}</strong>
+                            測驗回合 ${index + 1} (${rec.time}) - <strong>總分: ${rec.totalScore}</strong>
                         `;
                         li.style.cursor = 'pointer';
                         li.style.borderBottom = '1px solid #e2e8f0';
-                        li.addEventListener('click', () => displayQuizRoundDetails(date, recordList.length - 1 - index));
+                        li.addEventListener('click', () => displayQuizRoundDetails(date, index));
                         listElement.appendChild(li);
                     });
                 }
@@ -3905,7 +3909,8 @@
             const listElement = document.getElementById('quiz-records-list');
             listElement.innerHTML = '';
             
-            const recordList = quizRecordsByDate[date] || [];
+            // 確保這裡的排序與 displayQuizRoundDetails 一致
+            const recordList = (quizRecordsByDate[date] || []).slice().sort((a, b) => a.timestamp - b.timestamp);
 
             if (recordList.length === 0) {
                 listElement.innerHTML = `<li>當日尚無記錄</li>`;
@@ -3915,10 +3920,10 @@
             recordList.forEach((rec, index) => {
                 const li = document.createElement('li');
                 li.innerHTML = `
-                    測驗回合 ${recordList.length - index} (${rec.time}) - <strong>總分: ${rec.totalScore}</strong>
+                    測驗回合 ${index + 1} (${rec.time}) - <strong>總分: ${rec.totalScore}</strong>
                 `;
                 li.style.cursor = 'pointer';
-                li.addEventListener('click', () => displayQuizRoundDetails(date, recordList.length - 1 - index));
+                li.addEventListener('click', () => displayQuizRoundDetails(date, index));
                 listElement.appendChild(li);
             });
             
@@ -3931,11 +3936,13 @@
         }
         
         function displayQuizRoundDetails(date, index) {
-            const record = quizRecordsByDate[date][index];
+            // 確保這裡的排序與 displayQuizRecordsForDate 一致
+            const sortedRecords = (quizRecordsByDate[date] || []).slice().sort((a, b) => a.timestamp - b.timestamp);
+            const record = sortedRecords[index];
             if (!record || !record.details) return;
             
-            const totalRoundCount = quizRecordsByDate[date].length;
-            const roundNumber = totalRoundCount - index;
+            const totalRoundCount = sortedRecords.length;
+            const roundNumber = index + 1;
 
             document.getElementById('quiz-records-title').textContent = `${date} - 測驗回合 ${roundNumber}`;
             document.getElementById('quiz-list-title').textContent = `📋 詳細作答過程 (總分: ${record.totalScore})`;
