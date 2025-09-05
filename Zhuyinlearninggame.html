@@ -1,4 +1,3 @@
-﻿
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -7,6 +6,7 @@
     <title>注音符號聽力遊戲</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* 引入 Nunito 字體 */
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
 
         body {
@@ -15,6 +15,7 @@
             min-height: 100vh;
         }
 
+        /* 注音符號卡片樣式與動畫 */
         .symbol-card {
             transition: all 0.3s ease;
             cursor: pointer;
@@ -35,6 +36,7 @@
                 animation: shake 0.5s;
             }
 
+        /* 彈跳動畫 */
         @keyframes bounce {
             0%, 100% {
                 transform: translateY(0);
@@ -45,6 +47,7 @@
             }
         }
 
+        /* 晃動動畫 */
         @keyframes shake {
             0%, 100% {
                 transform: translateX(0);
@@ -59,10 +62,12 @@
             }
         }
 
+        /* 進度條樣式 */
         .progress-bar {
             transition: width 0.5s ease;
         }
 
+        /* 星星樣式 */
         .star {
             display: inline-block;
             opacity: 0.3;
@@ -74,6 +79,7 @@
                 transform: scale(1.2);
             }
 
+        /* 五彩紙屑樣式與動畫 */
         .confetti {
             position: absolute;
             width: 10px;
@@ -81,6 +87,7 @@
             opacity: 0;
         }
 
+        /* 紙屑下落動畫 */
         @keyframes fall {
             0% {
                 transform: translateY(-100px);
@@ -93,6 +100,7 @@
             }
         }
 
+        /* 關卡按鈕樣式 */
         .level-button {
             transition: all 0.3s ease;
         }
@@ -106,6 +114,7 @@
             opacity: 0.7;
         }
 
+        /* 角色容器 */
         .character-container {
             position: relative;
             width: 100px;
@@ -120,6 +129,7 @@
             transition: all 0.5s ease;
         }
 
+        /* 角色對話框樣式 */
         .speech-bubble {
             position: absolute;
             background-color: white;
@@ -146,6 +156,7 @@
                 border-color: white transparent transparent;
             }
 
+        /* 聲波動畫 */
         .sound-wave {
             display: flex;
             align-items: center;
@@ -189,6 +200,7 @@
             }
         }
 
+        /* 播放按鈕的漣漪效果 */
         .sound-button {
             position: relative;
             overflow: hidden;
@@ -224,6 +236,7 @@
             animation: ripple 1s ease-out;
         }
 
+        /* 嘴巴動畫 */
         .mouth {
             transition: all 0.3s ease;
         }
@@ -245,15 +258,12 @@
 </head>
 <body class="bg-gradient-to-b from-blue-100 to-purple-100">
     <div class="container mx-auto px-4 py-8 max-w-4xl">
-        <!-- Game Title -->
         <div class="text-center mb-8">
             <h1 class="text-4xl font-bold text-indigo-700 mb-2">注音符號聽力遊戲</h1>
             <p class="text-lg text-indigo-600">小學一年級注音符號學習遊戲</p>
         </div>
 
-        <!-- Main Game Container -->
         <div id="game-container" class="bg-white rounded-2xl shadow-xl p-6 relative overflow-hidden">
-            <!-- Start Screen -->
             <div id="start-screen" class="text-center py-10">
                 <div class="mb-8">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" class="w-40 h-40 mx-auto">
@@ -271,7 +281,6 @@
                 </button>
             </div>
 
-            <!-- Level Select Screen -->
             <div id="level-select" class="hidden">
                 <h2 class="text-2xl font-bold text-indigo-800 mb-6 text-center">選擇關卡</h2>
 
@@ -288,7 +297,6 @@
                 </div>
 
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-                    <!-- Level 1 -->
                     <div class="level-button bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl p-4 shadow-md text-center cursor-pointer" data-level="1">
                         <div class="text-3xl mb-2">🎧</div>
                         <h3 class="font-bold text-blue-800">第一關</h3>
@@ -300,7 +308,6 @@
                         </div>
                     </div>
 
-                    <!-- Level 2 -->
                     <div class="level-button bg-gradient-to-br from-green-100 to-green-200 rounded-xl p-4 shadow-md text-center cursor-pointer" data-level="2">
                         <div class="text-3xl mb-2">🎧</div>
                         <h3 class="font-bold text-green-800">第二關</h3>
@@ -312,7 +319,6 @@
                         </div>
                     </div>
 
-                    <!-- Level 3 -->
                     <div class="level-button bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl p-4 shadow-md text-center cursor-pointer" data-level="3">
                         <div class="text-3xl mb-2">🎧</div>
                         <h3 class="font-bold text-purple-800">第三關</h3>
@@ -324,7 +330,6 @@
                         </div>
                     </div>
 
-                    <!-- Level 4 -->
                     <div class="level-button locked bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl p-4 shadow-md text-center" data-level="4">
                         <div class="text-3xl mb-2">🔒</div>
                         <h3 class="font-bold text-gray-800">第四關</h3>
@@ -336,7 +341,6 @@
                         </div>
                     </div>
 
-                    <!-- Level 5 -->
                     <div class="level-button locked bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl p-4 shadow-md text-center" data-level="5">
                         <div class="text-3xl mb-2">🔒</div>
                         <h3 class="font-bold text-gray-800">第五關</h3>
@@ -348,7 +352,6 @@
                         </div>
                     </div>
 
-                    <!-- Level 6 -->
                     <div class="level-button locked bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl p-4 shadow-md text-center" data-level="6">
                         <div class="text-3xl mb-2">🔒</div>
                         <h3 class="font-bold text-gray-800">第六關</h3>
@@ -360,7 +363,6 @@
                         </div>
                     </div>
 
-                    <!-- Level 7 -->
                     <div class="level-button locked bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl p-4 shadow-md text-center" data-level="7">
                         <div class="text-3xl mb-2">🔒</div>
                         <h3 class="font-bold text-gray-800">第七關</h3>
@@ -372,7 +374,6 @@
                         </div>
                     </div>
 
-                    <!-- Level 8 -->
                     <div class="level-button locked bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl p-4 shadow-md text-center" data-level="8">
                         <div class="text-3xl mb-2">🔒</div>
                         <h3 class="font-bold text-gray-800">第八關</h3>
@@ -384,7 +385,6 @@
                         </div>
                     </div>
 
-                    <!-- Level 9 -->
                     <div class="level-button locked bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl p-4 shadow-md text-center" data-level="9">
                         <div class="text-3xl mb-2">🔒</div>
                         <h3 class="font-bold text-gray-800">第九關</h3>
@@ -404,9 +404,7 @@
                 </div>
             </div>
 
-            <!-- Game Screen -->
             <div id="game-screen" class="hidden">
-                <!-- Level Info -->
                 <div class="flex justify-between items-center mb-6">
                     <button id="back-to-levels" class="bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-full hover:bg-gray-300 transition-all duration-300 flex items-center">
                         <span class="mr-1">←</span> 返回
@@ -427,12 +425,10 @@
                     </div>
                 </div>
 
-                <!-- Progress Bar -->
                 <div class="w-full bg-gray-200 rounded-full h-4 mb-6">
                     <div id="progress-bar" class="bg-gradient-to-r from-green-400 to-blue-500 h-4 rounded-full progress-bar" style="width: 0%"></div>
                 </div>
 
-                <!-- Question Area -->
                 <div class="mb-8">
                     <div class="text-center mb-4">
                         <h3 class="text-lg text-gray-700">請聽發音，選出正確的注音符號：</h3>
@@ -468,12 +464,9 @@
                     </div>
                 </div>
 
-                <!-- Answer Options -->
                 <div id="options-container" class="grid grid-cols-2 gap-4">
-                    <!-- Options will be generated here -->
-                </div>
+                    </div>
 
-                <!-- Feedback Area -->
                 <div id="feedback-area" class="mt-6 text-center hidden">
                     <div id="correct-feedback" class="bg-green-100 text-green-800 p-4 rounded-xl hidden">
                         <p class="text-xl font-bold">太棒了！答對了！</p>
@@ -486,7 +479,6 @@
                 </div>
             </div>
 
-            <!-- Level Complete Screen -->
             <div id="level-complete" class="hidden text-center py-10">
                 <div class="mb-6">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" class="w-32 h-32 mx-auto">
@@ -517,13 +509,11 @@
             </div>
         </div>
 
-        <!-- Footer -->
         <div class="mt-6 text-center text-gray-600">
             <p>注音符號聽力遊戲 BY JOE</p>
         </div>
     </div>
 
-    <!-- 音效 -->
     <audio id="c_01" src="assets/sounds/F1.wav" preload="auto"></audio><!- ㄅ-->
     <audio id="c_02" src="assets/sounds/F2.wav" preload="auto"></audio><!- ㄆ-->
     <audio id="c_03" src="assets/sounds/F3.wav" preload="auto"></audio><!- ㄇ-->
@@ -567,18 +557,20 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Game state
+            // ==========================================
+            //  遊戲狀態與數據
+            // ==========================================
             const gameState = {
-                currentLevel: 1,
-                score: 0,
-                progress: 0,
-                totalQuestions: 10,
-                currentQuestion: 0,
-                correctAnswers: 0,
-                stars: 0,
-                currentSymbol: null,
-                isPlaying: false,
-                levels: {
+                currentLevel: 1,           // 目前關卡編號
+                score: 0,                  // 玩家分數
+                progress: 0,               // 關卡進度（0-100%）
+                totalQuestions: 10,        // 每關總問題數
+                currentQuestion: 0,        // 目前問題索引
+                correctAnswers: 0,         // 正確答題數
+                stars: 0,                  // 獲得的星星數
+                currentSymbol: null,       // 當前問題的正確注音符號
+                isPlaying: false,          // 聲音是否正在播放
+                levels: {                  // 關卡資料配置
                     1: {
                         title: "第一關：ㄅㄆㄇㄈ",
                         symbols: ["ㄅ", "ㄆ", "ㄇ", "ㄈ"],
@@ -589,7 +581,7 @@
                             "ㄇ": ["媽", "買", "米", "帽"],
                             "ㄈ": ["發", "飛", "方", "放"]
                         },
-                        unlocked: true,
+                        unlocked: true,    // 預設第一關解鎖
                         completed: false,
                         stars: 0
                     },
@@ -629,7 +621,7 @@
                             "ㄑ": ["去", "氣", "前", "親"],
                             "ㄒ": ["下", "小", "學", "心"]
                         },
-                        unlocked: false,
+                        unlocked: false,   // 預設第四關未解鎖
                         completed: false,
                         stars: 0
                     },
@@ -707,10 +699,12 @@
                         stars: 0
                     }
                 },
-                currentQuestions: []
+                currentQuestions: []    // 當前關卡的問題列表
             };
 
-            // DOM Elements
+            // ==========================================
+            //  DOM 元素存取
+            // ==========================================
             const startScreen = document.getElementById('start-screen');
             const levelSelect = document.getElementById('level-select');
             const gameScreen = document.getElementById('game-screen');
@@ -738,7 +732,9 @@
             const guideSpeech = document.getElementById('guide-speech');
             const characterMouth = document.getElementById('character-mouth');
 
-            // Event Listeners
+            // ==========================================
+            //  事件監聽器
+            // ==========================================
             startButton.addEventListener('click', showLevelSelect);
             backToStart.addEventListener('click', showStartScreen);
             backToLevels.addEventListener('click', showLevelSelect);
@@ -753,11 +749,11 @@
                         startLevel(level);
                     });
 
+                    // 關卡按鈕滑入/滑出時顯示提示訊息
                     button.addEventListener('mouseenter', () => {
                         const level = parseInt(button.getAttribute('data-level'));
                         showGuideSpeech(`第${level}關：聽聽${gameState.levels[level].title.split('：')[1]}的發音！`);
                     });
-
                     button.addEventListener('mouseleave', () => {
                         hideGuideSpeech();
                     });
@@ -765,14 +761,19 @@
                     button.addEventListener('mouseenter', () => {
                         showGuideSpeech("這個關卡還沒解鎖哦！先完成前面的關卡吧！");
                     });
-
                     button.addEventListener('mouseleave', () => {
                         hideGuideSpeech();
                     });
                 }
             });
 
-            // Game Functions
+            // ==========================================
+            //  核心遊戲功能函數
+            // ==========================================
+
+            /**
+             * 顯示開始畫面
+             */
             function showStartScreen() {
                 startScreen.classList.remove('hidden');
                 levelSelect.classList.add('hidden');
@@ -780,16 +781,20 @@
                 levelComplete.classList.add('hidden');
             }
 
+            /**
+             * 顯示關卡選擇畫面，並更新關卡按鈕狀態
+             */
             function showLevelSelect() {
                 startScreen.classList.add('hidden');
                 levelSelect.classList.remove('hidden');
                 gameScreen.classList.add('hidden');
                 levelComplete.classList.add('hidden');
-
-                // Update level buttons based on progress
                 updateLevelButtons();
             }
 
+            /**
+             * 根據遊戲進度更新關卡按鈕的鎖定狀態與星星數
+             */
             function updateLevelButtons() {
                 levelButtons.forEach(button => {
                     const level = parseInt(button.getAttribute('data-level'));
@@ -798,7 +803,7 @@
                     if (levelData.unlocked) {
                         button.classList.remove('locked');
 
-                        // Update stars
+                        // 更新星星顯示
                         const stars = button.querySelectorAll('.star');
                         for (let i = 0; i < stars.length; i++) {
                             if (i < levelData.stars) {
@@ -811,15 +816,26 @@
                 });
             }
 
+            /**
+             * 顯示角色引導對話框
+             * @param {string} text - 要顯示的訊息
+             */
             function showGuideSpeech(text) {
                 guideSpeech.textContent = text;
                 guideSpeech.style.opacity = '1';
             }
 
+            /**
+             * 隱藏角色引導對話框
+             */
             function hideGuideSpeech() {
                 guideSpeech.style.opacity = '0';
             }
 
+            /**
+             * 開始一個新的關卡
+             * @param {number} level - 關卡編號
+             */
             function startLevel(level) {
                 gameState.currentLevel = level;
                 gameState.score = 0;
@@ -827,29 +843,33 @@
                 gameState.currentQuestion = 0;
                 gameState.correctAnswers = 0;
 
-                // Generate questions for this level
+                // 產生本關卡的問題
                 generateQuestions(level);
 
-                // Update UI
+                // 更新遊戲介面顯示
                 levelTitle.textContent = gameState.levels[level].title;
                 scoreDisplay.textContent = gameState.score;
                 progressBar.style.width = '0%';
 
-                // Show game screen
+                // 顯示遊戲畫面
                 startScreen.classList.add('hidden');
                 levelSelect.classList.add('hidden');
                 gameScreen.classList.remove('hidden');
                 levelComplete.classList.add('hidden');
 
-                // Start first question
+                // 顯示第一個問題
                 showQuestion();
             }
 
+            /**
+             * 為當前關卡生成隨機問題列表
+             * @param {number} level - 關卡編號
+             */
             function generateQuestions(level) {
                 const levelData = gameState.levels[level];
                 gameState.currentQuestions = [];
 
-                // Create questions for each symbol in the level
+                // 產生總題數的問題
                 for (let i = 0; i < gameState.totalQuestions; i++) {
                     const randomSymbolIndex = Math.floor(Math.random() * levelData.symbols.length);
                     const symbol = levelData.symbols[randomSymbolIndex];
@@ -861,29 +881,38 @@
                         options: getRandomOptions(levelData.symbols, symbol)
                     });
                 }
-
-                // Shuffle questions
+                // 打亂問題順序
                 shuffleArray(gameState.currentQuestions);
             }
 
+            /**
+             * 從所有符號中隨機選擇三個作為錯誤選項
+             * @param {Array<string>} allSymbols - 所有注音符號
+             * @param {string} correctSymbol - 正確的注音符號
+             * @returns {Array<string>} - 包含一個正確答案和三個錯誤答案的陣列
+             */
             function getRandomOptions(allSymbols, correctSymbol) {
                 const options = [correctSymbol];
                 const availableSymbols = allSymbols.filter(s => s !== correctSymbol);
 
-                // Add 3 random incorrect options
+                // 加入三個隨機的錯誤選項
                 while (options.length < 4 && availableSymbols.length > 0) {
                     const randomIndex = Math.floor(Math.random() * availableSymbols.length);
                     options.push(availableSymbols[randomIndex]);
                     availableSymbols.splice(randomIndex, 1);
                 }
 
-                // Shuffle options
+                // 打亂選項順序
                 shuffleArray(options);
                 return options;
             }
 
+            /**
+             * 顯示當前問題的選項
+             */
             function showQuestion() {
                 if (gameState.currentQuestion >= gameState.totalQuestions) {
+                    // 如果所有問題都回答完畢，則完成關卡
                     completeLevel();
                     return;
                 }
@@ -891,16 +920,16 @@
                 const question = gameState.currentQuestions[gameState.currentQuestion];
                 gameState.currentSymbol = question.symbol;
 
-                // Hide feedback
+                // 隱藏回饋訊息
                 feedbackArea.classList.add('hidden');
                 correctFeedback.classList.add('hidden');
                 incorrectFeedback.classList.add('hidden');
 
-                // Hide sound wave and current symbol
-                soundWave.classList.add('hidden');
+                // 隱藏聲波
+                //soundWave.classList.add('hidden');
                 currentSymbol.classList.add('hidden');
 
-                // Create option buttons
+                // 動態生成選項按鈕
                 optionsContainer.innerHTML = '';
                 question.options.forEach((option) => {
                     const button = document.createElement('div');
@@ -911,42 +940,38 @@
                 });
             }
 
+            /**
+             * 播放當前問題的聲音
+             */
             function playCurrentSound() {
                 if (gameState.isPlaying) return;
 
                 gameState.isPlaying = true;
 
-                // Show sound wave and animate mouth
-                soundWave.classList.remove('hidden');
+                // 顯示聲波並觸發角色嘴巴動畫
+                //soundWave.classList.remove('hidden');
                 characterMouth.classList.add('speaking');
                 const questionA = gameState.currentQuestions[gameState.currentQuestion];
                 document.getElementById(questionA.symbolA).play();
 
-                // Simulate sound playing for 2 seconds
+                // 模擬聲音播放結束
                 setTimeout(() => {
                     gameState.isPlaying = false;
-                    soundWave.classList.add('hidden');
+                    //soundWave.classList.add('hidden');
                     characterMouth.classList.remove('speaking');
-
-                    // For advanced mode, show the symbol briefly
-                    //if (gameState.currentLevel > 3) {
-                    //    currentSymbol.querySelector('span').textContent = gameState.currentSymbol;
-                    //    currentSymbol.classList.remove('hidden');
-
-                    //    setTimeout(() => {
-                    //        currentSymbol.classList.add('hidden');
-                    //    }, 500);
-                   // }
                 }, 2000);
             }
 
+            /**
+             * 檢查使用者選擇的答案是否正確
+             * @param {string} selectedOption - 使用者選擇的注音符號
+             */
             function checkAnswer(selectedOption) {
                 const isCorrect = selectedOption === gameState.currentSymbol;
 
-                // Find the selected button
+                // 找到使用者點擊的卡片
                 const buttons = optionsContainer.querySelectorAll('.symbol-card');
                 let selectedButton;
-
                 buttons.forEach(button => {
                     if (button.textContent.trim() === selectedOption) {
                         selectedButton = button;
@@ -954,34 +979,28 @@
                 });
 
                 if (isCorrect) {
-                    // Correct answer
+                    // 答對邏輯
                     selectedButton.classList.add('correct');
                     gameState.score += 10;
                     gameState.correctAnswers++;
                     scoreDisplay.textContent = gameState.score;
-
-                    // Show feedback
                     feedbackArea.classList.remove('hidden');
                     correctFeedback.classList.remove('hidden');
-
-                    // Create confetti effect
-                    createConfetti();
+                    createConfetti(); // 答對時產生紙屑
                 } else {
-                    // Incorrect answer
+                    // 答錯邏輯
                     selectedButton.classList.add('incorrect');
-
-                    // Show feedback
                     feedbackArea.classList.remove('hidden');
                     incorrectFeedback.classList.remove('hidden');
                     correctAnswer.textContent = gameState.currentSymbol;
                 }
 
-                // Disable all buttons
+                // 禁用所有選項按鈕，防止重複點擊
                 buttons.forEach(button => {
                     button.style.pointerEvents = 'none';
                 });
 
-                // Move to next question after delay
+                // 延遲一段時間後進入下一題
                 setTimeout(() => {
                     gameState.currentQuestion++;
                     gameState.progress = (gameState.currentQuestion / gameState.totalQuestions) * 100;
@@ -990,11 +1009,13 @@
                 }, 2000);
             }
 
+            /**
+             * 完成關卡，計算分數與星星
+             */
             function completeLevel() {
-                // Calculate stars based on correct answers
+                // 根據正確率計算星星數
                 const percentage = (gameState.correctAnswers / gameState.totalQuestions) * 100;
                 let stars = 0;
-
                 if (percentage >= 90) {
                     stars = 3;
                 } else if (percentage >= 70) {
@@ -1003,19 +1024,18 @@
                     stars = 1;
                 }
 
-                // Update level data
+                // 更新關卡數據
                 gameState.levels[gameState.currentLevel].completed = true;
+                // 僅在獲得更多星星時更新記錄
                 gameState.levels[gameState.currentLevel].stars = Math.max(stars, gameState.levels[gameState.currentLevel].stars);
 
-                // Unlock next level if applicable
+                // 解鎖下一關
                 if (gameState.currentLevel < Object.keys(gameState.levels).length) {
                     gameState.levels[gameState.currentLevel + 1].unlocked = true;
                 }
 
-                // Update UI
+                // 更新完成畫面的UI
                 finalScore.innerHTML = `你獲得了 <span class="font-bold text-indigo-700">${gameState.score}</span> 分！`;
-
-                // Update stars display
                 const resultStarsElements = resultStars.querySelectorAll('.star');
                 for (let i = 0; i < resultStarsElements.length; i++) {
                     if (i < stars) {
@@ -1025,21 +1045,22 @@
                     }
                 }
 
-                // Show/hide next level button
+                // 判斷是否隱藏「下一關」按鈕
                 if (gameState.currentLevel >= Object.keys(gameState.levels).length) {
                     nextLevel.classList.add('hidden');
                 } else {
                     nextLevel.classList.remove('hidden');
                 }
 
-                // Show level complete screen
+                // 顯示關卡完成畫面並產生慶祝紙屑
                 gameScreen.classList.add('hidden');
                 levelComplete.classList.remove('hidden');
-
-                // Create celebration confetti
                 createCelebrationConfetti();
             }
 
+            /**
+             * 進入下一關
+             */
             function startNextLevel() {
                 if (gameState.currentLevel < Object.keys(gameState.levels).length) {
                     startLevel(gameState.currentLevel + 1);
@@ -1048,10 +1069,12 @@
                 }
             }
 
+            /**
+             * 產生少量紙屑效果
+             */
             function createConfetti() {
                 const confettiCount = 30;
                 const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
-
                 for (let i = 0; i < confettiCount; i++) {
                     const confetti = document.createElement('div');
                     confetti.className = 'confetti';
@@ -1059,18 +1082,16 @@
                     confetti.style.left = `${Math.random() * 100}%`;
                     confetti.style.animation = `fall ${1 + Math.random() * 2}s linear forwards`;
                     document.getElementById('game-container').appendChild(confetti);
-
-                    // Remove confetti after animation
-                    setTimeout(() => {
-                        confetti.remove();
-                    }, 3000);
+                    setTimeout(() => { confetti.remove(); }, 3000);
                 }
             }
 
+            /**
+             * 產生大量紙屑效果（關卡完成時使用）
+             */
             function createCelebrationConfetti() {
                 const confettiCount = 100;
                 const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
-
                 for (let i = 0; i < confettiCount; i++) {
                     const confetti = document.createElement('div');
                     confetti.className = 'confetti';
@@ -1078,15 +1099,19 @@
                     confetti.style.left = `${Math.random() * 100}%`;
                     confetti.style.animation = `fall ${1 + Math.random() * 3}s linear forwards`;
                     document.getElementById('game-container').appendChild(confetti);
-
-                    // Remove confetti after animation
-                    setTimeout(() => {
-                        confetti.remove();
-                    }, 4000);
+                    setTimeout(() => { confetti.remove(); }, 4000);
                 }
             }
 
-            // Utility Functions
+            // ==========================================
+            //  通用工具函數
+            // ==========================================
+
+            /**
+             * 打亂陣列順序
+             * @param {Array<any>} array - 要打亂的陣列
+             * @returns {Array<any>} - 已打亂的陣列
+             */
             function shuffleArray(array) {
                 for (let i = array.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
@@ -1095,11 +1120,12 @@
                 return array;
             }
 
-            // Initialize game
+            // ==========================================
+            //  遊戲初始化
+            // ==========================================
             showStartScreen();
         });
     </script>
     <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9353f54a23896a80',t:'MTc0NTQ4MDQ4NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
 </body>
 </html>
-
