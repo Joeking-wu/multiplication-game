@@ -26,4 +26,4 @@ clock_matching_game.html 時鐘幾點，整點與半點練習。[時鐘幾點排
 
 Abacus.html 小朋友珠算入門練習。[小朋友珠算入門](https://joeking-wu.github.io/multiplication-game/Abacus.html).
 
-A_1_4.html 數學分與合單元。[數學分與合單元](https://joeking-wu.github.io/multiplication-game/A_1_4/A_1_4.html).
+A_1_4.html 數學分與合單元。[數學分與合單元](https://joeking-wu.github.io/multiplication-game/A_1_4.html).
