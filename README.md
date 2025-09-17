@@ -27,3 +27,10 @@ clock_matching_game.html 時鐘幾點，整點與半點練習。[時鐘幾點排
 Abacus.html 小朋友珠算入門練習。[小朋友珠算入門](https://joeking-wu.github.io/multiplication-game/Abacus.html).
 
 A_1_4.html 數學分與合單元。[數學分與合單元](https://joeking-wu.github.io/multiplication-game/A_1_4/A_1_4.html).
+
+
+其它作者的產品分享
+[太空漫遊](https://jinshuanyu.github.io/spacewalk/index.html).
+[量詞配對](https://jinshuanyu.github.io/chinese-quantifiers/index.html).
+
+
