@@ -178,9 +178,9 @@ function displayImages(container, count, container2, count2) {
 
         let imagePath;
         if (container.id === 'part1-images') {
-            imagePath = `A_1_4/images/P1_${formattedIndex}.PNG`;
+            imagePath = `https://raw.githubusercontent.com/Joeking-wu/multiplication-game/refs/heads/main/A_1_4/images/P1_${formattedIndex}.png`;
         } else {
-            imagePath = `A_1_4/images/P2_${formattedIndex}.PNG`;
+            imagePath = `https://raw.githubusercontent.com/Joeking-wu/multiplication-game/refs/heads/main/A_1_4/images/P2_${formattedIndex}.png`;
         }
 
         const img = document.createElement('img');
@@ -194,9 +194,9 @@ function displayImages(container, count, container2, count2) {
 
         let imagePath;
         if (container2.id === 'part2-images') {
-            imagePath = `A_1_4/images/P2_${formattedIndex}.PNG`;
+            imagePath = `https://raw.githubusercontent.com/Joeking-wu/multiplication-game/refs/heads/main/A_1_4/images/P2_${formattedIndex}.png`;
         } else {
-            imagePath = `A_1_4/images/P1_${formattedIndex}.PNG`;
+            imagePath = `https://raw.githubusercontent.com/Joeking-wu/multiplication-game/refs/heads/main/A_1_4/images/P1_${formattedIndex}.png`;
         }
 
         const img = document.createElement('img');
