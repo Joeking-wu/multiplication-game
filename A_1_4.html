@@ -1,0 +1,69 @@
+﻿<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分分與合合</title>
+    <link rel="stylesheet" href="style_A_1_4.css">
+</head>
+<body>
+    <div class="container">
+        <h1>分與合</h1>
+        <div id="start-screen">
+            <p>請輸入你的名字：</p>
+            <input type="text" id="player-name-input" placeholder="你的名字">
+            <div class="mode-selection">
+                <button id="split-mode-button" class="mode-button">分-遊戲</button>
+                <button id="combine-mode-button" class="mode-button">合-遊戲</button>
+            </div>
+        </div>
+
+        <div id="game-screen" class="hidden">
+            <div class="game-info">
+                <p>玩家：<span id="player-name"></span></p>
+                <p>分數：<span id="score">0</span></p>
+                <p>答對題數：<span id="correct-count">0</span></p>
+                <p>時間：<span id="timer">0</span> 秒</p>
+            </div>
+
+            <div class="game-area">
+                <div id="question-text"></div>
+
+                <div class="visuals-container">
+                    <div id="part1-images" class="image-box"></div>
+                    <div id="part2-images" class="image-box"></div>
+                </div>
+
+                <div class="tree-diagram-container">
+                    <div class="total-box">
+                        <input type="number" id="box-total" class="answer-box">
+                    </div>
+                    <div class="part-box part-box-1">
+                        <input type="number" id="box-part1" class="answer-box">
+                    </div>
+                    <div class="part-box part-box-2">
+                        <input type="number" id="box-part2" class="answer-box">
+                    </div>
+                    <svg class="connector-lines">
+                    </svg>
+                </div>
+                <button id="submit-button">送出</button>
+            </div>
+        </div>
+
+        <div id="end-screen" class="hidden">
+            <h2>遊戲結束！</h2>
+            <p>你的分數是：<span id="final-score"></span></p>
+            <button id="restart-button">重新開始</button>
+        </div>
+
+        <div id="leaderboard-container">
+            <h2>排行榜</h2>
+            <ul id="leaderboard-list">
+            </ul>
+        </div>
+    </div>
+
+    <script src="script_A_1_4.js"></script>
+</body>
+</html>
