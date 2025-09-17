@@ -36,7 +36,7 @@ let currentQuestion = {};
 let isGameOver = false;
 let gameMode = ''; // 'split' or 'combine'
 
-let Png_cnt = 5;
+let Png_cnt = 10;
 
 // 定義每個數字有多少張圖片可以選擇，假設從 1 到 10 都有 10 張圖片
 const imageCounts = {};
@@ -178,9 +178,9 @@ function displayImages(container, count, container2, count2) {
 
         let imagePath;
         if (container.id === 'part1-images') {
-            imagePath = `https://raw.githubusercontent.com/Joeking-wu/multiplication-game/refs/heads/main/A_1_4/images/P1_${formattedIndex}.png`;
+            imagePath = `images/P1_${formattedIndex}.png`;
         } else {
-            imagePath = `https://raw.githubusercontent.com/Joeking-wu/multiplication-game/refs/heads/main/A_1_4/images/P2_${formattedIndex}.png`;
+            imagePath = `images/P2_${formattedIndex}.png`;
         }
 
         const img = document.createElement('img');
@@ -194,9 +194,9 @@ function displayImages(container, count, container2, count2) {
 
         let imagePath;
         if (container2.id === 'part2-images') {
-            imagePath = `https://raw.githubusercontent.com/Joeking-wu/multiplication-game/refs/heads/main/A_1_4/images/P2_${formattedIndex}.png`;
+            imagePath = `images/P2_${formattedIndex}.png`;
         } else {
-            imagePath = `https://raw.githubusercontent.com/Joeking-wu/multiplication-game/refs/heads/main/A_1_4/images/P1_${formattedIndex}.png`;
+            imagePath = `images/P1_${formattedIndex}.png`;
         }
 
         const img = document.createElement('img');
