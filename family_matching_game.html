@@ -1,0 +1,660 @@
+﻿<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>親人稱謂配對遊戲 - 完整版</title>
+    <style>
+        /* -------------------------------------------
+         * CSS 樣式區
+         * ------------------------------------------- */
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+
+        #game-container {
+            max-width: 900px;
+            margin: 0 auto 30px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #question-area {
+            min-height: 120px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #e6f7ff;
+            border-radius: 8px;
+        }
+
+        #drop-zone {
+            width: 150px;
+            height: 150px;
+            border: 4px dashed #007bff;
+            margin: 10px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            background-color: #f0f8ff;
+            font-size: 1.2em;
+            color: #007bff;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+            #drop-zone.hover {
+                border-color: #28a745;
+                background-color: #e2f9e7;
+            }
+
+        #photo-gallery {
+            border-top: 2px solid #ddd;
+            padding-top: 20px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .draggable-image-wrapper {
+            position: relative;
+            margin: 8px;
+            cursor: grab;
+            display: inline-block;
+            transition: opacity 0.3s;
+            background-color: #fff;
+            padding: 5px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .draggable-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #555;
+            pointer-events: none;
+        }
+
+        .photo-label {
+            display: block;
+            margin-top: 5px;
+            font-size: 0.9em;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .dragging {
+            opacity: 0.3;
+        }
+
+        .correct-border {
+            border-color: green !important;
+            background-color: #ccffcc !important;
+        }
+
+        .incorrect-border {
+            border-color: red !important;
+            background-color: #ffcccc !important;
+        }
+
+        .control-buttons {
+            margin: 20px 0;
+        }
+
+            .control-buttons button {
+                padding: 10px 20px;
+                font-size: 1em;
+                cursor: pointer;
+                margin: 0 10px;
+                border: none;
+                border-radius: 5px;
+                color: white;
+                transition: background-color 0.3s;
+            }
+
+        #next-btn {
+            background-color: #007bff;
+        }
+
+            #next-btn:hover:not(:disabled) {
+                background-color: #0056b3;
+            }
+
+            #next-btn:disabled {
+                background-color: #ccc;
+                cursor: not-allowed;
+            }
+
+        #submit-btn {
+            background-color: #28a745;
+        }
+
+            #submit-btn:hover:not(:disabled) {
+                background-color: #1e7e34;
+            }
+
+            #submit-btn:disabled {
+                background-color: #ccc;
+                cursor: not-allowed;
+            }
+
+        /* 歷史記錄區樣式 */
+        #history-area {
+            max-width: 900px;
+            margin: 30px auto;
+            text-align: left;
+            padding: 20px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            border-radius: 10px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px dashed #eee;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .history-score {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .history-details-btn {
+            padding: 5px 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* 彈出視窗樣式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 700px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+            .close:hover, .close:focus {
+                color: black;
+                text-decoration: none;
+                cursor: pointer;
+            }
+
+        .review-item {
+            padding: 10px 0;
+            border-bottom: 1px dotted #ccc;
+        }
+
+        .review-question {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .review-result {
+            font-size: 0.9em;
+        }
+
+        .correct-answer {
+            color: green;
+        }
+
+        .incorrect-answer {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <div id="question-area">
+            <h2 id="question-text">載入中...</h2>
+            <div id="status-message" style="font-size: 1.1em; margin-top: 10px; font-weight: bold;"></div>
+        </div>
+
+        <div id="drop-zone">請將正確照片拖曳到此處</div>
+
+        <div class="control-buttons">
+            <button id="submit-btn" onclick="checkAnswer()">確定答案</button>
+            <button id="next-btn" onclick="nextQuestion()" disabled>下一題 (0/15)</button>
+        </div>
+
+        <p>當前分數: <span id="current-score">0</span> / <span id="total-questions">15</span></p>
+
+        <h2>所有家庭成員照片 (請拖拉)</h2>
+        <div id="photo-gallery">
+        </div>
+    </div>
+
+    <div id="history-area">
+        <h2>🧑‍🎓 答題記錄</h2>
+        <div id="history-list">
+            <p id="no-history">尚無記錄。</p>
+        </div>
+    </div>
+
+    <div id="review-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3 id="review-title">歷史答題細節</h3>
+            <div id="review-content">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ----------------------------------------------------------------
+        // 【1. 資料區：題庫與照片庫】
+        // ----------------------------------------------------------------
+
+        // 題庫資料 (30 題範例)
+        const questions = [
+            { id: 1, text: "請問誰是你的爸爸？", answerPhotoId: 'photo-father' },
+            { id: 2, text: "請問誰是你的媽媽？", answerPhotoId: 'photo-mother' },
+            { id: 3, text: "請問誰是你的爺爺 (爸爸的爸爸)？", answerPhotoId: 'photo-gfather' },
+            { id: 4, text: "請問誰是你的奶奶 (爸爸的媽媽)？", answerPhotoId: 'photo-gmother-p' },
+            { id: 5, text: "請問誰是你的外公 (媽媽的爸爸)？", answerPhotoId: 'photo-gfather-m' },
+            { id: 6, text: "請問誰是你的外婆 (媽媽的媽媽)？", answerPhotoId: 'photo-gmother-m' },
+            { id: 7, text: "請問誰是你的哥哥？", answerPhotoId: 'photo-brother' },
+            { id: 8, text: "請問誰是你的姊姊？", answerPhotoId: 'photo-sister' },
+            { id: 9, text: "請問誰是你的弟弟或妹妹？", answerPhotoId: 'photo-younger' },
+            { id: 10, text: "請問誰是你的伯父 (爸爸的哥哥)？", answerPhotoId: 'photo-bf' },
+            { id: 11, text: "請問誰是你的叔叔 (爸爸的弟弟)？", answerPhotoId: 'photo-shu' },
+            { id: 12, text: "請問誰是你的姑姑 (爸爸的姊妹)？", answerPhotoId: 'photo-gg' },
+            { id: 13, text: "請問誰是你的伯母 (伯父的妻子)？", answerPhotoId: 'photo-bm' },
+            { id: 14, text: "請問誰是你的姑丈 (姑姑的丈夫)？", answerPhotoId: 'photo-gz' },
+            { id: 15, text: "請問誰是你的舅舅 (媽媽的兄弟)？", answerPhotoId: 'photo-jj' },
+            { id: 16, text: "請問誰是你的阿姨 (媽媽的姊妹)？", answerPhotoId: 'photo-ay' },
+            { id: 17, text: "請問誰是你的舅媽 (舅舅的妻子)？", answerPhotoId: 'photo-jm' },
+            { id: 18, text: "請問誰是你的姨丈 (阿姨的丈夫)？", answerPhotoId: 'photo-yz' },
+            { id: 19, text: "請問誰是你的堂哥 (伯叔的孩子)？", answerPhotoId: 'photo-tcou1' },
+            { id: 20, text: "請問誰是你的表姊 (舅姨的孩子)？", answerPhotoId: 'photo-bcou2' },
+            { id: 21, text: "請問誰是你的兒子或女兒？", answerPhotoId: 'photo-child' },
+            { id: 22, text: "請問誰是你的姪子 (兄弟的孩子)？", answerPhotoId: 'photo-niece' },
+            { id: 23, text: "請問誰是你妻子的父親 (岳父)？", answerPhotoId: 'photo-yf' },
+            { id: 24, text: "請問誰是你丈夫的母親 (婆婆)？", answerPhotoId: 'photo-pp' },
+            { id: 25, text: "請問誰是你的媳婦 (兒子的妻子)？", answerPhotoId: 'photo-wife-son' },
+            { id: 26, text: "請問誰是你的女婿 (女兒的丈夫)？", answerPhotoId: 'photo-hsb-dau' },
+            { id: 27, text: "請問誰是你的曾祖父 (爺爺的爸爸)？", answerPhotoId: 'photo-ancestor' },
+            { id: 28, text: "請問誰是你的外曾祖母 (外婆的媽媽)？", answerPhotoId: 'photo-ancestor2' },
+            { id: 29, text: "請問誰是你的孫子 (兒子的孩子)？", answerPhotoId: 'photo-grandchild' },
+            { id: 30, text: "請問誰是你的外孫女 (女兒的孩子)？", answerPhotoId: 'photo-grandchild-f' },
+        ];
+
+        // 照片資料 (所有親人照片)
+        const allPhotos = [
+            // **請注意：這裡的 URL 都是範例，請替換成您自己的圖片路徑**
+            { id: 'photo-father', name: '爸爸', url: 'https://via.placeholder.com/80/0000FF/FFFFFF?text=爸' },
+            { id: 'photo-mother', name: '媽媽', url: 'https://via.placeholder.com/80/FF00AA/FFFFFF?text=媽' },
+            { id: 'photo-gfather', name: '爺爺', url: 'https://via.placeholder.com/80/333333/FFFFFF?text=爺爺' },
+            { id: 'photo-gmother-p', name: '奶奶', url: 'https://via.placeholder.com/80/708090/FFFFFF?text=奶奶' },
+            { id: 'photo-gfather-m', name: '外公', url: 'https://via.placeholder.com/80/3333FF/FFFFFF?text=外公' },
+            { id: 'photo-gmother-m', name: '外婆', url: 'https://via.placeholder.com/80/AA00AA/FFFFFF?text=外婆' },
+            { id: 'photo-brother', name: '哥哥', url: 'https://via.placeholder.com/80/00FF00/FFFFFF?text=哥' },
+            { id: 'photo-sister', name: '姊姊', url: 'https://via.placeholder.com/80/FFA500/FFFFFF?text=姊' },
+            { id: 'photo-younger', name: '弟妹', url: 'https://via.placeholder.com/80/FFFF00/333333?text=弟妹' },
+            { id: 'photo-bf', name: '伯父', url: 'https://via.placeholder.com/80/4444FF/FFFFFF?text=伯父' },
+            { id: 'photo-shu', name: '叔叔', url: 'https://via.placeholder.com/80/00008B/FFFFFF?text=叔叔' },
+            { id: 'photo-gg', name: '姑姑', url: 'https://via.placeholder.com/80/FF69B4/FFFFFF?text=姑姑' },
+            { id: 'photo-bm', name: '伯母', url: 'https://via.placeholder.com/80/CCCCFF/FFFFFF?text=伯母' },
+            { id: 'photo-gz', name: '姑丈', url: 'https://via.placeholder.com/80/800080/FFFFFF?text=姑丈' },
+            { id: 'photo-jj', name: '舅舅', url: 'https://via.placeholder.com/80/008080/FFFFFF?text=舅舅' },
+            { id: 'photo-ay', name: '阿姨', url: 'https://via.placeholder.com/80/FFC0CB/FFFFFF?text=阿姨' },
+            { id: 'photo-jm', name: '舅媽', url: 'https://via.placeholder.com/80/6495ED/FFFFFF?text=舅媽' },
+            { id: 'photo-yz', name: '姨丈', url: 'https://via.placeholder.com/80/4B0082/FFFFFF?text=姨丈' },
+            { id: 'photo-tcou1', name: '堂哥', url: 'https://via.placeholder.com/80/00FFFF/FFFFFF?text=堂哥' },
+            { id: 'photo-bcou2', name: '表姊', url: 'https://via.placeholder.com/80/FFD700/333333?text=表姊' },
+            { id: 'photo-child', name: '子女', url: 'https://via.placeholder.com/80/3CB371/FFFFFF?text=子女' },
+            { id: 'photo-niece', name: '姪子', url: 'https://via.placeholder.com/80/8FBC8F/FFFFFF?text=姪子' },
+            { id: 'photo-yf', name: '岳父', url: 'https://via.placeholder.com/80/8B0000/FFFFFF?text=岳父' },
+            { id: 'photo-pp', name: '婆婆', url: 'https://via.placeholder.com/80/FF1493/FFFFFF?text=婆婆' },
+            { id: 'photo-wife-son', name: '媳婦', url: 'https://via.placeholder.com/80/DDA0DD/FFFFFF?text=媳婦' },
+            { id: 'photo-hsb-dau', name: '女婿', url: 'https://via.placeholder.com/80/4682B4/FFFFFF?text=女婿' },
+            { id: 'photo-ancestor', name: '曾祖父', url: 'https://via.placeholder.com/80/A9A9A9/FFFFFF?text=曾祖父' },
+            { id: 'photo-ancestor2', name: '曾祖母', url: 'https://via.placeholder.com/80/D3D3D3/333333?text=曾祖母' },
+            { id: 'photo-grandchild', name: '孫子', url: 'https://via.placeholder.com/80/ADD8E6/FFFFFF?text=孫子' },
+            { id: 'photo-grandchild-f', name: '外孫女', url: 'https://via.placeholder.com/80/F08080/FFFFFF?text=外孫女' },
+        ];
+
+        // ----------------------------------------------------------------
+        // 【2. 變數設定與 DOM 引用】
+        // ----------------------------------------------------------------
+
+        const TOTAL_QUESTIONS_TO_PLAY = 15; // *** 設定每次遊戲要玩的題目數量 ***
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answerInDropZone = null;
+        let currentQuizDetails = []; // 儲存當次遊戲的作答細節
+
+        const dropZone = document.getElementById('drop-zone');
+        const questionTextElement = document.getElementById('question-text');
+        const nextButton = document.getElementById('next-btn');
+        const submitButton = document.getElementById('submit-btn');
+        const statusMessage = document.getElementById('status-message');
+        const totalQuestionsElement = document.getElementById('total-questions');
+        const reviewModal = document.getElementById('review-modal');
+        const reviewContent = document.getElementById('review-content');
+
+        // ----------------------------------------------------------------
+        // 【3. 核心工具函數】
+        // ----------------------------------------------------------------
+
+        // Fisher-Yates 洗牌演算法：隨機抽取並打亂題目
+        function selectRandomQuestions(allQuestions, count) {
+            let array = [...allQuestions];
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array.slice(0, count);
+        }
+
+        // 根據 ID 取得照片對應的親人名稱
+        function getPhotoNameById(id) {
+            const photo = allPhotos.find(p => p.id === id);
+            return photo ? photo.name : '未知親人';
+        }
+
+        // ----------------------------------------------------------------
+        // 【4. 圖片與遊戲流程】
+        // ----------------------------------------------------------------
+
+        // **這個就是您需要的圖片初始化函式！**
+        function initPhotos() {
+            const gallery = document.getElementById('photo-gallery');
+            gallery.innerHTML = '';
+
+            allPhotos.forEach(photo => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'draggable-image-wrapper';
+                wrapper.id = photo.id + '-wrapper';
+                wrapper.draggable = true;
+                wrapper.addEventListener('dragstart', dragStart);
+                wrapper.addEventListener('dragend', dragEnd);
+
+                const img = document.createElement('img');
+                img.className = 'draggable-image';
+                img.src = photo.url;
+                img.alt = photo.name;
+
+                const label = document.createElement('span');
+                label.className = 'photo-label';
+                label.textContent = photo.name;
+
+                wrapper.appendChild(img);
+                wrapper.appendChild(label);
+                gallery.appendChild(wrapper);
+            });
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= shuffledQuestions.length) {
+                // 遊戲結束時，儲存歷史記錄
+                saveGameHistory();
+
+                questionTextElement.textContent = `🎉 遊戲結束！您總共答對 ${score} 題。`;
+                statusMessage.textContent = '太棒了！請查看下方的答題記錄。';
+                dropZone.innerHTML = "恭喜完成！";
+                nextButton.disabled = true;
+                submitButton.disabled = true;
+                return;
+            }
+
+            const currentQ = shuffledQuestions[currentQuestionIndex];
+            questionTextElement.textContent = `第 ${currentQuestionIndex + 1} 題: ${currentQ.text}`;
+            statusMessage.textContent = '';
+
+            resetDropZone();
+
+            nextButton.textContent = `下一題 (${currentQuestionIndex + 1}/${shuffledQuestions.length})`;
+
+            submitButton.disabled = false;
+            nextButton.disabled = true;
+        }
+
+        function checkAnswer() {
+            if (!answerInDropZone) {
+                statusMessage.textContent = '🔴 請先拖曳一張照片到框框裡！';
+                return;
+            }
+
+            const currentQ = shuffledQuestions[currentQuestionIndex];
+            const dropZoneImg = dropZone.querySelector('.draggable-image');
+
+            const isCorrect = (answerInDropZone === currentQ.answerPhotoId);
+            const correctName = getPhotoNameById(currentQ.answerPhotoId);
+            const studentAnswerName = getPhotoNameById(answerInDropZone);
+
+            // 記錄當前題目的詳細作答情況 (用於歷史記錄)
+            currentQuizDetails.push({
+                qText: currentQ.text,
+                correctId: currentQ.answerPhotoId,
+                correctName: correctName,
+                studentId: answerInDropZone,
+                studentName: studentAnswerName,
+                isCorrect: isCorrect
+            });
+
+            // 視覺回饋與計分
+            if (isCorrect) {
+                score++;
+                statusMessage.textContent = `🟢 答對了！這位是你的 ${correctName}。`;
+                dropZoneImg.classList.add('correct-border');
+                dropZone.classList.add('correct-border');
+            } else {
+                statusMessage.textContent = `❌ 答錯了！正確答案是：${correctName}。`;
+                dropZoneImg.classList.add('incorrect-border');
+                dropZone.classList.add('incorrect-border');
+            }
+
+            document.getElementById('current-score').textContent = score;
+
+            submitButton.disabled = true;
+            nextButton.disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            loadQuestion();
+        }
+
+        function resetDropZone() {
+            const oldWrapper = dropZone.querySelector('.draggable-image-wrapper');
+            if (oldWrapper) {
+                document.getElementById('photo-gallery').appendChild(oldWrapper);
+                oldWrapper.querySelector('.draggable-image').classList.remove('correct-border', 'incorrect-border');
+            }
+            dropZone.classList.remove('correct-border', 'incorrect-border');
+            dropZone.innerHTML = "請將正確照片拖曳到此處";
+            answerInDropZone = null;
+        }
+
+        // ----------------------------------------------------------------
+        // 【5. 拖拉事件處理】
+        // ----------------------------------------------------------------
+
+        function dragStart(event) {
+            event.dataTransfer.setData("text/plain", event.target.id);
+            setTimeout(() => event.target.classList.add('dragging'), 0);
+
+            if (event.target.parentElement.id === 'drop-zone') {
+                answerInDropZone = null;
+                dropZone.classList.remove('correct-border', 'incorrect-border');
+                dropZone.innerHTML = "請將正確照片拖曳到此處";
+            }
+        }
+
+        function dragEnd(event) {
+            event.target.classList.remove('dragging');
+        }
+
+        function drop(event) {
+            event.preventDefault();
+            dropZone.classList.remove('hover');
+
+            const draggedWrapperId = event.dataTransfer.getData("text/plain");
+            const draggedWrapper = document.getElementById(draggedWrapperId);
+
+            if (draggedWrapper && !submitButton.disabled) {
+                const oldWrapper = dropZone.querySelector('.draggable-image-wrapper');
+                if (oldWrapper) {
+                    document.getElementById('photo-gallery').appendChild(oldWrapper);
+                }
+
+                dropZone.innerHTML = '';
+                dropZone.appendChild(draggedWrapper);
+                answerInDropZone = draggedWrapperId.replace('-wrapper', '');
+            }
+        }
+
+        // ----------------------------------------------------------------
+        // 【6. 歷史記錄功能】
+        // ----------------------------------------------------------------
+
+        function saveGameHistory() {
+            const history = JSON.parse(localStorage.getItem('quizHistory')) || [];
+
+            const now = new Date();
+            const timeString = `${now.getMonth() + 1}/${now.getDate()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+            const gameRecord = {
+                timestamp: now.getTime(),
+                time: timeString,
+                score: score,
+                total: shuffledQuestions.length,
+                details: currentQuizDetails // 儲存所有題目細節
+            };
+
+            history.unshift(gameRecord);
+            localStorage.setItem('quizHistory', JSON.stringify(history));
+
+            displayHistory();
+        }
+
+        function displayHistory() {
+            const historyList = document.getElementById('history-list');
+            const history = JSON.parse(localStorage.getItem('quizHistory')) || [];
+
+            historyList.innerHTML = '';
+
+            if (history.length === 0) {
+                historyList.innerHTML = '<p id="no-history">尚無記錄。</p>';
+                return;
+            }
+
+            history.forEach((record) => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.innerHTML = `
+                        <span>${record.time}</span>
+                        <span class="history-score">答對：${record.score}/${record.total} 題</span>
+                        <button class="history-details-btn" onclick="showReview(${record.timestamp})">查看細節</button>
+                    `;
+                historyList.appendChild(item);
+            });
+        }
+
+        function showReview(timestamp) {
+            const history = JSON.parse(localStorage.getItem('quizHistory')) || [];
+            const record = history.find(r => r.timestamp === timestamp);
+
+            if (!record) return;
+
+            document.getElementById('review-title').textContent = `${record.time} 答題回顧 (${record.score}/${record.total} 題)`;
+            reviewContent.innerHTML = '';
+
+            record.details.forEach((detail, index) => {
+                const isCorrect = detail.isCorrect;
+                const resultText = isCorrect ?
+                    `<span class="correct-answer">✅ 恭喜答對！</span>` :
+                    `<span class="incorrect-answer">❌ 答錯了</span>`;
+
+                const item = document.createElement('div');
+                item.className = 'review-item';
+                item.innerHTML = `
+                        <div class="review-question">Q${index + 1}: ${detail.qText}</div>
+                        <div class="review-result">
+                            ${resultText} |
+                            **作答:** ${detail.studentName} |
+                            **正確答案:** ${detail.correctName}
+                        </div>
+                    `;
+                reviewContent.appendChild(item);
+            });
+
+            reviewModal.style.display = 'block';
+        }
+
+        function closeModal() {
+            reviewModal.style.display = 'none';
+        }
+
+        // 點擊視窗外部關閉
+        window.onclick = function (event) {
+            if (event.target == reviewModal) {
+                closeModal();
+            }
+        }
+
+        // ----------------------------------------------------------------
+        // 【7. 程式主入口 - 啟動點】
+        // ----------------------------------------------------------------
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // 載入時先初始化照片和歷史記錄
+            initPhotos();
+            displayHistory();
+
+            // 開始新的遊戲
+            shuffledQuestions = selectRandomQuestions(questions, TOTAL_QUESTIONS_TO_PLAY);
+            document.getElementById('total-questions').textContent = TOTAL_QUESTIONS_TO_PLAY;
+            loadQuestion();
+
+            // 設置放置區的拖拉事件
+            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('hover'); });
+            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('hover'));
+            dropZone.addEventListener('drop', drop);
+        });
+
+    </script>
+</body>
+</html>
