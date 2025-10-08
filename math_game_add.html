@@ -285,6 +285,7 @@
                         <th>答對題數</th>
                         <th>用時</th>
                         <th>日期</th>
+                        <th>時間</th>
                     </tr>
                 </thead>
                 <tbody id="leaderboardBody">
@@ -612,12 +613,17 @@ const allQuestions = generateGameData1();
             let scores = JSON.parse(localStorage.getItem('mathGameScores') || '[]');
             const now = new Date();
             const dateString = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}`;
-            
+
+            // 儲存時間 (HH:MM:SS) - 新增
+            const timeString = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
             scores.push({
                 name: name,
                 correct: correctAnswers,
                 time: time,
-                date: dateString
+                date: dateString,
+                // 將完整的時間字串儲存起來 - 新增
+                finishTime: timeString
             });
             localStorage.setItem('mathGameScores', JSON.stringify(scores));
         }
@@ -652,6 +658,7 @@ const allQuestions = generateGameData1();
                     <td>${score.correct}/12</td>
                     <td>${formatTime(score.time)}</td>
                     <td>${score.date}</td>
+                    <td>${score.finishTime}</td>
                 `;
                 tbody.appendChild(row);
             });
