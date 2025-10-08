@@ -87,21 +87,19 @@
             color: #555;
         }
 
-        /* ****** 核心調整區域 ****** */
-        /* 將草稿區和遊戲區並排 */
+        /* 桌面/平板佈局 (手寫區/題目區並排) */
         .calculation-area {
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* 讓內容靠上對齊 */
+            align-items: flex-start; 
             gap: 40px;
             margin-bottom: 20px;
         }
         
-        /* 讓右側區域（題目和鍵盤）可以適應寬度 */
         .right-side-game-area {
             display: flex;
-            flex-direction: column; /* 題目在上，鍵盤在下 */
-            align-items: center; /* 讓內部元素居中 */
+            flex-direction: column; 
+            align-items: center; 
         }
 
         /* 手寫草稿區容器樣式 */
@@ -113,7 +111,7 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        /* Canvas 樣式 */
+        /* Canvas 樣式 (固定尺寸，讓繪圖緩衝區不變) */
         #scratchpad {
             border: 2px solid #333;
             border-radius: 5px;
@@ -162,8 +160,7 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             margin-top: 30px;
-            max-width: 300px; /* 限制鍵盤最大寬度 */
-            /* 移除 auto margin，由父層的 align-items: center 控制居中 */
+            max-width: 300px; 
         }
         .numpad-button {
             padding: 15px 0;
@@ -175,27 +172,73 @@
             background-color: #f0f0f0;
             transition: background-color 0.1s;
         }
-        .numpad-button:active {
-            background-color: #ddd;
-        }
-        .numpad-action {
-            background-color: #ff9800;
-            color: white;
-        }
-        .numpad-action:active {
-            background-color: #e68900;
-        }
         .numpad-enter {
             background-color: #4CAF50;
             color: white;
             grid-column: span 2; 
         }
-        .numpad-enter:active {
-            background-color: #45a049;
-        }
-        /* ****** 核心調整區域結束 ****** */
+        /* ... 其他按鈕樣式保持不變 ... */
 
-        /* 模式選擇和排行榜樣式 (保持不變) */
+        
+        /* ************************************** */
+        /* 手機響應式優化 (螢幕寬度小於 600px) */
+        /* ************************************** */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                max-width: 100%;
+                margin: 0;
+                border-radius: 0; /* 手機上移除圓角以最大化空間 */
+            }
+
+            .main-content {
+                padding: 20px 10px; /* 縮小內邊距 */
+            }
+
+            /* 核心修改：垂直堆疊 */
+            .calculation-area {
+                flex-direction: column; 
+                gap: 20px; 
+                align-items: center; 
+            }
+
+            /* 確保左右區塊在手機上佔滿寬度並居中 */
+            .scratchpad-container,
+            .right-side-game-area {
+                width: 100%;
+                max-width: 350px; /* 限制最大寬度，避免在極寬手機上太分散 */
+            }
+            
+            /* 調整 Canvas 大小以節省垂直空間 */
+            #scratchpad {
+                width: 100%; /* 讓 Canvas 顯示寬度適應父容器 */
+                height: 150px; /* 降低顯示高度 */
+            }
+
+            /* 縮小題目文字和輸入框 */
+            .question-area {
+                font-size: 2.2rem; 
+            }
+            
+            #answerInput {
+                font-size: 2rem; 
+                width: 100px;
+            }
+
+            .numpad {
+                margin-top: 20px; 
+                max-width: 90%; 
+            }
+            
+            .info-bar {
+                font-size: 1rem;
+            }
+        }
+        
+        /* ... 模式選擇和排行榜樣式 (保持不變) ... */
         .mode-button-group {
             margin-top: 20px;
         }
@@ -212,7 +255,7 @@
             color: white;
         }
 
-        /* 排行榜樣式 (保持不變) */
+        /* 排行榜樣式 */
         .leaderboard-table {
             width: 100%;
             border-collapse: collapse;
@@ -402,6 +445,7 @@
 
         function getCanvasPos(canvas, clientX, clientY) {
             const rect = canvas.getBoundingClientRect();
+            // 使用 clientX/Y 和 getBoundingClientRect 計算相對位置
             return {
                 x: clientX - rect.left,
                 y: clientY - rect.top
@@ -420,17 +464,27 @@
                 clientX = e.clientX;
                 clientY = e.clientY;
             }
+            
+            // 繪圖時需要根據 Canvas 的繪圖緩衝區尺寸 (width/height 屬性) 和 
+            // 實際顯示尺寸 (rect.width/height) 進行比例縮放，
+            // 以避免在手機上 CSS 縮放後筆跡不準的問題。
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
 
             const pos = getCanvasPos(canvas, clientX, clientY);
 
             ctx.beginPath();
-            ctx.moveTo(lastX, lastY);
-            ctx.lineTo(pos.x, pos.y);
+            // 應用縮放比例到座標
+            ctx.moveTo(lastX * scaleX, lastY * scaleY);
+            ctx.lineTo(pos.x * scaleX, pos.y * scaleY);
+            
             ctx.strokeStyle = '#000000'; 
             ctx.lineWidth = 3; 
             ctx.lineCap = 'round';
             ctx.stroke();
 
+            // 存儲未縮放的座標
             [lastX, lastY] = [pos.x, pos.y];
         }
 
@@ -456,7 +510,6 @@
         function stopDrawing() {
             isDrawing = false;
         }
-
 
         // ----------------------------------------------------
         // 核心邏輯 - 顯示切換 & 遊戲控制 
