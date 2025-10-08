@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>數學乘法練習系統</title>
+    <style>
+        /* 保持原有的介面樣式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+        }
+        
+        .main-content {
+            padding: 30px;
+            text-align: center;
+            position: relative; 
+        }
+
+        .start-group, .game-group, .result-group, .leaderboard-group {
+            display: none;
+            padding: 20px;
+        }
+        
+        .start-group {
+            display: block; /* 預設顯示首頁 */
+        }
+
+        /* 通用返回按鈕樣式 */
+        .back-btn-top {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background-color 0.15s;
+        }
+        .back-btn-top:hover {
+            background-color: #5a6268;
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #555;
+        }
+
+        /* ****** 核心調整區域 ****** */
+        /* 將草稿區和遊戲區並排 */
+        .calculation-area {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* 讓內容靠上對齊 */
+            gap: 40px;
+            margin-bottom: 20px;
+        }
+        
+        /* 讓右側區域（題目和鍵盤）可以適應寬度 */
+        .right-side-game-area {
+            display: flex;
+            flex-direction: column; /* 題目在上，鍵盤在下 */
+            align-items: center; /* 讓內部元素居中 */
+        }
+
+        /* 手寫草稿區容器樣式 */
+        .scratchpad-container {
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            background-color: #f8f8f8;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* Canvas 樣式 */
+        #scratchpad {
+            border: 2px solid #333;
+            border-radius: 5px;
+            background-color: #ffffff;
+            cursor: crosshair;
+            user-select: none; 
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            touch-action: none; 
+        }
+
+        .question-area {
+            font-size: 3rem;
+            margin: 0; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        
+        #answerInput {
+            width: 150px;
+            padding: 10px;
+            margin-left: 20px;
+            font-size: 2.5rem;
+            text-align: center;
+            border: 3px solid #ccc;
+            border-radius: 10px;
+            transition: border-color 0.15s; 
+            cursor: default; 
+        }
+
+        /* 即時回饋顏色 */
+        #answerInput.input-correct { border-color: #28a745; } 
+        #answerInput.input-wrong { border-color: #dc3545; } 
+
+        #answerInput:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* 虛擬鍵盤樣式 */
+        .numpad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 30px;
+            max-width: 300px; /* 限制鍵盤最大寬度 */
+            /* 移除 auto margin，由父層的 align-items: center 控制居中 */
+        }
+        .numpad-button {
+            padding: 15px 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            transition: background-color 0.1s;
+        }
+        .numpad-button:active {
+            background-color: #ddd;
+        }
+        .numpad-action {
+            background-color: #ff9800;
+            color: white;
+        }
+        .numpad-action:active {
+            background-color: #e68900;
+        }
+        .numpad-enter {
+            background-color: #4CAF50;
+            color: white;
+            grid-column: span 2; 
+        }
+        .numpad-enter:active {
+            background-color: #45a049;
+        }
+        /* ****** 核心調整區域結束 ****** */
+
+        /* 模式選擇和排行榜樣式 (保持不變) */
+        .mode-button-group {
+            margin-top: 20px;
+        }
+        
+        .mode-button {
+            background-color: #ff9800;
+            padding: 12px 25px;
+            margin: 5px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        /* 排行榜樣式 (保持不變) */
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        .leaderboard-table th, .leaderboard-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .leaderboard-table th {
+            background-color: #f2f2f2;
+            color: #333;
+            font-weight: bold;
+        }
+        .rank-1 { background-color: #ffeb3b80; }
+        .rank-2 { background-color: #c0c0c080; }
+        .rank-3 { background-color: #cd7f3280; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>乘法挑戰系統</h1>
+            <p id="playerDisplay"></p>
+        </div>
+
+        <div id="startScreen" class="start-group main-content">
+            <h2>選擇挑戰模式</h2>
+            <div style="margin-top: 20px;">
+                <label for="playerNameInput" style="font-size: 1.2rem; display: block; margin-bottom: 10px;">你的名字:</label>
+                <input type="text" id="playerNameInput" placeholder="請輸入名字" style="padding: 10px; font-size: 1.1rem; border: 1px solid #ccc; border-radius: 5px; width: 80%; max-width: 300px;">
+            </div>
+            <div class="mode-button-group">
+                <button class="mode-button" data-mode="1x1">幾十 × 一位數</button>
+                <button class="mode-button" data-mode="1x2">二位數 × 一位數</button>
+                <button class="mode-button" data-mode="2x2">幾百 × 一位數</button>
+                <button class="mode-button" data-mode="3x1">三位數 × 一位數</button>
+            </div>
+            <div style="margin-top: 30px;">
+                <button id="showLeaderboardBtn" style="background-color: #007bff; padding: 12px 25px; margin: 5px; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: bold; color: white;">查看排行榜</button>
+            </div>
+        </div>
+
+        <div id="gameScreen" class="game-group main-content">
+            <button id="backToStartFromGameBtn" class="back-btn-top">返回主頁 (放棄挑戰)</button>
+            
+            <div class="info-bar">
+                <span>分數: <span id="scoreDisplay">0</span></span>
+                <span>題號: <span id="questionCount">0</span>/12</span>
+                <span>時間: <span id="timerDisplay">00:00</span></span>
+            </div>
+            
+            <div class="calculation-area">
+                <div class="scratchpad-container">
+                    <div style="font-weight: bold; margin-bottom: 5px;">計算草稿區 (手寫)</div>
+                    <canvas id="scratchpad" width="250" height="200"></canvas>
+                    <button id="clearScratchpadBtn" class="numpad-action" style="width: 100%; padding: 8px; border-radius: 5px; margin-top: 5px; font-weight: bold;">清除草稿</button>
+                </div>
+
+                <div class="right-side-game-area">
+                    <div class="question-input-area">
+                        <div class="question-area">
+                            <span id="factor1"></span>
+                            <span style="margin: 0 10px;">×</span>
+                            <span id="factor2"></span>
+                            <span style="margin: 0 10px;">=</span>
+                            <input type="number" id="answerInput" placeholder="?" autocomplete="off" readonly>
+                        </div>
+
+                        <p id="feedback" style="margin-top: 20px; font-size: 1.2rem; font-weight: bold;">請輸入答案</p>
+                    </div>
+                    
+                    <div class="numpad">
+                        <button class="numpad-button" data-value="7">7</button>
+                        <button class="numpad-button" data-value="8">8</button>
+                        <button class="numpad-button" data-value="9">9</button>
+                        <button class="numpad-button" data-value="4">4</button>
+                        <button class="numpad-button" data-value="5">5</button>
+                        <button class="numpad-button" data-value="6">6</button>
+                        <button class="numpad-button" data-value="1">1</button>
+                        <button class="numpad-button" data-value="2">2</button>
+                        <button class="numpad-button" data-value="3">3</button>
+                        <button class="numpad-button numpad-action" data-value="clear">清除</button>
+                        <button class="numpad-button" data-value="0">0</button>
+                        <button class="numpad-button numpad-enter" data-value="enter">送出</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="resultScreen" class="result-group main-content">
+             <button id="backToStartBtnTop" class="back-btn-top">返回主頁</button>
+            
+            <h2>挑戰結束！</h2>
+            <p style="font-size: 1.5rem; margin: 20px 0;">最終得分: <span id="finalScore"></span></p>
+            <p style="font-size: 1.5rem; margin: 20px 0;">總耗時: <span id="finalTime"></span></p>
+            <p id="bestTimeMessage" style="color: #28a745; font-weight: bold;"></p>
+            <button id="backToStartBtn" style="background-color: #ffc107; margin-top: 15px;">返回首頁</button>
+        </div>
+
+        <div id="leaderboardScreen" class="leaderboard-group main-content">
+            <button id="backFromLeaderboardBtnTop" class="back-btn-top">返回主頁</button>
+            
+            <h2>最佳成績排行榜</h2>
+            <div style="margin-bottom: 20px;">
+                <label for="modeSelector" style="font-size: 1.1rem; font-weight: bold;">選擇模式:</label>
+                <select id="modeSelector" style="padding: 8px; font-size: 1rem; border-radius: 5px;">
+                    <option value="1x1">幾十 × 一位數</option>
+                    <option value="1x2">二位數 × 一位數</option>
+                    <option value="2x2">幾百 × 一位數</option>
+                    <option value="3x1">三位數 × 一位數</option>
+                </select>
+            </div>
+            
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>排名</th>
+                        <th>玩家</th>
+                        <th>最佳時間</th>
+                        <th>答對題數</th>
+                        <th>完成時間</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBody">
+                    </tbody>
+            </table>
+            
+            <button id="backFromLeaderboardBtn" style="margin-top: 20px; background-color: #007bff;">返回首頁</button>
+        </div>
+    </div>
+
+    <script>
+        // 介面元素
+        const screens = ['startScreen', 'gameScreen', 'resultScreen', 'leaderboardScreen'];
+        const playerNameInput = document.getElementById('playerNameInput');
+        const playerDisplay = document.getElementById('playerDisplay');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const questionCount = document.getElementById('questionCount');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const factor1El = document.getElementById('factor1');
+        const factor2El = document.getElementById('factor2');
+        const answerInput = document.getElementById('answerInput');
+        const feedbackEl = document.getElementById('feedback');
+        const finalScoreEl = document.getElementById('finalScore');
+        const finalTimeEl = document.getElementById('finalTime');
+        const bestTimeMessageEl = document.getElementById('bestTimeMessage');
+        const leaderboardBody = document.getElementById('leaderboardBody');
+        const modeSelector = document.getElementById('modeSelector');
+        
+        // Canvas 元素與繪圖狀態
+        const canvas = document.getElementById('scratchpad');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        
+        // 遊戲狀態
+        let playerName = '';
+        let score = 0;
+        let correctCount = 0;
+        let totalQuestions = 12;
+        let currentQuestion = 0;
+        let timer = 0;
+        let timerInterval;
+        let currentProblem = {};
+        let currentMode = ''; 
+        let isAnswered = false; 
+
+        // 排行榜數據 Key
+        const MODE_KEYS = {
+            '1x1': 'Multiplication_1x1_Scores', // 幾十 × 一位數
+            '1x2': 'Multiplication_1x2_Scores', // 二位數 × 一位數
+            '2x2': 'Multiplication_2x2_Scores', // 幾百 × 一位數
+            '3x1': 'Multiplication_3x1_Scores'  // 三位數 × 一位數
+        };
+
+        // ----------------------------------------------------
+        // Canvas 繪圖邏輯
+        // ----------------------------------------------------
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function getCanvasPos(canvas, clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            let clientX, clientY;
+            if (e.type.startsWith('touch')) {
+                if (e.cancelable) e.preventDefault(); 
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            const pos = getCanvasPos(canvas, clientX, clientY);
+
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.strokeStyle = '#000000'; 
+            ctx.lineWidth = 3; 
+            ctx.lineCap = 'round';
+            ctx.stroke();
+
+            [lastX, lastY] = [pos.x, pos.y];
+        }
+
+        function startDrawing(e) {
+            if (document.getElementById('gameScreen').style.display !== 'block') return;
+
+            isDrawing = true;
+            
+            let clientX, clientY;
+            if (e.type.startsWith('touch')) {
+                 if (e.cancelable) e.preventDefault(); 
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            const pos = getCanvasPos(canvas, clientX, clientY);
+            [lastX, lastY] = [pos.x, pos.y];
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+
+        // ----------------------------------------------------
+        // 核心邏輯 - 顯示切換 & 遊戲控制 
+        // ----------------------------------------------------
+
+        function showScreen(screenId) {
+            screens.forEach(id => {
+                document.getElementById(id).style.display = (id === screenId) ? 'block' : 'none';
+            });
+            if (screenId === 'leaderboardScreen') {
+                updateLeaderboard(modeSelector.value); 
+            }
+        }
+
+        function stopGameAndGoHome() {
+            clearInterval(timerInterval); 
+            
+            score = 0;
+            correctCount = 0;
+            currentQuestion = 0;
+            timer = 0;
+            currentProblem = {};
+            isAnswered = false;
+            
+            answerInput.value = '';
+            answerInput.classList.remove('input-correct', 'input-wrong');
+            clearCanvas(); 
+
+            showScreen('startScreen');
+        }
+        
+        // ----------------------------------------------------
+        // 實時回饋與驗證 
+        // ----------------------------------------------------
+
+        function checkRealtimeAnswer() {
+            const userAnswerStr = answerInput.value.trim();
+            answerInput.classList.remove('input-correct', 'input-wrong');
+
+            if (userAnswerStr === '') {
+                answerInput.style.borderColor = '#ccc';
+                isAnswered = false; 
+                feedbackEl.textContent = '請輸入答案';
+                feedbackEl.style.color = '#333';
+                return;
+            }
+
+            const userAnswer = parseInt(userAnswerStr);
+            const correctAnswer = currentProblem.answer;
+
+            if (userAnswer === correctAnswer) {
+                answerInput.classList.add('input-correct');
+                feedbackEl.textContent = '✅ 答案正確，請按送出！';
+                feedbackEl.style.color = '#28a745';
+                isAnswered = true; 
+            } else {
+                answerInput.classList.add('input-wrong');
+                feedbackEl.textContent = '❌ 答案錯誤，請修正！';
+                feedbackEl.style.color = '#dc3545';
+                isAnswered = false; 
+            }
+        }
+
+        function handleNumpadInput(value) {
+            if (currentQuestion === 0) return; 
+            
+            let currentValue = answerInput.value.trim();
+
+            if (value === 'clear') {
+                answerInput.value = '';
+                checkRealtimeAnswer(); 
+            } else if (value === 'enter') {
+                if (isAnswered) {
+                    submitAndAdvance();
+                } else {
+                    if (currentValue === '') {
+                        feedbackEl.textContent = '請先輸入答案！';
+                    } else {
+                        feedbackEl.textContent = '❌ 請先修正答案再按送出！';
+                    }
+                    feedbackEl.style.color = '#dc3545';
+                    answerInput.classList.add('input-wrong'); 
+                    return;
+                }
+            } else if (value >= '0' && value <= '9') {
+                if (currentValue.length < 5) {
+                    answerInput.value = currentValue + value;
+                    checkRealtimeAnswer(); 
+                }
+            }
+        }
+        
+        function submitAndAdvance() {
+            score += 10;
+            correctCount++;
+            scoreDisplay.textContent = score;
+
+            answerInput.value = '';
+            answerInput.classList.remove('input-correct', 'input-wrong');
+            isAnswered = false; 
+            clearCanvas(); 
+
+            if (currentQuestion >= totalQuestions) {
+                showResult();
+            } else {
+                generateProblem(currentMode);
+            }
+        }
+        
+        function startGame(mode) {
+            playerName = playerNameInput.value.trim();
+            if (playerName === '') {
+                alert('請輸入你的名字才能開始遊戲！');
+                return;
+            }
+            
+            currentMode = mode;
+            
+            score = 0;
+            correctCount = 0;
+            currentQuestion = 0;
+            timer = 0;
+            currentProblem = {};
+            isAnswered = false;
+            
+            const modeName = document.querySelector(`[data-mode="${mode}"]`).textContent;
+            playerDisplay.textContent = `玩家: ${playerName} (${modeName})`;
+            scoreDisplay.textContent = score;
+            questionCount.textContent = currentQuestion;
+            feedbackEl.textContent = '請輸入答案';
+            
+            showScreen('gameScreen');
+            startTimer();
+            generateProblem(currentMode);
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timer++;
+                timerDisplay.textContent = formatTime(timer);
+            }, 1000);
+        }
+
+        function generateProblem(mode) {
+            currentQuestion++;
+            questionCount.textContent = currentQuestion;
+            answerInput.value = '';
+            answerInput.style.borderColor = '#ccc';
+            isAnswered = false; 
+            answerInput.classList.remove('input-correct', 'input-wrong');
+            clearCanvas(); 
+            
+            feedbackEl.textContent = '請輸入答案';
+            feedbackEl.style.color = '#333';
+
+            let f1, f2;
+
+            switch (mode) {
+                case '1x1': // 幾十 × 一位數 (10-90 x 1-9)
+                    f1 = (Math.floor(Math.random() * 9) + 1) * 10; 
+                    f2 = Math.floor(Math.random() * 9) + 1; 
+                    break;
+                case '1x2': // 二位數 × 一位數 (10-99 x 1-9)
+                    f1 = Math.floor(Math.random() * 90) + 10;
+                    f2 = Math.floor(Math.random() * 9) + 1;
+                    break;
+                case '2x2': // 幾百 × 一位數 (100-900 x 1-9)
+                    f1 = (Math.floor(Math.random() * 9) + 1) * 100;
+                    f2 = Math.floor(Math.random() * 9) + 1;
+                    break;
+                case '3x1': // 三位數 × 一位數 (100-999 x 1-9)
+                    f1 = Math.floor(Math.random() * 900) + 100;
+                    f2 = Math.floor(Math.random() * 9) + 1;
+                    break;
+                default:
+                    f1 = 1; f2 = 1;
+            }
+
+            const answer = f1 * f2;
+
+            factor1El.textContent = f1;
+            factor2El.textContent = f2;
+            currentProblem = { answer: answer };
+        }
+
+        function showResult() {
+            clearInterval(timerInterval);
+            showScreen('resultScreen');
+
+            finalScoreEl.textContent = score;
+            finalTimeEl.textContent = formatTime(timer);
+            
+            saveScore(playerName, correctCount, timer, currentMode);
+            
+            const modeName = document.querySelector(`[data-mode="${currentMode}"]`).textContent;
+            bestTimeMessageEl.textContent = `在 ${modeName} 模式中，您的成績已記錄！`;
+        }
+        
+        // ----------------------------------------------------
+        // 排行榜功能
+        // ----------------------------------------------------
+        
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return String(minutes).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+        }
+
+        function saveScore(name, correctAnswers, time, mode) {
+            const key = MODE_KEYS[mode];
+            let scores = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            const now = new Date();
+            const dateString = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}`;
+            const timeString = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+            const fullDateTime = `${dateString} ${timeString}`;
+            
+            const newRecord = {
+                name: name,
+                correct: correctAnswers,
+                time: time,
+                dateTime: fullDateTime
+            };
+            
+            scores.push(newRecord);
+            scores.sort((a, b) => a.time - b.time);
+
+            localStorage.setItem(key, JSON.stringify(scores.slice(0, 20)));
+        }
+
+        function updateLeaderboard(mode) {
+            const key = MODE_KEYS[mode];
+            let scores = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            scores.sort((a, b) => a.time - b.time);
+            
+            leaderboardBody.innerHTML = '';
+
+            if (scores.length === 0) {
+                const row = document.createElement('tr');
+                const cell = document.createElement('td');
+                cell.colSpan = 5; 
+                cell.style.textAlign = 'center';
+                cell.textContent = `目前 ${modeSelector.options[modeSelector.selectedIndex].text} 模式沒有成績紀錄。`;
+                row.appendChild(cell);
+                leaderboardBody.appendChild(row);
+                return;
+            }
+
+            scores.slice(0, 10).forEach((score, index) => { 
+                const row = document.createElement('tr');
+                let rankClass = '';
+                if (index === 0) rankClass = 'rank-1';
+                else if (index === 1) rankClass = 'rank-2';
+                else if (index === 2) rankClass = 'rank-3';
+                
+                row.innerHTML = `
+                    <td class="${rankClass} py-3 px-4">${index + 1}</td>
+                    <td class="py-3 px-4 font-medium">${score.name}</td>
+                    <td class="py-3 px-4">${formatTime(score.time)}</td>
+                    <td class="py-3 px-4">${score.correct}/${totalQuestions}</td>
+                    <td class="py-3 px-4 text-sm">${score.dateTime.replace(' ', '-')}</td>
+                `;
+                leaderboardBody.appendChild(row);
+            });
+        }
+
+        // ----------------------------------------------------
+        // 事件監聽與初始化
+        // ----------------------------------------------------
+
+        function init() {
+            showScreen('startScreen');
+            
+            // 監聽模式選擇按鈕 (開始遊戲)
+            document.querySelectorAll('.mode-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    startGame(this.getAttribute('data-mode'));
+                });
+            });
+            
+            // 監聽虛擬小鍵盤
+            document.querySelectorAll('.numpad-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    handleNumpadInput(this.getAttribute('data-value'));
+                });
+            });
+
+            // 監聽實體鍵盤 (數字、Enter、Backspace)
+            document.addEventListener('keydown', (e) => {
+                if (document.getElementById('gameScreen').style.display === 'block') {
+                    if (e.key >= '0' && e.key <= '9') {
+                        handleNumpadInput(e.key);
+                    } else if (e.key === 'Backspace') {
+                        e.preventDefault(); 
+                        answerInput.value = answerInput.value.slice(0, -1);
+                        checkRealtimeAnswer(); 
+                    } else if (e.key === 'Enter') {
+                        handleNumpadInput('enter');
+                    }
+                }
+            });
+
+            // Canvas 繪圖事件監聽
+            document.getElementById('clearScratchpadBtn').addEventListener('click', clearCanvas);
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            canvas.addEventListener('touchstart', startDrawing);
+            canvas.addEventListener('touchmove', draw, { passive: false }); 
+            canvas.addEventListener('touchend', stopDrawing);
+            canvas.addEventListener('touchcancel', stopDrawing);
+
+            // 首頁按鈕
+            document.getElementById('showLeaderboardBtn').addEventListener('click', () => showScreen('leaderboardScreen'));
+            
+            // 排行榜模式切換
+            modeSelector.addEventListener('change', function() {
+                updateLeaderboard(this.value);
+            });
+
+            // 統一處理所有返回主頁按鈕
+            document.getElementById('backToStartBtn').addEventListener('click', () => showScreen('startScreen'));
+            document.getElementById('backFromLeaderboardBtn').addEventListener('click', () => showScreen('startScreen'));
+            document.getElementById('backToStartFromGameBtn').addEventListener('click', stopGameAndGoHome);
+            document.getElementById('backToStartBtnTop').addEventListener('click', () => showScreen('startScreen'));
+            document.getElementById('backFromLeaderboardBtnTop').addEventListener('click', () => showScreen('startScreen'));
+        }
+
+        // 啟動應用
+        init();
+    </script>
+</body>
+</html>
