@@ -9,9 +9,12 @@ dec.html 減法計算，一位、二位、三位數減法計算(10、100、1000)
 index.html 乘法計算，一位數的乘法計算，可透過每題的時間長短，來提升能力。[乘法計算](https://joeking-wu.github.io/multiplication-game/index.html).
 
 99_50.html 99乘法表計算一次共50題，記錄時間及答題數。[99-50題乘法計算](https://joeking-wu.github.io/multiplication-game/99_50.html).
+
 99_50_1.html 99乘法表計算一次共50題，記錄時間及答題數。[99-50題乘法計算](https://joeking-wu.github.io/multiplication-game/99_50_1.html).
 
 99_XXX_X.html 99乘法幾十乘一位、二位數乘一位、幾百乘一位、三位乘一位，記錄時間及答題數。[99-XXX_X題乘法計算](https://joeking-wu.github.io/multiplication-game/99_XXX_X.html).
+
+99_XXX_X_1.html 99乘法幾十乘一位、二位數乘一位、幾百乘一位、三位乘一位，記錄時間及答題數。[99-XXX_X題乘法計算](https://joeking-wu.github.io/multiplication-game/99_XXX_X_1.html).
 
 Zhuyinlearninggame.html 注音練習。[注音練習](https://joeking-wu.github.io/multiplication-game/Zhuyinlearninggame.html).
 
