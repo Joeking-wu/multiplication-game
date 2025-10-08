@@ -1,0 +1,778 @@
+﻿﻿
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>九九乘法表挑戰</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e1f5fe 100%);
+            min-height: 100vh;
+        }
+        .question-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        @media (min-width: 768px) {
+            .question-container {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+        .input-correct {
+            border-color: #4ade80 !important;
+            background-color: #f0fdf4 !important;
+        }
+        .input-wrong {
+            border-color: #f87171 !important;
+            background-color: #fef2f2 !important;
+        }
+        .timer {
+            font-variant-numeric: tabular-nums;
+        }
+        .numpad-key {
+            user-select: none;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        .numpad-key:active {
+            transform: scale(0.95);
+            background-color: #e5e7eb;
+        }
+        .page-btn.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .leaderboard-row:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        .leaderboard-row:hover {
+            background-color: #f0f9ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">九九乘法表挑戰</h1>
+            
+            <!-- 開始畫面 -->
+            <div id="start-screen" class="flex flex-col items-center">
+                <div class="w-full max-w-md">
+                    <div class="mb-6">
+                        <label for="player-name" class="block text-lg font-medium text-gray-700 mb-2">請輸入您的名字：</label>
+                        <input type="text" id="player-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="您的名字">
+                    </div>
+                    
+                    <div class="bg-blue-50 rounded-lg p-4 mb-6">
+                        <h2 class="font-bold text-blue-800 mb-2">遊戲說明：</h2>
+                        <ul class="list-disc list-inside text-gray-700 space-y-1">
+                            <li>共有50題不重複的九九乘法題目，分為5頁</li>
+                            <li>每頁10題，可使用頁面下方的按鈕切換頁面</li>
+                            <li>使用虛擬數字鍵盤輸入答案</li>
+                            <li>計時將在您開始答題時啟動</li>
+                            <li>完成所有題目後，點擊「提交答案」按鈕</li>
+                            <li>系統會記錄您的最佳成績</li>
+                        </ul>
+                    </div>
+                    
+                    <button id="start-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 mb-4">
+                        開始挑戰
+                    </button>
+                    
+                    <button id="leaderboard-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
+                        查看排行榜
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 排行榜畫面 -->
+            <div id="leaderboard-screen" class="hidden">
+                <h2 class="text-2xl font-bold text-center mb-6">最佳成績排行榜</h2>
+                
+                <div class="overflow-x-auto mb-6">
+                    <table class="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+                        <thead>
+                            <tr class="bg-gray-100 text-gray-700">
+                                <th class="py-3 px-4 text-left font-medium">排名</th>
+                                <th class="py-3 px-4 text-left font-medium">玩家</th>
+                                <th class="py-3 px-4 text-left font-medium">最佳時間</th>
+                                <th class="py-3 px-4 text-left font-medium">答對題數</th>
+				<th class="py-3 px-4 text-left font-medium">完成時間</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body">
+                            <!-- 排行榜數據將在這裡動態生成 -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="text-center">
+                    <button id="back-to-start-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50">
+                        返回開始畫面
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 遊戲畫面 -->
+            <div id="game-screen" class="hidden">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+                    <div class="flex items-center mb-4 md:mb-0">
+                        <span class="text-lg font-medium text-gray-700 mr-2">玩家：</span>
+                        <span id="display-name" class="text-lg font-bold text-blue-600"></span>
+                    </div>
+                    
+                    <div class="flex items-center space-x-6">
+                        <div class="flex items-center">
+                            <span class="text-lg font-medium text-gray-700 mr-2">計時：</span>
+                            <span id="timer" class="timer text-lg font-bold text-red-600">00:00:00</span>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <span class="text-lg font-medium text-gray-700 mr-2">最佳時間：</span>
+                            <span id="best-time" class="timer text-lg font-bold text-green-600">--:--:--</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h2 class="text-xl font-bold text-gray-700">第 <span id="current-page">1</span> 頁</h2>
+                        <div class="text-lg">
+                            <span class="font-medium text-gray-700">答對題數：</span>
+                            <span id="correct-count" class="font-bold text-green-600">0</span>
+                            <span class="text-gray-700">/</span>
+                            <span class="font-bold text-gray-700">50</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question-container mb-6" id="questions">
+                        <!-- 題目將在這裡動態生成 -->
+                    </div>
+                    
+                    <!-- 分頁按鈕 -->
+                    <div class="flex justify-center space-x-2 mb-6">
+                        <button class="page-btn active w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center font-medium" data-page="1">1</button>
+                        <button class="page-btn w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center font-medium" data-page="2">2</button>
+                        <button class="page-btn w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center font-medium" data-page="3">3</button>
+                        <button class="page-btn w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center font-medium" data-page="4">4</button>
+                        <button class="page-btn w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center font-medium" data-page="5">5</button>
+                    </div>
+                </div>
+                
+                <!-- 虛擬數字鍵盤 -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium text-gray-700 mb-2">數字鍵盤</h3>
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <div class="flex justify-center mb-4">
+                            <div id="numpad-display" class="w-full bg-white border border-gray-300 rounded px-4 py-2 text-xl font-medium text-center">
+                                <!-- 顯示當前輸入 -->
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="numpad-key bg-white border border-gray-300 rounded-lg p-3 text-center text-xl font-medium" data-value="1">1</div>
+                            <div class="numpad-key bg-white border border-gray-300 rounded-lg p-3 text-center text-xl font-medium" data-value="2">2</div>
+                            <div class="numpad-key bg-white border border-gray-300 rounded-lg p-3 text-center text-xl font-medium" data-value="3">3</div>
+                            <div class="numpad-key bg-white border border-gray-300 rounded-lg p-3 text-center text-xl font-medium" data-value="4">4</div>
+                            <div class="numpad-key bg-white border border-gray-300 rounded-lg p-3 text-center text-xl font-medium" data-value="5">5</div>
+                            <div class="numpad-key bg-white border border-gray-300 rounded-lg p-3 text-center text-xl font-medium" data-value="6">6</div>
+                            <div class="numpad-key bg-white border border-gray-300 rounded-lg p-3 text-center text-xl font-medium" data-value="7">7</div>
+                            <div class="numpad-key bg-white border border-gray-300 rounded-lg p-3 text-center text-xl font-medium" data-value="8">8</div>
+                            <div class="numpad-key bg-white border border-gray-300 rounded-lg p-3 text-center text-xl font-medium" data-value="9">9</div>
+                            <div class="numpad-key bg-white border border-gray-300 rounded-lg p-3 text-center text-xl font-medium" data-value="clear">清除</div>
+                            <div class="numpad-key bg-white border border-gray-300 rounded-lg p-3 text-center text-xl font-medium" data-value="0">0</div>
+                            <div class="numpad-key bg-green-500 hover:bg-green-600 text-white border border-green-600 rounded-lg p-3 text-center text-xl font-medium" data-value="enter">確認</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end">
+                    <button id="submit-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+                        提交答案
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 結果畫面 -->
+            <div id="result-screen" class="hidden flex flex-col items-center">
+                <h2 class="text-2xl font-bold text-center mb-4">挑戰結果</h2>
+                
+                <div class="bg-blue-50 rounded-lg p-6 w-full max-w-md mb-6">
+                    <div class="mb-4">
+                        <span class="text-lg font-medium text-gray-700">玩家：</span>
+                        <span id="result-name" class="text-lg font-bold text-blue-600"></span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <span class="text-lg font-medium text-gray-700">答對題數：</span>
+                        <span id="result-correct" class="text-lg font-bold text-green-600"></span>
+                        <span class="text-gray-700">/</span>
+                        <span class="text-lg font-bold text-gray-700">50</span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <span class="text-lg font-medium text-gray-700">完成時間：</span>
+                        <span id="result-time" class="timer text-lg font-bold text-blue-600"></span>
+                    </div>
+                    
+                    <div>
+                        <span class="text-lg font-medium text-gray-700">最佳時間：</span>
+                        <span id="result-best-time" class="timer text-lg font-bold text-green-600"></span>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-4">
+                    <button id="retry-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                        再次挑戰
+                    </button>
+                    
+                    <button id="view-leaderboard-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
+                        查看排行榜
+                    </button>
+                    
+                    <button id="new-player-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50">
+                        更換玩家
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局變數
+        let questions = [];
+        let startTime;
+        let timerInterval;
+        let bestTimes = {};
+        let playerScores = {}; // 儲存玩家的答對題數
+        let currentPlayer = '';
+        let correctAnswers = 0;
+        let currentPage = 1;
+        let currentFocusedInput = null;
+        
+        // DOM 元素
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const leaderboardScreen = document.getElementById('leaderboard-screen');
+        const playerNameInput = document.getElementById('player-name');
+        const displayName = document.getElementById('display-name');
+        const timerElement = document.getElementById('timer');
+        const bestTimeElement = document.getElementById('best-time');
+        const questionsContainer = document.getElementById('questions');
+        const correctCountElement = document.getElementById('correct-count');
+        const currentPageElement = document.getElementById('current-page');
+        const startBtn = document.getElementById('start-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const retryBtn = document.getElementById('retry-btn');
+        const newPlayerBtn = document.getElementById('new-player-btn');
+        const leaderboardBtn = document.getElementById('leaderboard-btn');
+        const viewLeaderboardBtn = document.getElementById('view-leaderboard-btn');
+        const backToStartBtn = document.getElementById('back-to-start-btn');
+        const resultName = document.getElementById('result-name');
+        const resultCorrect = document.getElementById('result-correct');
+        const resultTime = document.getElementById('result-time');
+        const resultBestTime = document.getElementById('result-best-time');
+        const numpadDisplay = document.getElementById('numpad-display');
+        const pageButtons = document.querySelectorAll('.page-btn');
+        const leaderboardBody = document.getElementById('leaderboard-body');
+        
+        // 從本地存儲加載數據
+        function loadData() {
+            const savedTimes = localStorage.getItem('multiplicationBestTimes1');
+            if (savedTimes) {
+                bestTimes = JSON.parse(savedTimes);
+            }
+            
+            const savedScores = localStorage.getItem('multiplicationPlayerScores1');
+            if (savedScores) {
+                playerScores = JSON.parse(savedScores);
+            }
+        }
+        
+        // 保存數據到本地存儲
+        function saveData() {
+            localStorage.setItem('multiplicationBestTimes1', JSON.stringify(bestTimes));
+            localStorage.setItem('multiplicationPlayerScores1', JSON.stringify(playerScores));
+        }
+        
+        // 生成50個不重複的乘法題目
+        function generateQuestions() {
+            const allPossibleQuestions = [];
+            
+            // 生成所有可能的乘法題目 (1-9) x (1-9)
+            for (let i = 1; i <= 9; i++) {
+                for (let j = 1; j <= 9; j++) {
+                    allPossibleQuestions.push({
+                        factor1: i,
+                        factor2: j,
+                        answer: i * j,
+                        userAnswer: '',
+                        isCorrect: false
+                    });
+                }
+            }
+            
+            // 隨機打亂題目順序
+            const shuffled = [...allPossibleQuestions].sort(() => 0.5 - Math.random());
+            
+            // 取前50個題目
+            return shuffled.slice(0, 50);
+        }
+        
+        // 渲染當前頁面的題目
+        function renderCurrentPage() {
+            questionsContainer.innerHTML = '';
+            currentPageElement.textContent = currentPage;
+            
+            // 計算當前頁面的題目範圍
+            const startIndex = (currentPage - 1) * 10;
+            const endIndex = startIndex + 10;
+            const currentPageQuestions = questions.slice(startIndex, endIndex);
+            
+            currentPageQuestions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'bg-white border border-gray-200 rounded-lg p-3 shadow-sm';
+                
+                const questionNumber = document.createElement('div');
+                questionNumber.className = 'text-xs font-medium text-gray-500 mb-1';
+                questionNumber.textContent = `第 ${startIndex + index + 1} 題`;
+                
+                const questionContent = document.createElement('div');
+                questionContent.className = 'flex items-center justify-between';
+                
+                const formula = document.createElement('div');
+                formula.className = 'text-lg font-medium';
+                formula.textContent = `${q.factor1} × ${q.factor2} = `;
+                
+                const inputContainer = document.createElement('div');
+                inputContainer.className = 'flex-1 ml-2';
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.readOnly = true;
+                input.className = 'w-full px-2 py-1 border border-gray-300 rounded text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition';
+                input.dataset.index = startIndex + index;
+                input.dataset.answer = q.answer;
+                input.value = q.userAnswer;
+                
+                // 如果已經有答案，顯示對錯
+                if (q.userAnswer !== '') {
+                    if (q.isCorrect) {
+                        input.classList.add('input-correct');
+                    } else {
+                        input.classList.add('input-wrong');
+                    }
+                }
+                
+                // 點擊輸入框時設置為當前焦點
+                input.addEventListener('click', (e) => {
+                    setCurrentFocusedInput(e.target);
+                });
+                
+                inputContainer.appendChild(input);
+                questionContent.appendChild(formula);
+                questionContent.appendChild(inputContainer);
+                
+                questionDiv.appendChild(questionNumber);
+                questionDiv.appendChild(questionContent);
+                
+                questionsContainer.appendChild(questionDiv);
+            });
+            
+            // 更新頁面按鈕狀態
+            updatePageButtons();
+        }
+        
+        // 設置當前焦點輸入框
+        function setCurrentFocusedInput(input) {
+            // 移除之前的焦點樣式
+            if (currentFocusedInput) {
+                currentFocusedInput.classList.remove('ring-2', 'ring-blue-500');
+            }
+            
+            // 設置新的焦點
+            currentFocusedInput = input;
+            numpadDisplay.textContent = input.value;
+            
+            // 添加焦點樣式
+            input.classList.add('ring-2', 'ring-blue-500');
+        }
+        
+        // 更新頁面按鈕狀態
+        function updatePageButtons() {
+            pageButtons.forEach(btn => {
+                const page = parseInt(btn.dataset.page);
+                if (page === currentPage) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+        
+        // 切換頁面
+        function changePage(page) {
+            currentPage = page;
+            renderCurrentPage();
+            
+            // 自動聚焦第一個輸入框
+            setTimeout(() => {
+                const firstInput = document.querySelector(`input[data-index="${(currentPage - 1) * 10}"]`);
+                if (firstInput) {
+                    setCurrentFocusedInput(firstInput);
+                }
+            }, 100);
+        }
+        
+        // 更新答對題數
+        function updateCorrectCount() {
+            correctAnswers = questions.filter(q => q.isCorrect).length;
+            correctCountElement.textContent = correctAnswers;
+        }
+        
+        // 處理數字鍵盤輸入
+        function handleNumpadInput(value) {
+            if (!currentFocusedInput) return;
+            
+            const index = parseInt(currentFocusedInput.dataset.index);
+            const correctAnswer = parseInt(currentFocusedInput.dataset.answer);
+            
+            if (value === 'clear') {
+                // 清除輸入
+                currentFocusedInput.value = '';
+                numpadDisplay.textContent = '';
+                questions[index].userAnswer = '';
+                questions[index].isCorrect = false;
+                currentFocusedInput.classList.remove('input-correct', 'input-wrong');
+                updateCorrectCount();
+            } else if (value === 'enter') {
+                // 確認輸入並移至下一題
+                const userAnswer = currentFocusedInput.value;
+                if (userAnswer === '') return;
+                
+                // 移動到下一個輸入框
+                const nextIndex = index + 1;
+                if (nextIndex < 50) {
+                    const nextPage = Math.floor(nextIndex / 10) + 1;
+                    if (nextPage !== currentPage) {
+                        changePage(nextPage);
+                    } else {
+                        const nextInput = document.querySelector(`input[data-index="${nextIndex}"]`);
+                        if (nextInput) {
+                            setCurrentFocusedInput(nextInput);
+                        }
+                    }
+                }
+            } else {
+                // 數字輸入
+                // 限制最多兩位數
+                if (currentFocusedInput.value.length >= 2) return;
+                
+                const newValue = currentFocusedInput.value + value;
+                currentFocusedInput.value = newValue;
+                numpadDisplay.textContent = newValue;
+                
+                // 更新問題數據
+                questions[index].userAnswer = newValue;
+                questions[index].isCorrect = parseInt(newValue) === correctAnswer;
+                
+                // 更新輸入框樣式
+                if (questions[index].isCorrect) {
+                    currentFocusedInput.classList.add('input-correct');
+                    currentFocusedInput.classList.remove('input-wrong');
+                } else {
+                    currentFocusedInput.classList.add('input-wrong');
+                    currentFocusedInput.classList.remove('input-correct');
+                }
+                
+                updateCorrectCount();
+            }
+        }
+        
+        // 開始計時
+        function startTimer() {
+            startTime = new Date();
+            timerInterval = setInterval(updateTimer, 1000);
+            updateTimer();
+        }
+        
+        // 停止計時
+        function stopTimer() {
+            clearInterval(timerInterval);
+            return calculateElapsedTime();
+        }
+        
+        // 更新計時器顯示
+        function updateTimer() {
+            const elapsedTime = calculateElapsedTime();
+            timerElement.textContent = formatTime(elapsedTime);
+        }
+        
+        // 計算經過的時間（毫秒）
+        function calculateElapsedTime() {
+            return new Date() - startTime;
+        }
+        
+        // 格式化時間為 HH:MM:SS
+        function formatTime(milliseconds) {
+            const totalSeconds = Math.floor(milliseconds / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            
+            return [
+                hours.toString().padStart(2, '0'),
+                minutes.toString().padStart(2, '0'),
+                seconds.toString().padStart(2, '0')
+            ].join(':');
+        }
+        
+        // 檢查是否為最佳時間
+        function checkBestTime(player, time, score) {
+		// 建立完整的日期時間字串 (YYYY/MM/DD HH:MM:SS)
+    		const now = new Date();
+    		const dateString = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}`;
+    		const timeString = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    		const fullDateTime = `${dateString} ${timeString}`; 
+
+            	// 檢查是否為新紀錄或更佳時間
+    		if (!bestTimes[player] || time < bestTimes[player].time) {
+        		// 儲存一個物件，包含時間、分數和日期時間
+        		bestTimes[player] = {
+            			time: time,
+            			score: score, // 雖然 playerScores 也有存，但存一份在這裡更方便
+            			recordDateTime: fullDateTime
+        		};
+        		// 由於我們修改了 bestTimes 的結構，這裡不再需要 playerScores
+        		// playerScores[player] = score; // 這裡可以移除，因為已經存到 bestTimes 裡
+        		saveData();
+        		return true;
+    		}
+    		return false;
+        }
+        
+        // 顯示最佳時間
+        function displayBestTime(player) {
+            if (bestTimes[player]) {
+                bestTimeElement.textContent = formatTime(bestTimes[player]);
+            } else {
+                bestTimeElement.textContent = '--:--:--';
+            }
+        }
+        
+        // 渲染排行榜
+        function renderLeaderboard() {
+            leaderboardBody.innerHTML = '';
+            
+            // 將玩家數據轉換為數組並按時間排序
+            const players = Object.keys(bestTimes).map(name => ({
+                name,
+                time: bestTimes[name].time,
+            	score: bestTimes[name].score || 0, // 從 bestTimes 中讀取分數
+            	recordDateTime: bestTimes[name].recordDateTime || 'N/A'
+            }));
+            
+            players.sort((a, b) => a.time - b.time);
+            
+            // 生成排行榜行
+            players.forEach((player, index) => {
+                const row = document.createElement('tr');
+                row.className = 'leaderboard-row';
+                
+                const rankCell = document.createElement('td');
+                rankCell.className = 'py-3 px-4';
+                rankCell.textContent = index + 1;
+                
+                const nameCell = document.createElement('td');
+                nameCell.className = 'py-3 px-4 font-medium';
+                nameCell.textContent = player.name;
+                
+                const timeCell = document.createElement('td');
+                timeCell.className = 'py-3 px-4';
+                timeCell.textContent = formatTime(player.time);
+                
+                const scoreCell = document.createElement('td');
+                scoreCell.className = 'py-3 px-4';
+                scoreCell.textContent = `${player.score} / 50`;
+                
+		// *** 新增日期時間儲存格 ***
+        	const dateTimeCell = document.createElement('td');
+        	dateTimeCell.className = 'py-3 px-4 text-sm';
+        	dateTimeCell.textContent = player.recordDateTime;
+        	// *************************
+
+                row.appendChild(rankCell);
+                row.appendChild(nameCell);
+                row.appendChild(timeCell);
+                row.appendChild(scoreCell);
+                row.appendChild(dateTimeCell); // <--- 將新的欄位加入列中
+
+                leaderboardBody.appendChild(row);
+            });
+            
+            // 如果沒有數據，顯示提示
+            if (players.length === 0) {
+                const emptyRow = document.createElement('tr');
+                const emptyCell = document.createElement('td');
+                emptyCell.colSpan = 4;
+                emptyCell.className = 'py-6 px-4 text-center text-gray-500';
+                emptyCell.textContent = '目前還沒有任何成績記錄';
+                emptyRow.appendChild(emptyCell);
+                leaderboardBody.appendChild(emptyRow);
+            }
+        }
+        
+        // 顯示排行榜
+        function showLeaderboard() {
+            renderLeaderboard();
+            startScreen.classList.add('hidden');
+            gameScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+            leaderboardScreen.classList.remove('hidden');
+        }
+        
+        // 開始遊戲
+        function startGame() {
+            currentPlayer = playerNameInput.value.trim();
+            if (!currentPlayer) {
+                alert('請輸入您的名字！');
+                return;
+            }
+            
+            displayName.textContent = currentPlayer;
+            displayBestTime(currentPlayer);
+            
+            questions = generateQuestions();
+            correctAnswers = 0;
+            currentPage = 1;
+            renderCurrentPage();
+            
+            startScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            resultScreen.classList.add('hidden');
+            leaderboardScreen.classList.add('hidden');
+            
+            // 聚焦第一個輸入框
+            setTimeout(() => {
+                const firstInput = document.querySelector('input[data-index="0"]');
+                if (firstInput) {
+                    setCurrentFocusedInput(firstInput);
+                }
+            }, 100);
+            
+            startTimer();
+        }
+        
+        // 提交答案
+        function submitAnswers() {
+            const elapsedTime = stopTimer();
+            const formattedTime = formatTime(elapsedTime);
+            
+            resultName.textContent = currentPlayer;
+            resultCorrect.textContent = correctAnswers;
+            resultTime.textContent = formattedTime;
+            
+            const isBest = checkBestTime(currentPlayer, elapsedTime, correctAnswers);
+            resultBestTime.textContent = formatTime(bestTimes[currentPlayer]);
+            
+            gameScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+        }
+        
+        // 重新開始遊戲
+        function restartGame() {
+            questions = generateQuestions();
+            correctAnswers = 0;
+            correctCountElement.textContent = '0';
+            currentPage = 1;
+            renderCurrentPage();
+            
+            resultScreen.classList.add('hidden');
+            leaderboardScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            
+            // 聚焦第一個輸入框
+            setTimeout(() => {
+                const firstInput = document.querySelector('input[data-index="0"]');
+                if (firstInput) {
+                    setCurrentFocusedInput(firstInput);
+                }
+            }, 100);
+            
+            startTimer();
+        }
+        
+        // 更換玩家
+        function changePlayer() {
+            resultScreen.classList.add('hidden');
+            leaderboardScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+            playerNameInput.value = '';
+            playerNameInput.focus();
+        }
+        
+        // 返回開始畫面
+        function backToStart() {
+            leaderboardScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+        }
+        
+        // 初始化
+        function init() {
+            loadData();
+            
+            // 按鈕事件監聽
+            startBtn.addEventListener('click', startGame);
+            submitBtn.addEventListener('click', submitAnswers);
+            retryBtn.addEventListener('click', restartGame);
+            newPlayerBtn.addEventListener('click', changePlayer);
+            leaderboardBtn.addEventListener('click', showLeaderboard);
+            viewLeaderboardBtn.addEventListener('click', showLeaderboard);
+            backToStartBtn.addEventListener('click', backToStart);
+            
+            // 頁面按鈕事件監聽
+            pageButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    changePage(parseInt(btn.dataset.page));
+                });
+            });
+            
+            // 數字鍵盤事件監聽
+            const numpadKeys = document.querySelectorAll('.numpad-key');
+            numpadKeys.forEach(key => {
+                key.addEventListener('click', () => {
+                    handleNumpadInput(key.dataset.value);
+                });
+            });
+            
+            // 鍵盤事件監聽
+            document.addEventListener('keydown', (e) => {
+                if (!currentFocusedInput) return;
+                
+                if (e.key >= '0' && e.key <= '9') {
+                    handleNumpadInput(e.key);
+                } else if (e.key === 'Backspace') {
+                    handleNumpadInput('clear');
+                } else if (e.key === 'Enter') {
+                    handleNumpadInput('enter');
+                }
+            });
+            
+            playerNameInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    startGame();
+                }
+            });
+        }
+        
+        // 啟動應用
+        init();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'957af1ea566f4a96',t:'MTc1MTI1ODAwMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
