@@ -424,20 +424,10 @@
     min-width:220px;
     background:white;
   }
-  .floatingNextBar{
-    position:fixed;
-    right:18px;
-    bottom:18px;
-    z-index:999;
-    background:rgba(255,255,255,.95);
-    border:1px solid #ccc;
-    border-radius:12px;
-    padding:10px 12px;
-    box-shadow:0 3px 12px rgba(0,0,0,.18);
-  }
-  .floatingNextBar button{
+  .topNextBtn{
     font-size:18px;
     padding:10px 18px;
+    white-space:nowrap;
   }
   .studentManageBox{
     margin-top:12px;
@@ -558,6 +548,7 @@
           </div>
         </div>
         <div class="row">
+          <button class="primary topNextBtn" id="nextBtn" onclick="nextQuestion()">下一題</button>
           <button onclick="backHome()">回首頁</button>
         </div>
       </div>
@@ -630,9 +621,7 @@
         <div class="message" id="divisionMessage"></div>
       </div>
 
-      <div class="floatingNextBar" id="floatingNextBar">
-        <button class="primary" id="nextBtn" onclick="nextQuestion()">下一題</button>
-      </div>
+
 
       <div class="note practiceHintBottom">
         乘法：最上面第一列是「十位乘法進位」，第二列是「個位乘法進位」。除法：請依直式過程填商、乘回去、相減/帶下來的數。<br>
