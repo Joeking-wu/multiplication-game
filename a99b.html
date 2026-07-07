@@ -415,6 +415,37 @@
   .reviewDivisionGrid .divisionBoard td{width:50px;height:36px;font-size:20px;}
   .reviewDivisionGrid .divisionBoard .head{height:22px;font-size:14px;}
 
+
+  .studentSelect{
+    font-size:18px;
+    padding:8px 10px;
+    border:1px solid #aaa;
+    border-radius:6px;
+    min-width:220px;
+    background:white;
+  }
+  .floatingNextBar{
+    position:fixed;
+    right:18px;
+    bottom:18px;
+    z-index:999;
+    background:rgba(255,255,255,.95);
+    border:1px solid #ccc;
+    border-radius:12px;
+    padding:10px 12px;
+    box-shadow:0 3px 12px rgba(0,0,0,.18);
+  }
+  .floatingNextBar button{
+    font-size:18px;
+    padding:10px 18px;
+  }
+  .studentManageBox{
+    margin-top:12px;
+    padding:10px;
+    border:1px solid #d5d5d5;
+    border-radius:8px;
+    background:#fafafa;
+  }
 </style>
 </head>
 <body>
@@ -428,11 +459,12 @@
       </div>
       <div class="row" style="margin-top:14px;">
         <label>姓名：</label>
-        <input id="studentName" class="nameInput" placeholder="請輸入姓名">
-        <button onclick="saveName()">套用姓名</button>
+        <select id="studentNameSelect" class="studentSelect" onchange="selectStudentName(this.value)">
+          <option value="">請選擇姓名</option>
+        </select>
         <button onclick="showRecords()">查看紀錄</button>
       </div>
-      <div class="small" style="margin-top:8px;">目前使用者：<b id="currentNameText">尚未輸入</b></div>
+      <div class="small" style="margin-top:8px;">目前使用者：<b id="currentNameText">尚未選擇</b></div>
     </div>
 
     <div class="card">
@@ -496,6 +528,16 @@
           <button onclick="exportAllRecords()">匯出全部紀錄</button>
           <button onclick="triggerImportRecords()">匯入紀錄</button>
           <button onclick="adminLogout()">登出管理員</button>
+        </div>
+        <div class="studentManageBox">
+          <b>姓名管理</b>
+          <div class="row" style="margin-top:8px;">
+            <input id="newStudentName" class="nameInput" placeholder="輸入新姓名">
+            <button onclick="addStudentName()">新增姓名</button>
+          </div>
+          <div class="small" style="margin-top:6px;">
+            孩子首頁只能從下拉選單選姓名，避免打錯名字造成紀錄分散。
+          </div>
         </div>
         <div id="adminMessage" class="small" style="margin-top:8px;"></div>
         <input id="importRecordsFile" type="file" accept=".json,application/json" class="hidden" onchange="importRecordsFromFile(event)">
@@ -588,7 +630,7 @@
         <div class="message" id="divisionMessage"></div>
       </div>
 
-      <div class="row" style="margin-top:10px;">
+      <div class="floatingNextBar" id="floatingNextBar">
         <button class="primary" id="nextBtn" onclick="nextQuestion()">下一題</button>
       </div>
 
@@ -677,29 +719,99 @@ function showPage(pageId){
   ["homePage","practicePage","resultPage","recordsPage","detailPage"].forEach(id => $(id).classList.add("hidden"));
   $(pageId).classList.remove("hidden");
 }
-function saveName(){
-  const name = $("studentName").value.trim();
-  if(!name){ alert("請先輸入姓名。"); return; }
-  currentName = name;
+function studentListKey(){ return "mathPracticeStudentNames_v1"; }
+
+function getStudentNames(){
+  let names = [];
+  try{
+    names = JSON.parse(localStorage.getItem(studentListKey()) || "[]");
+  }catch{
+    names = [];
+  }
+
+  // 兼容舊紀錄：把已有紀錄中的姓名也加入選單
+  try{
+    migrateLegacyRecords();
+    const fromRecords = getAllRecords().map(r => r.studentName).filter(Boolean);
+    fromRecords.forEach(n => {
+      if(!names.includes(n)) names.push(n);
+    });
+  }catch{}
+
+  names = Array.from(new Set(names.filter(n => String(n).trim()).map(n => String(n).trim())));
+  names.sort((a,b)=>a.localeCompare(b, "zh-Hant"));
+  localStorage.setItem(studentListKey(), JSON.stringify(names));
+  return names;
+}
+function setStudentNames(names){
+  names = Array.from(new Set(names.filter(n => String(n).trim()).map(n => String(n).trim())));
+  names.sort((a,b)=>a.localeCompare(b, "zh-Hant"));
+  localStorage.setItem(studentListKey(), JSON.stringify(names));
+}
+function renderStudentSelect(){
+  const sel = $("studentNameSelect");
+  if(!sel) return;
+  const names = getStudentNames();
+  let html = `<option value="">請選擇姓名</option>`;
+  names.forEach(n => {
+    html += `<option value="${escapeHtml(n)}" ${n===currentName ? "selected" : ""}>${escapeHtml(n)}</option>`;
+  });
+  sel.innerHTML = html;
+}
+function selectStudentName(name){
+  currentName = String(name || "").trim();
   localStorage.setItem("mathPracticeCurrentName", currentName);
   updateNameText();
+  renderStudentSelect();
+}
+function addStudentName(){
+  if(!adminLoggedIn){
+    alert("請先登入管理員。");
+    return;
+  }
+  const input = $("newStudentName");
+  const name = input ? input.value.trim() : "";
+  if(!name){
+    alert("請輸入姓名。");
+    return;
+  }
+  const names = getStudentNames();
+  if(names.includes(name)){
+    alert("這個姓名已經存在。");
+    return;
+  }
+  names.push(name);
+  setStudentNames(names);
+  currentName = name;
+  localStorage.setItem("mathPracticeCurrentName", currentName);
+  if(input) input.value = "";
+  renderStudentSelect();
+  updateNameText();
+  const msg = $("adminMessage");
+  if(msg) msg.textContent = `已新增姓名：${name}`;
+}
+function saveName(){
+  // 保留舊函式名稱，避免舊按鈕或匯入資料相容問題
+  const sel = $("studentNameSelect");
+  if(sel) selectStudentName(sel.value);
 }
 function loadName(){
   currentName = localStorage.getItem("mathPracticeCurrentName") || "";
-  if(currentName) $("studentName").value = currentName;
+  renderStudentSelect();
   updateNameText();
 }
 function updateNameText(){
-  $("currentNameText").textContent = currentName || "尚未輸入";
+  $("currentNameText").textContent = currentName || "尚未選擇";
 }
 function ensureName(){
-  const typed = $("studentName").value.trim();
-  if(typed && typed !== currentName){
-    currentName = typed;
-    localStorage.setItem("mathPracticeCurrentName", currentName);
-    updateNameText();
+  if(!currentName){
+    const sel = $("studentNameSelect");
+    if(sel && sel.value) currentName = sel.value.trim();
   }
-  if(!currentName){ alert("請先輸入姓名。"); return false; }
+  if(!currentName){
+    alert("請先選擇姓名。若名單沒有姓名，請由管理員登入後新增姓名。");
+    return false;
+  }
   return true;
 }
 function randInt(min, max){
@@ -1284,6 +1396,15 @@ function getAllStudentNames(){
   return names;
 }
 function showRecords(selectedName=null){
+  if(!currentName){
+    const names = getStudentNames();
+    if(names.length > 0){
+      currentName = names[0];
+      localStorage.setItem("mathPracticeCurrentName", currentName);
+      updateNameText();
+      renderStudentSelect();
+    }
+  }
   if(!ensureName()) return;
   stopTimer(); practice = null;
   migrateLegacyRecords();
@@ -1543,6 +1664,7 @@ function exportAllRecords(){
     version:"v4-admin-export",
     exportedAt:new Date().toISOString(),
     recordCount:records.length,
+    studentNames:getStudentNames(),
     records:records
   };
 
@@ -1583,6 +1705,7 @@ function importRecordsFromFile(event){
     try{
       const parsed = JSON.parse(reader.result);
       const importedRecords = Array.isArray(parsed) ? parsed : parsed.records;
+      const importedNames = (!Array.isArray(parsed) && Array.isArray(parsed.studentNames)) ? parsed.studentNames : [];
 
       if(!Array.isArray(importedRecords)){
         alert("匯入失敗：這個 JSON 檔案沒有可用的 records 資料。");
@@ -1614,6 +1737,18 @@ function importRecordsFromFile(event){
       });
 
       setAllRecords(merged);
+
+      // 合併匯入檔中的姓名與紀錄中的姓名
+      const names = getStudentNames();
+      importedNames.forEach(n => {
+        n = String(n || "").trim();
+        if(n && !names.includes(n)) names.push(n);
+      });
+      importedRecords.forEach(r => {
+        if(r && r.studentName && !names.includes(r.studentName)) names.push(r.studentName);
+      });
+      setStudentNames(names);
+      renderStudentSelect();
 
       const message = `匯入成功：新增 ${added} 筆，略過重複 ${skipped} 筆${invalid ? `，無效資料 ${invalid} 筆` : ""}。`;
       alert(message);
