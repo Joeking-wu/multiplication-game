@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>國小直式乘法練習</title>
+<style>
+  :root{
+    --ok:#d9ead3;
+    --bad:#f4cccc;
+    --empty:#eeeeee;
+    --blue:#d9eaf7;
+    --yellow:#fff2cc;
+    --green:#e2f0d9;
+    --border:#777;
+  }
+  body{
+    font-family:"Microsoft JhengHei", Arial, sans-serif;
+    margin:0;
+    background:#f7f7f7;
+    color:#222;
+  }
+  .page{
+    max-width:1080px;
+    margin:0 auto;
+    padding:24px;
+  }
+  .card{
+    background:white;
+    border:1px solid #d0d0d0;
+    border-radius:10px;
+    padding:18px;
+    box-shadow:0 2px 8px rgba(0,0,0,.06);
+    margin-bottom:16px;
+  }
+  h1{margin:0 0 12px;font-size:28px;}
+  h2{margin:0 0 12px;font-size:22px;}
+  h3{margin:14px 0 8px;font-size:18px;}
+  .note{
+    background:var(--yellow);
+    border:1px solid #e0c36a;
+    padding:10px 12px;
+    line-height:1.7;
+    border-radius:8px;
+  }
+  .row{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  label{font-size:16px;}
+  input.nameInput{
+    font-size:18px;
+    padding:8px 10px;
+    border:1px solid #aaa;
+    border-radius:6px;
+    width:220px;
+  }
+  button{
+    font-size:16px;
+    padding:9px 14px;
+    border:1px solid #777;
+    border-radius:7px;
+    background:white;
+    cursor:pointer;
+  }
+  button:hover{background:#f0f0f0;}
+  button.primary{
+    background:#1f4e78;
+    color:white;
+    border-color:#1f4e78;
+  }
+  button.primary:hover{background:#173b5b;}
+  button.disabled, button:disabled{
+    color:#999;
+    border-color:#ccc;
+    background:#eee;
+    cursor:not-allowed;
+  }
+  .typeGrid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+    gap:12px;
+    margin-top:12px;
+  }
+  .typeBtn{
+    text-align:left;
+    padding:14px;
+    min-height:78px;
+  }
+  .typeBtn b{
+    display:block;
+    font-size:18px;
+    margin-bottom:6px;
+  }
+  .typeBtn span{
+    color:#555;
+    font-size:14px;
+  }
+  .topBar{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .statLine{
+    font-size:16px;
+    line-height:1.8;
+  }
+
+  .problemBox{
+    display:inline-block;
+    background:white;
+    padding:18px 22px 22px;
+    border:1px solid #ccc;
+    box-shadow:0 1px 4px rgba(0,0,0,.08);
+    margin-top:12px;
+  }
+  table.mathGrid{
+    border-collapse:collapse;
+    table-layout:fixed;
+  }
+  .mathGrid th{
+    width:58px;
+    height:30px;
+    font-size:18px;
+    font-weight:500;
+    text-align:center;
+  }
+  .mathGrid td{
+    width:58px;
+    height:48px;
+    border:1px dashed var(--border);
+    text-align:center;
+    vertical-align:middle;
+    font-size:26px;
+    position:relative;
+  }
+  .mathGrid td.label{
+    width:44px;
+    border:none;
+    font-size:26px;
+    font-weight:bold;
+  }
+  .mathGrid td.noBorder{border:none;}
+  .mathGrid tr.lineTop td.grid{border-top:4px solid #000;}
+  .mathGrid tr.resultTop td.grid{border-top:4px solid #000;}
+  input.cell{
+    width:50px;
+    height:42px;
+    border:none;
+    outline:none;
+    text-align:center;
+    font-size:26px;
+    background:transparent;
+    font-family:"Microsoft JhengHei", Arial, sans-serif;
+  }
+  .fixed{font-size:28px;}
+  .ok{background:var(--ok) !important;}
+  .bad{background:var(--bad) !important;}
+  .emptyExpected{background:var(--empty) !important;}
+  .message{
+    margin-top:14px;
+    font-size:18px;
+    font-weight:bold;
+    min-height:28px;
+  }
+  #countdownText{
+    display:inline-block;
+    margin-left:10px;
+    padding:3px 10px;
+    border-radius:999px;
+    background:#fce5cd;
+    color:#990000;
+  }
+  .small{font-size:14px;color:#555;}
+  .hidden{display:none !important;}
+
+  .recordTable{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+    font-size:15px;
+  }
+  .recordTable th, .recordTable td{
+    border:1px solid #ccc;
+    padding:8px;
+    text-align:left;
+    vertical-align:top;
+  }
+  .recordTable th{background:#eaf2f8;}
+
+  .questionDetail{
+    border:1px solid #ccc;
+    border-radius:8px;
+    padding:12px;
+    margin:14px 0;
+    background:#fff;
+  }
+  .wrongText{color:#990000;font-weight:bold;}
+  .rightText{color:#38761d;font-weight:bold;}
+  .reviewWrap{
+    display:flex;
+    gap:18px;
+    align-items:flex-start;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+  .reviewGrid{
+    transform-origin:top left;
+  }
+  .reviewGrid .mathGrid td{
+    width:50px;
+    height:42px;
+    font-size:23px;
+  }
+  .reviewGrid .mathGrid th{
+    width:50px;
+    height:26px;
+    font-size:16px;
+  }
+  .reviewGrid .mathGrid td.label{
+    width:38px;
+  }
+  .reviewCellWrong{
+    background:var(--bad) !important;
+    color:#990000;
+    font-weight:bold;
+  }
+  .reviewCellOk{
+    background:var(--ok) !important;
+  }
+  .reviewCellEmpty{
+    background:var(--empty) !important;
+  }
+  .expectedMark{
+    position:absolute;
+    right:2px;
+    bottom:1px;
+    font-size:11px;
+    color:#990000;
+    line-height:1;
+  }
+  .legend{
+    font-size:14px;
+    line-height:1.8;
+    color:#444;
+  }
+  .legend span{
+    display:inline-block;
+    width:16px;
+    height:16px;
+    vertical-align:middle;
+    border:1px solid #aaa;
+    margin-right:4px;
+  }
+  .boxOk{background:var(--ok);}
+  .boxBad{background:var(--bad);}
+  .boxEmpty{background:var(--empty);}
+
+  .nameSelectGrid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:10px;
+    margin-top:12px;
+  }
+  .nameCard{
+    border:1px solid #ccc;
+    border-radius:8px;
+    padding:12px;
+    background:#fff;
+    cursor:pointer;
+    text-align:left;
+  }
+  .nameCard:hover{background:#f2f7fb;}
+  .nameCard.active{
+    border-color:#1f4e78;
+    background:#eaf2f8;
+  }
+
+
+  .filterPanel{
+    background:#f8fbfd;
+    border:1px solid #c9dceb;
+    border-radius:8px;
+    padding:12px;
+    margin-top:12px;
+  }
+  .filterPanel select,
+  .filterPanel input{
+    font-size:16px;
+    padding:7px 9px;
+    border:1px solid #aaa;
+    border-radius:6px;
+  }
+  .pagination{
+    display:flex;
+    gap:6px;
+    align-items:center;
+    flex-wrap:wrap;
+    margin-top:12px;
+  }
+  .pagination button.active{
+    background:#1f4e78;
+    color:#fff;
+    border-color:#1f4e78;
+  }
+  .muted{
+    color:#666;
+    font-size:14px;
+  }
+
+  #adminMessage{
+    color:#555;
+    line-height:1.6;
+  }
+
+  .compactPractice .card{
+    padding:12px 16px;
+  }
+  .compactPractice h1{
+    font-size:24px;
+    margin-bottom:6px;
+  }
+  .compactPractice .statLine{
+    line-height:1.5;
+  }
+  .compactPractice .problemBox{
+    margin-top:8px;
+    padding:12px 16px 14px;
+  }
+  .compactPractice .mathGrid th{
+    height:24px;
+    font-size:16px;
+  }
+  .compactPractice .mathGrid td{
+    height:42px;
+    font-size:24px;
+  }
+  .compactPractice input.cell{
+    height:36px;
+    font-size:24px;
+  }
+  .compactPractice .message{
+    margin-top:8px;
+    min-height:24px;
+    font-size:17px;
+  }
+  .practiceHintBottom{
+    margin-top:12px;
+    font-size:14px;
+    line-height:1.5;
+  }
+
+  .divisionProblemBox{
+    display:inline-block;
+    background:white;
+    padding:10px 14px 12px;
+    border:1px solid #ccc;
+    box-shadow:0 1px 4px rgba(0,0,0,.08);
+    margin-top:8px;
+  }
+  .divisionBoardWrap{
+    position:relative;
+    display:inline-block;
+    background:white;
+    padding-left:18px;
+    padding-top:2px;
+  }
+  table.divisionBoard{
+    border-collapse:collapse;
+    table-layout:fixed;
+    position:relative;
+    z-index:2;
+  }
+  .divisionBoard td{
+    width:54px;
+    height:40px;
+    text-align:center;
+    vertical-align:middle;
+    font-size:22px;
+    position:relative;
+    box-sizing:border-box;
+  }
+  .divisionBoard .head{
+    height:24px;
+    font-size:15px;
+    font-weight:bold;
+  }
+  .divisionBoard .lightCell{border:1px solid #d6d6d6;}
+  .divisionBoard .dashCell{border:2px dashed #222;}
+  .divisionBoard .mainDigit{border:1px dotted #444;font-size:24px;}
+  .divisionBoard .workCell{border:1px dotted #444;}
+  .divisionBoard .solidBottom{border-bottom:4px solid #000 !important;}
+  .divisionBoard .digit{font-size:24px;}
+  .divisionBoard input.cell{
+    width:44px;
+    height:32px;
+    border:none;
+    outline:none;
+    text-align:center;
+    font-size:22px;
+    background:transparent;
+    font-family:"Microsoft JhengHei", Arial, sans-serif;
+  }
+  .divisionSvgLayer{
+    position:absolute;
+    left:0;
+    top:0;
+    pointer-events:none;
+    overflow:visible;
+    z-index:3;
+  }
+  .reviewDivisionGrid .divisionBoard td{width:50px;height:36px;font-size:20px;}
+  .reviewDivisionGrid .divisionBoard .head{height:22px;font-size:14px;}
+
+</style>
+</head>
+<body>
+<div class="page">
+
+  <section id="homePage">
+    <div class="card">
+      <h1>國小直式練習</h1>
+      <div class="note">
+        請先輸入姓名，再選擇題型。系統會紀錄每次練習的日期、花費時間、正確題數、錯誤題數，以及每一題每一格的作答內容。
+      </div>
+      <div class="row" style="margin-top:14px;">
+        <label>姓名：</label>
+        <input id="studentName" class="nameInput" placeholder="請輸入姓名">
+        <button onclick="saveName()">套用姓名</button>
+        <button onclick="showRecords()">查看紀錄</button>
+      </div>
+      <div class="small" style="margin-top:8px;">目前使用者：<b id="currentNameText">尚未輸入</b></div>
+    </div>
+
+    <div class="card">
+      <h2>直式乘法練習</h2>
+      <div class="typeGrid">
+        <button class="typeBtn" onclick="startPractice('4x1')">
+          <b>四位數 × 一位數</b>
+          <span>例如：3486 × 7</span>
+        </button>
+        <button class="typeBtn" onclick="startPractice('1x2')">
+          <b>一位數 × 二位數</b>
+          <span>例如：8 × 47</span>
+        </button>
+        <button class="typeBtn" onclick="startPractice('3x2')">
+          <b>三位數 × 二位數</b>
+          <span>例如：582 × 20</span>
+        </button>
+        <button class="typeBtn" onclick="startPractice('4x2')">
+          <b>四位數 × 二位數</b>
+          <span>例如：3486 × 47</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>直式除法練習</h2>
+      <div class="typeGrid">
+        <button class="typeBtn" onclick="startPractice('d4_1_q4')">
+          <b>四位數 ÷ 一位數，商四位數</b>
+          <span>例如：2160 ÷ 6</span>
+        </button>
+        <button class="typeBtn" onclick="startPractice('d4_1_q3')">
+          <b>四位數 ÷ 一位數，商三位數</b>
+          <span>例如：2160 ÷ 8</span>
+        </button>
+        <button class="typeBtn" onclick="startPractice('d2_2_q1')">
+          <b>二位數 ÷ 二位數，商一位數</b>
+          <span>例如：36 ÷ 18</span>
+        </button>
+        <button class="typeBtn" onclick="startPractice('d3_2_q1')">
+          <b>三位數 ÷ 二位數，商一位數</b>
+          <span>例如：111 ÷ 37</span>
+        </button>
+        <button class="typeBtn" onclick="startPractice('d3_2_q2')">
+          <b>三位數 ÷ 二位數，商二位數</b>
+          <span>例如：851 ÷ 37</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>管理員功能</h2>
+      <div class="note">
+        匯出/匯入紀錄需要管理員登入後才會顯示。匯入時會自動合併紀錄，不覆蓋既有資料，也會略過重複紀錄。
+      </div>
+      <div id="adminLoginBox" class="row" style="margin-top:12px;">
+        <button onclick="adminLogin()">管理員登入</button>
+      </div>
+      <div id="adminActionBox" class="hidden" style="margin-top:12px;">
+        <div class="row">
+          <button onclick="exportAllRecords()">匯出全部紀錄</button>
+          <button onclick="triggerImportRecords()">匯入紀錄</button>
+          <button onclick="adminLogout()">登出管理員</button>
+        </div>
+        <div id="adminMessage" class="small" style="margin-top:8px;"></div>
+        <input id="importRecordsFile" type="file" accept=".json,application/json" class="hidden" onchange="importRecordsFromFile(event)">
+      </div>
+    </div>
+  </section>
+
+  <section id="practicePage" class="hidden compactPractice">
+    <div class="card">
+      <div class="topBar">
+        <div>
+          <h1 id="practiceTitle">直式乘法練習</h1>
+          <div class="statLine">
+            姓名：<b id="practiceName"></b>　
+            題數：<b id="progressText"></b>　
+            題目：<b id="questionText"></b>　
+            計時：<b id="timerText">0 秒</b>
+          </div>
+        </div>
+        <div class="row">
+          <button onclick="backHome()">回首頁</button>
+        </div>
+      </div>
+      <div class="problemBox" id="mulProblemBox">
+        <table class="mathGrid" id="grid">
+          <tr>
+            <th></th>
+            <th>十萬</th><th>萬</th><th>千</th><th>百</th><th>十</th><th>個</th>
+          </tr>
+          <tr data-row="carryTen">
+            <td class="label noBorder"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+          </tr>
+          <tr data-row="carryOne">
+            <td class="label noBorder"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+          </tr>
+          <tr data-row="topNumber">
+            <td class="label noBorder"></td>
+            <td class="grid fixed"></td><td class="grid fixed"></td><td class="grid fixed"></td>
+            <td class="grid fixed"></td><td class="grid fixed"></td><td class="grid fixed"></td>
+          </tr>
+          <tr data-row="bottomNumber">
+            <td class="label noBorder">×</td>
+            <td class="grid fixed"></td><td class="grid fixed"></td><td class="grid fixed"></td>
+            <td class="grid fixed"></td><td class="grid fixed"></td><td class="grid fixed"></td>
+          </tr>
+          <tr class="lineTop" data-row="partialOne">
+            <td class="label noBorder"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+          </tr>
+          <tr data-row="partialTen">
+            <td class="label noBorder"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+          </tr>
+          <tr class="resultTop" data-row="result">
+            <td class="label noBorder"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+            <td class="grid"><input class="cell" inputmode="numeric" maxlength="1"></td>
+          </tr>
+        </table>
+        <div class="message" id="message"></div>
+      </div>
+      <div class="divisionProblemBox hidden" id="divProblemBox">
+        <div id="divisionBoardHost"></div>
+        <div class="message" id="divisionMessage"></div>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <button class="primary" id="nextBtn" onclick="nextQuestion()">下一題</button>
+      </div>
+
+      <div class="note practiceHintBottom">
+        乘法：最上面第一列是「十位乘法進位」，第二列是「個位乘法進位」。除法：請依直式過程填商、乘回去、相減/帶下來的數。<br>
+        按「下一題」後會先檢查本題；若有錯誤，錯誤格會變紅，旁邊倒數 3 秒後才進入下一題。
+      </div>
+    </div>
+  </section>
+
+  <section id="resultPage" class="hidden">
+    <div class="card">
+      <h1>練習完成</h1>
+      <div id="resultSummary" class="statLine"></div>
+      <div class="row" style="margin-top:14px;">
+        <button class="primary" onclick="backHome()">回首頁</button>
+        <button onclick="showRecords()">查看紀錄</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="recordsPage" class="hidden">
+    <div class="card">
+      <div class="topBar">
+        <h1>作答紀錄</h1>
+        <div class="row">
+          <button onclick="backHome()">回首頁</button>
+          
+        </div>
+      </div>
+      <div class="note">
+        這裡可以用姓名搜尋/下拉選擇，再用題型、錯題、顯示筆數篩選紀錄。點「詳細」可以用直式格子查看每一題錯在哪裡。
+      </div>
+      <div id="recordsContent"></div>
+    </div>
+  </section>
+
+  <section id="detailPage" class="hidden">
+    <div class="card">
+      <div class="topBar">
+        <h1>紀錄詳細內容</h1>
+        <div class="row">
+          <button onclick="showRecords()">回紀錄列表</button>
+          <button onclick="backHome()">回首頁</button>
+        </div>
+      </div>
+      <div class="legend">
+        <span class="boxOk"></span>正確　
+        <span class="boxBad"></span>錯誤，格子右下角會標出正確答案　
+        <span class="boxEmpty"></span>正確空白
+      </div>
+      <div id="detailContent"></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+const colCount = 6;
+const labels = ["十萬","萬","千","百","十","個"];
+const rowNames = ["carryTen","carryOne","partialOne","partialTen","result"];
+const mulTypeInfo = {
+  "4x1": { title:"四位數 × 一位數", category:"multiplication", categoryTitle:"乘法", aMin:1000, aMax:9999, bMin:1, bMax:9, aDigits:4, bDigits:1 },
+  "1x2": { title:"一位數 × 二位數", category:"multiplication", categoryTitle:"乘法", aMin:1, aMax:9, bMin:10, bMax:99, aDigits:1, bDigits:2 },
+  "3x2": { title:"三位數 × 二位數", category:"multiplication", categoryTitle:"乘法", aMin:100, aMax:999, bMin:10, bMax:99, aDigits:3, bDigits:2 },
+  "4x2": { title:"四位數 × 二位數", category:"multiplication", categoryTitle:"乘法", aMin:1000, aMax:9999, bMin:10, bMax:99, aDigits:4, bDigits:2 }
+};
+const divTypeInfo = {
+  "d4_1_q4": { title:"四位數 ÷ 一位數，商四位數", category:"division", categoryTitle:"除法", dividendDigits:4, divisorDigits:1, quotientDigits:4 },
+  "d4_1_q3": { title:"四位數 ÷ 一位數，商三位數", category:"division", categoryTitle:"除法", dividendDigits:4, divisorDigits:1, quotientDigits:3 },
+  "d2_2_q1": { title:"二位數 ÷ 二位數，商一位數", category:"division", categoryTitle:"除法", dividendDigits:2, divisorDigits:2, quotientDigits:1 },
+  "d3_2_q1": { title:"三位數 ÷ 二位數，商一位數", category:"division", categoryTitle:"除法", dividendDigits:3, divisorDigits:2, quotientDigits:1 },
+  "d3_2_q2": { title:"三位數 ÷ 二位數，商二位數", category:"division", categoryTitle:"除法", dividendDigits:3, divisorDigits:2, quotientDigits:2 }
+};
+const typeInfo = {...mulTypeInfo, ...divTypeInfo};
+
+let currentName = "";
+let practice = null;
+let timer = null;
+let countdownTimer = null;
+let adminLoggedIn = false;
+const ADMIN_PASSWORD = "admin1234";
+
+function $(id){ return document.getElementById(id); }
+function showPage(pageId){
+  ["homePage","practicePage","resultPage","recordsPage","detailPage"].forEach(id => $(id).classList.add("hidden"));
+  $(pageId).classList.remove("hidden");
+}
+function saveName(){
+  const name = $("studentName").value.trim();
+  if(!name){ alert("請先輸入姓名。"); return; }
+  currentName = name;
+  localStorage.setItem("mathPracticeCurrentName", currentName);
+  updateNameText();
+}
+function loadName(){
+  currentName = localStorage.getItem("mathPracticeCurrentName") || "";
+  if(currentName) $("studentName").value = currentName;
+  updateNameText();
+}
+function updateNameText(){
+  $("currentNameText").textContent = currentName || "尚未輸入";
+}
+function ensureName(){
+  const typed = $("studentName").value.trim();
+  if(typed && typed !== currentName){
+    currentName = typed;
+    localStorage.setItem("mathPracticeCurrentName", currentName);
+    updateNameText();
+  }
+  if(!currentName){ alert("請先輸入姓名。"); return false; }
+  return true;
+}
+function randInt(min, max){
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+function digitsToCols(n){
+  const s = String(n);
+  const arr = Array(colCount).fill("");
+  for(let i=0; i<s.length && i<colCount; i++){
+    arr[colCount - s.length + i] = s[i];
+  }
+  return arr;
+}
+function digitsToColsWithMinimumDigits(n, forceDigits){
+  let s = String(n);
+  if(forceDigits && s.length < forceDigits) s = s.padStart(forceDigits, "0");
+  const arr = Array(colCount).fill("");
+  for(let i=0; i<s.length && i<colCount; i++){
+    arr[colCount - s.length + i] = s[i];
+  }
+  return arr;
+}
+function carryArrayForMultiplyByDigit(num, digit, shift){
+  const ds = String(num).split("").map(Number);
+  const arr = Array(colCount).fill("");
+  let carry = 0;
+  for(let i=ds.length-1; i>=0; i--){
+    const digitCol = colCount - (ds.length - i);
+    const p = ds[i] * digit + carry;
+    carry = Math.floor(p / 10);
+    const carryCol = digitCol - 1 - shift;
+    if(carry > 0 && carryCol >= 0 && carryCol < colCount){
+      arr[carryCol] = String(carry);
+    }
+  }
+  return arr;
+}
+function createQuestion(typeKey){
+  const info = typeInfo[typeKey];
+  if(info.category === "division") return createDivisionQuestion(typeKey);
+  return createMultiplicationQuestion(typeKey);
+}
+function createMultiplicationQuestion(typeKey){
+  const info = mulTypeInfo[typeKey];
+  const A = randInt(info.aMin, info.aMax);
+  const B = randInt(info.bMin, info.bMax);
+  const ones = B % 10;
+  const tens = Math.floor(B / 10);
+  const partialOne = A * ones;
+  const partialTen = A * tens * 10;
+  const result = A * B;
+  const expected = {
+    carryTen: tens > 0 ? carryArrayForMultiplyByDigit(A, tens, 1) : Array(colCount).fill(""),
+    carryOne: carryArrayForMultiplyByDigit(A, ones, 0),
+    partialOne: ones === 0 ? digitsToColsWithMinimumDigits(0, info.aDigits) : digitsToCols(partialOne),
+    partialTen: tens > 0 ? digitsToCols(partialTen) : Array(colCount).fill(""),
+    result: digitsToCols(result)
+  };
+  return {
+    operation:"multiplication",
+    A, B,
+    questionText:`${A} × ${B}`,
+    expected,
+    topNumber:digitsToCols(A),
+    bottomNumber:digitsToCols(B)
+  };
+}
+
+const DIV_RIGHT_COLS = 4;
+const DIV_TOTAL_COLS = 6;
+const DIV_LABELS = ["千","百","十","個"];
+const DIV_CELL_W = 54;
+const DIV_CELL_H = 40;
+const DIV_HEAD_H = 24;
+const DIV_PAD_LEFT = 18;
+
+function randNoZeroNumber(len){
+  let s = "";
+  for(let i=0; i<len; i++) s += String(randInt(1,9));
+  return Number(s);
+}
+function createDivisionQuestion(typeKey){
+  const p = generateDivisionProblem(typeKey);
+  const board = buildDivisionData(p);
+  return {
+    operation:"division",
+    questionText:`${p.dividend} ÷ ${p.divisor}`,
+    dividend:p.dividend,
+    divisor:p.divisor,
+    quotient:p.quotient,
+    divData:board
+  };
+}
+function generateDivisionProblem(type){
+  if(type === "d4_1_q4"){
+    while(true){
+      const d = randInt(2, 9);
+      const q = randNoZeroNumber(4);
+      const dvd = d * q;
+      if(dvd >= 1000 && dvd <= 9999) return { divisor:d, quotient:q, dividend:dvd, dividendDigits:4, divisorDigits:1, quotientDigits:4 };
+    }
+  }
+  if(type === "d4_1_q3"){
+    while(true){
+      const d = randInt(2, 9);
+      const q = randNoZeroNumber(3);
+      const dvd = d * q;
+      if(dvd >= 1000 && dvd <= 9999) return { divisor:d, quotient:q, dividend:dvd, dividendDigits:4, divisorDigits:1, quotientDigits:3 };
+    }
+  }
+  if(type === "d2_2_q1"){
+    while(true){
+      const d = randInt(10, 49);
+      const q = randInt(2, 9);
+      const dvd = d * q;
+      if(dvd >= 10 && dvd <= 99) return { divisor:d, quotient:q, dividend:dvd, dividendDigits:2, divisorDigits:2, quotientDigits:1 };
+    }
+  }
+  if(type === "d3_2_q1"){
+    while(true){
+      const d = randInt(12, 99);
+      const q = randInt(2, 9);
+      const dvd = d * q;
+      if(dvd >= 100 && dvd <= 999) return { divisor:d, quotient:q, dividend:dvd, dividendDigits:3, divisorDigits:2, quotientDigits:1 };
+    }
+  }
+  if(type === "d3_2_q2"){
+    while(true){
+      const d = randInt(10, 99);
+      const q = randNoZeroNumber(2);
+      const dvd = d * q;
+      if(dvd >= 100 && dvd <= 999) return { divisor:d, quotient:q, dividend:dvd, dividendDigits:3, divisorDigits:2, quotientDigits:2 };
+    }
+  }
+}
+function divDigits(n){ return String(n).split("").map(x => Number(x)); }
+function divToPaddedRightDigits(n){ return String(n).padStart(DIV_RIGHT_COLS, "0").split("").map(Number); }
+function divLocalToGlobal(localCol){ return 2 + localCol; }
+function divNumToCellsEndingAt(num, endGlobalCol, minDigits=1){
+  const arr = Array(DIV_TOTAL_COLS).fill("");
+  let s = String(num);
+  if(num === 0) s = "0";
+  if(minDigits && s.length < minDigits) s = s.padStart(minDigits, "0");
+  const start = endGlobalCol - s.length + 1;
+  for(let i=0; i<s.length; i++){
+    const c = start + i;
+    if(c >= 0 && c < DIV_TOTAL_COLS) arr[c] = s[i];
+  }
+  return arr;
+}
+function buildDivisionSteps(p){
+  const dividend = divToPaddedRightDigits(p.dividend);
+  const dividendStartLocal = DIV_RIGHT_COLS - p.dividendDigits;
+  const qStartLocal = DIV_RIGHT_COLS - p.quotientDigits;
+  const qDigits = divDigits(p.quotient);
+  const steps = [];
+  let remainder = 0;
+  for(let s=0; s<p.quotientDigits; s++){
+    const localCol = qStartLocal + s;
+    const globalCol = divLocalToGlobal(localCol);
+    let current;
+    if(s === 0){
+      let numText = "";
+      for(let c=dividendStartLocal; c<=localCol; c++) numText += String(dividend[c]);
+      current = Number(numText);
+    }else{
+      current = remainder * 10 + dividend[localCol];
+    }
+    const qd = qDigits[s];
+    const product = p.divisor * qd;
+    const rem = current - product;
+    const productCells = divNumToCellsEndingAt(product, globalCol);
+    const hasNext = s < p.quotientDigits - 1;
+    const resultValue = hasNext ? rem * 10 + dividend[localCol + 1] : rem;
+    const resultEndCol = hasNext ? globalCol + 1 : globalCol;
+    const resultCells = divNumToCellsEndingAt(resultValue, resultEndCol);
+    steps.push({s, globalCol, qd, product, rem, productCells, resultCells});
+    remainder = rem;
+  }
+  return steps;
+}
+function buildDivisionData(p){
+  const expectedMap = {};
+  const steps = buildDivisionSteps(p);
+  const qFullText = String(p.quotient).padStart(DIV_RIGHT_COLS, " ");
+  for(let c=2; c<DIV_TOTAL_COLS; c++){
+    const idx = c - 2;
+    expectedMap[`q_${c}`] = qFullText[idx] && qFullText[idx] !== " " ? qFullText[idx] : "";
+  }
+  steps.forEach((step, stepIndex) => {
+    for(let c=2; c<DIV_TOTAL_COLS; c++){
+      expectedMap[`p${stepIndex}_${c}`] = step.productCells[c] || "";
+      expectedMap[`r${stepIndex}_${c}`] = step.resultCells[c] || "";
+    }
+  });
+  return {...p, steps, expectedMap};
+}
+function renderDivisionBoard(q, review=false){
+  const p = q.divData;
+  const divDigitsText = String(p.divisor).split("");
+  const dvdDigits = String(p.dividend).padStart(DIV_RIGHT_COLS, " ").split("");
+  const divisorStart = 2 - p.divisorDigits;
+  let html = `<div class="divisionBoardWrap"><table class="divisionBoard">`;
+  html += `<tr>`;
+  for(let c=0; c<DIV_TOTAL_COLS; c++){
+    const text = c >= 2 ? DIV_LABELS[c - 2] : "";
+    html += divFixedCell("head lightCell", text);
+  }
+  html += `</tr>`;
+  html += `<tr>`;
+  for(let c=0; c<DIV_TOTAL_COLS; c++){
+    html += c >= 2 ? divInputCell(`q_${c}`, "dashCell", review, q) : divFixedCell("lightCell", "");
+  }
+  html += `</tr>`;
+  html += `<tr>`;
+  for(let c=0; c<DIV_TOTAL_COLS; c++){
+    let text = "";
+    let cls = "lightCell digit";
+    if(c >= divisorStart && c < divisorStart + p.divisorDigits) text = divDigitsText[c - divisorStart];
+    if(c >= 2){
+      text = dvdDigits[c - 2] === " " ? "" : dvdDigits[c - 2];
+      cls = "mainDigit digit";
+    }
+    html += divFixedCell(cls, text);
+  }
+  html += `</tr>`;
+  p.steps.forEach((step, stepIndex) => {
+    html += `<tr>`;
+    for(let c=0; c<DIV_TOTAL_COLS; c++){
+      html += c >= 2 ? divInputCell(`p${stepIndex}_${c}`, "workCell solidBottom", review, q) : divFixedCell("lightCell", "");
+    }
+    html += `</tr>`;
+    html += `<tr>`;
+    for(let c=0; c<DIV_TOTAL_COLS; c++){
+      html += c >= 2 ? divInputCell(`r${stepIndex}_${c}`, "workCell", review, q) : divFixedCell("lightCell", "");
+    }
+    html += `</tr>`;
+  });
+  html += `</table>`;
+  const width = DIV_PAD_LEFT + DIV_TOTAL_COLS * DIV_CELL_W + 14;
+  const height = DIV_HEAD_H + DIV_CELL_H * (2 + 1 + p.steps.length * 2) + 12;
+  const boardX = DIV_PAD_LEFT;
+  const topLineY = DIV_HEAD_H + DIV_CELL_H + 8;
+  const barStartX = boardX + 2 * DIV_CELL_W + 2;
+  const barEndX = boardX + DIV_TOTAL_COLS * DIV_CELL_W - 2;
+  const divisorRightX = boardX + 2 * DIV_CELL_W - 8;
+  const curveBottomY = topLineY + DIV_CELL_H + 8;
+  const curveCtrlX = boardX + 2 * DIV_CELL_W + 12;
+  const path = `M ${divisorRightX} ${topLineY} Q ${curveCtrlX} ${topLineY + 26}, ${divisorRightX} ${curveBottomY}`;
+  html += `<svg class="divisionSvgLayer" width="${width}" height="${height}"><path d="${path}" fill="none" stroke="#000" stroke-width="3"></path><line x1="${barStartX}" y1="${topLineY}" x2="${barEndX}" y2="${topLineY}" stroke="#000" stroke-width="4"></line></svg>`;
+  html += `</div>`;
+  return html;
+}
+function divFixedCell(cls, text=""){
+  return `<td class="${cls}">${escapeHtml(text || "")}</td>`;
+}
+function divInputCell(key, cls, review, q){
+  if(review){
+    const cell = (q.cells || []).find(x => x.key === key) || {user:"", expected:(q.divData.expectedMap || {})[key] || "", ok:true};
+    let reviewCls = cls + " ";
+    if(cell.ok) reviewCls += (cell.expected === "" ? "reviewCellEmpty" : "reviewCellOk");
+    else reviewCls += "reviewCellWrong";
+    const mark = cell.ok ? "" : `<span class="expectedMark">答:${escapeHtml(cell.expected || "空")}</span>`;
+    return `<td class="${reviewCls}">${escapeHtml(cell.user || "")}${mark}</td>`;
+  }
+  return `<td class="${cls}"><input class="cell" data-key="${key}" inputmode="numeric" maxlength="1"></td>`;
+}
+function startPractice(typeKey){
+  if(!ensureName()) return;
+  const questions = [];
+  for(let i=0;i<10;i++) questions.push(createQuestion(typeKey));
+  const info = typeInfo[typeKey];
+  practice = {
+    id:Date.now().toString(),
+    studentName:currentName,
+    typeKey,
+    typeTitle:info.title,
+    category:info.category,
+    categoryTitle:info.categoryTitle,
+    startedAt:new Date().toISOString(),
+    startTimeMs:Date.now(),
+    currentIndex:0,
+    questions,
+    answers:[]
+  };
+  $("practiceTitle").textContent = `${practice.categoryTitle}練習：${practice.typeTitle}`;
+  $("practiceName").textContent = currentName;
+  $("message").textContent = "";
+  $("nextBtn").disabled = false;
+  showPage("practicePage");
+  startTimer();
+  renderQuestion();
+}
+function startTimer(){
+  if(timer) clearInterval(timer);
+  timer = setInterval(()=>{
+    if(!practice) return;
+    $("timerText").textContent = formatDuration(Math.floor((Date.now()-practice.startTimeMs)/1000));
+  },500);
+}
+function stopTimer(){
+  if(timer){ clearInterval(timer); timer = null; }
+  stopCountdown();
+}
+function stopCountdown(){
+  if(countdownTimer){ clearInterval(countdownTimer); countdownTimer = null; }
+}
+function activeMessage(){
+  if(practice && practice.questions && practice.questions[practice.currentIndex] && practice.questions[practice.currentIndex].operation === "division"){
+    return $("divisionMessage");
+  }
+  return $("message");
+}
+function renderQuestion(){
+  stopCountdown();
+  const q = practice.questions[practice.currentIndex];
+  $("progressText").textContent = `${practice.currentIndex+1} / 10`;
+  $("questionText").textContent = q.questionText;
+  $("message").textContent = "";
+  $("divisionMessage").textContent = "";
+  clearInputClasses();
+  clearInputsOnly();
+
+  if(q.operation === "division"){
+    $("mulProblemBox").classList.add("hidden");
+    $("divProblemBox").classList.remove("hidden");
+    $("divisionBoardHost").innerHTML = renderDivisionBoard(q, false);
+  }else{
+    $("divProblemBox").classList.add("hidden");
+    $("mulProblemBox").classList.remove("hidden");
+    setFixedNumber("topNumber", q.topNumber);
+    setFixedNumber("bottomNumber", q.bottomNumber);
+  }
+
+  setTimeout(()=>{ const first = getAllInputs()[0]; if(first) first.focus(); }, 0);
+}
+function setFixedNumber(rowName, arr){
+  const row = document.querySelector(`tr[data-row="${rowName}"]`);
+  const cells = row.querySelectorAll("td.grid");
+  cells.forEach((td,i)=> td.textContent = arr[i] || "");
+}
+function getInputs(rowName){
+  const row = document.querySelector(`tr[data-row="${rowName}"]`);
+  return Array.from(row.querySelectorAll("input.cell"));
+}
+function getAllInputs(){
+  if(practice && practice.questions && practice.questions[practice.currentIndex] && practice.questions[practice.currentIndex].operation === "division"){
+    return Array.from(document.querySelectorAll("#divProblemBox input.cell"));
+  }
+  return Array.from(document.querySelectorAll("#mulProblemBox input.cell"));
+}
+function clearInputsOnly(){ getAllInputs().forEach(inp => inp.value = ""); }
+function clearInputClasses(){
+  getAllInputs().forEach(inp => {
+    inp.parentElement.classList.remove("ok","bad","emptyExpected");
+  });
+}
+function normalize(v){ return String(v || "").trim(); }
+function isCorrectCell(rowName, colIndex, userValue, correctValue){
+  userValue = normalize(userValue);
+  correctValue = normalize(correctValue);
+  if(correctValue === "") return userValue === "";
+  if(rowName === "partialTen" && colIndex === 5 && correctValue === "0"){
+    return userValue === "" || userValue === "0";
+  }
+  return userValue === correctValue;
+}
+function collectAndCheck(mark){
+  const q = practice.questions[practice.currentIndex];
+  return q.operation === "division" ? collectAndCheckDivision(q, mark) : collectAndCheckMultiplication(q, mark);
+}
+function collectAndCheckDivision(q, mark){
+  const detail = {
+    operation:"division",
+    index:practice.currentIndex+1,
+    questionText:q.questionText,
+    dividend:q.dividend,
+    divisor:q.divisor,
+    quotient:q.quotient,
+    divData:q.divData,
+    cells:[],
+    wrongCells:[],
+    isCorrect:true
+  };
+  if(mark) clearInputClasses();
+  getAllInputs().forEach(inp => {
+    const key = inp.dataset.key;
+    const expectedValue = q.divData.expectedMap[key] || "";
+    const userValue = inp.value || "";
+    const ok = expectedValue === "" ? normalize(userValue) === "" : normalize(userValue) === expectedValue;
+    if(!ok) detail.isCorrect = false;
+    const meta = divisionCellLabel(key);
+    detail.cells.push({key, row:meta.row, col:meta.col, user:userValue, expected:expectedValue, ok});
+    if(!ok){
+      detail.wrongCells.push({row:meta.row, col:meta.col, user:userValue, expected:expectedValue});
+    }
+    if(mark){
+      if(ok) inp.parentElement.classList.add(expectedValue === "" ? "emptyExpected" : "ok");
+      else inp.parentElement.classList.add("bad");
+    }
+  });
+  return detail;
+}
+function divisionCellLabel(key){
+  const parts = key.split("_");
+  const prefix = parts[0];
+  const colIdx = Number(parts[1]) - 2;
+  const col = DIV_LABELS[colIdx] || "";
+  if(prefix === "q") return {row:"商", col};
+  if(prefix.startsWith("p")) return {row:`第${Number(prefix.slice(1))+1}步乘回去`, col};
+  if(prefix.startsWith("r")) return {row:`第${Number(prefix.slice(1))+1}步相減/帶下`, col};
+  return {row:key, col};
+}
+function collectAndCheckMultiplication(q, mark){
+  const detail = {
+    operation:"multiplication",
+    index:practice.currentIndex+1,
+    questionText:q.questionText,
+    A:q.A,
+    B:q.B,
+    topNumber:q.topNumber,
+    bottomNumber:q.bottomNumber,
+    rows:{},
+    wrongCells:[],
+    isCorrect:true
+  };
+  if(mark) clearInputClasses();
+  rowNames.forEach(rowName=>{
+    const inputs = getInputs(rowName);
+    detail.rows[rowName] = [];
+    inputs.forEach((inp,i)=>{
+      const expectedValue = q.expected[rowName][i] || "";
+      const userValue = inp.value || "";
+      const ok = isCorrectCell(rowName, i, userValue, expectedValue);
+      if(!ok) detail.isCorrect = false;
+      detail.rows[rowName].push({ col:labels[i], user:userValue, expected:expectedValue, ok });
+      if(!ok){
+        detail.wrongCells.push({ row:rowLabel(rowName), col:labels[i], user:userValue, expected:expectedValue });
+      }
+      if(mark){
+        if(ok) inp.parentElement.classList.add(expectedValue === "" ? "emptyExpected" : "ok");
+        else inp.parentElement.classList.add("bad");
+      }
+    });
+  });
+  return detail;
+}
+function nextQuestion(){
+  $("nextBtn").disabled = true;
+  const detail = collectAndCheck(true);
+  practice.answers[practice.currentIndex] = detail;
+  if(detail.isCorrect){
+    activeMessage().innerHTML = "本題正確，進入下一題。";
+    activeMessage().style.color = "#38761d";
+    setTimeout(goNextOrFinish, 350);
+  }else{
+    startWrongCountdown(3);
+  }
+}
+function startWrongCountdown(sec){
+  stopCountdown();
+  let left = sec;
+  activeMessage().innerHTML = `本題有錯誤，紅色格子請看一下。<span id="countdownText">${left} 秒後下一題</span>`;
+  activeMessage().style.color = "#990000";
+  countdownTimer = setInterval(()=>{
+    left--;
+    const box = $("countdownText");
+    if(box) box.textContent = `${left} 秒後下一題`;
+    if(left <= 0){
+      stopCountdown();
+      goNextOrFinish();
+    }
+  },1000);
+}
+function goNextOrFinish(){
+  practice.currentIndex++;
+  if(practice.currentIndex >= 10) finishPractice();
+  else{
+    $("nextBtn").disabled = false;
+    renderQuestion();
+  }
+}
+function finishPractice(){
+  stopTimer();
+  const endedAt = new Date().toISOString();
+  const durationSec = Math.floor((Date.now()-practice.startTimeMs)/1000);
+  const correctQuestions = practice.answers.filter(a => a && a.isCorrect).length;
+  const wrongQuestions = 10 - correctQuestions;
+  const accuracy = Math.round(correctQuestions / 10 * 100);
+  const record = {
+    id:practice.id,
+    studentName:practice.studentName,
+    typeKey:practice.typeKey,
+    typeTitle:practice.typeTitle,
+    category:practice.category,
+    categoryTitle:practice.categoryTitle,
+    startedAt:practice.startedAt,
+    endedAt,
+    durationSec,
+    totalQuestions:10,
+    correctQuestions,
+    wrongQuestions,
+    accuracy,
+    questions:practice.answers
+  };
+  saveRecord(record);
+  $("resultSummary").innerHTML = `
+    姓名：<b>${escapeHtml(record.studentName)}</b><br>
+    類別：<b>${escapeHtml(record.categoryTitle)}</b><br>
+    題型：<b>${escapeHtml(record.typeTitle)}</b><br>
+    正確：<b>${correctQuestions}</b> 題，錯誤：<b>${wrongQuestions}</b> 題<br>
+    正確率：<b>${accuracy}%</b><br>
+    花費時間：<b>${formatDuration(durationSec)}</b>
+  `;
+  practice = null;
+  showPage("resultPage");
+}
+function allRecordsKey(){ return "mathPracticeAllRecords_v3"; }
+function legacyStorageKey(name){ return "mathPracticeRecords_v2_" + name; }
+
+let recordView = {
+  selectedName:"",
+  nameSearch:"",
+  category:"all",
+  typeKey:"all",
+  wrongOnly:false,
+  pageSize:20,
+  page:1
+};
+
+function getAllRecords(){
+  try{return JSON.parse(localStorage.getItem(allRecordsKey()) || "[]");}
+  catch{return [];}
+}
+function setAllRecords(records){localStorage.setItem(allRecordsKey(), JSON.stringify(records));}
+function migrateLegacyRecords(){
+  if(localStorage.getItem("mathPracticeMigrated_v3") === "yes") return;
+  const all = getAllRecords();
+  const seen = new Set(all.map(r => r.id));
+  for(let i=0; i<localStorage.length; i++){
+    const key = localStorage.key(i);
+    if(key && key.startsWith("mathPracticeRecords_v2_")){
+      try{
+        const arr = JSON.parse(localStorage.getItem(key) || "[]");
+        arr.forEach(r => {
+          if(r && r.id && !seen.has(r.id)){
+            if(!r.category){ r.category = "multiplication"; r.categoryTitle = "乘法"; }
+            all.push(r); seen.add(r.id);
+          }
+        });
+      }catch{}
+    }
+  }
+  setAllRecords(all);
+  localStorage.setItem("mathPracticeMigrated_v3", "yes");
+}
+function normalizeRecord(r){
+  if(!r.category){ r.category = "multiplication"; r.categoryTitle = "乘法"; }
+  if(!r.categoryTitle) r.categoryTitle = r.category === "division" ? "除法" : "乘法";
+  return r;
+}
+function getRecords(name=currentName){
+  migrateLegacyRecords();
+  if(!name) return [];
+  return getAllRecords().map(normalizeRecord).filter(r => r.studentName === name);
+}
+function saveRecord(record){
+  migrateLegacyRecords();
+  const records = getAllRecords();
+  records.unshift(record);
+  setAllRecords(records);
+}
+function getAllStudentNames(){
+  migrateLegacyRecords();
+  const names = [];
+  const set = new Set();
+  getAllRecords().forEach(r => {
+    if(r.studentName && !set.has(r.studentName)){set.add(r.studentName); names.push(r.studentName);}
+  });
+  names.sort((a,b)=>a.localeCompare(b, "zh-Hant"));
+  if(currentName && !set.has(currentName)) names.unshift(currentName);
+  return names;
+}
+function showRecords(selectedName=null){
+  if(!ensureName()) return;
+  stopTimer(); practice = null;
+  migrateLegacyRecords();
+  const names = getAllStudentNames();
+  if(selectedName !== null){recordView.selectedName = selectedName; recordView.page = 1;}
+  if(!recordView.selectedName) recordView.selectedName = currentName || names[0] || "";
+  renderRecordsPage();
+  showPage("recordsPage");
+}
+function renderRecordsPage(){
+  const names = getAllStudentNames();
+  const box = $("recordsContent");
+  if(names.length === 0){box.innerHTML = `<p>目前沒有任何作答紀錄。</p>`; return;}
+  const searchText = (recordView.nameSearch || "").trim().toLowerCase();
+  const filteredNames = names.filter(n => n.toLowerCase().includes(searchText));
+  let html = `
+    <div class="filterPanel">
+      <div class="row">
+        <label>搜尋姓名：</label>
+        <input id="recordNameSearch" value="${escapeHtml(recordView.nameSearch)}" placeholder="輸入姓名關鍵字" oninput="updateRecordNameSearch(this.value)">
+        <label>選擇姓名：</label>
+        <select id="recordNameSelect" onchange="updateRecordName(this.value)">
+          ${filteredNames.map(n => `<option value="${escapeHtml(n)}" ${n===recordView.selectedName ? "selected" : ""}>${escapeHtml(n)}（${getRecords(n).length}筆）</option>`).join("")}
+        </select>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <label>類別：</label>
+        <select onchange="updateRecordCategory(this.value)">
+          <option value="all" ${recordView.category==="all" ? "selected" : ""}>全部</option>
+          <option value="multiplication" ${recordView.category==="multiplication" ? "selected" : ""}>乘法</option>
+          <option value="division" ${recordView.category==="division" ? "selected" : ""}>除法</option>
+        </select>
+        <label>題型：</label>
+        <select onchange="updateRecordType(this.value)">
+          <option value="all" ${recordView.typeKey==="all" ? "selected" : ""}>全部題型</option>
+          ${Object.keys(typeInfo).filter(k => recordView.category === "all" || typeInfo[k].category === recordView.category).map(k => `<option value="${k}" ${recordView.typeKey===k ? "selected" : ""}>${escapeHtml(typeInfo[k].categoryTitle)}｜${escapeHtml(typeInfo[k].title)}</option>`).join("")}
+        </select>
+        <label>錯題：</label>
+        <select onchange="updateRecordWrongOnly(this.value)">
+          <option value="all" ${!recordView.wrongOnly ? "selected" : ""}>全部紀錄</option>
+          <option value="wrong" ${recordView.wrongOnly ? "selected" : ""}>只看有錯的練習</option>
+        </select>
+        <label>顯示：</label>
+        <select onchange="updateRecordPageSize(this.value)">
+          <option value="10" ${recordView.pageSize===10 ? "selected" : ""}>每頁10筆</option>
+          <option value="20" ${recordView.pageSize===20 ? "selected" : ""}>每頁20筆</option>
+          <option value="50" ${recordView.pageSize===50 ? "selected" : ""}>每頁50筆</option>
+          <option value="100" ${recordView.pageSize===100 ? "selected" : ""}>每頁100筆</option>
+        </select>
+      </div>
+      <div class="muted" style="margin-top:8px;">可以先選乘法/除法，再選題型；也可以只看有錯的練習。</div>
+    </div>`;
+  if(filteredNames.length === 0){box.innerHTML = html + `<p>找不到符合「${escapeHtml(recordView.nameSearch)}」的姓名。</p>`; return;}
+  if(!filteredNames.includes(recordView.selectedName)) recordView.selectedName = filteredNames[0] || "";
+  const activeName = recordView.selectedName;
+  const allNameRecords = getRecords(activeName);
+  if(allNameRecords.length === 0){box.innerHTML = html + `<p>目前沒有 ${escapeHtml(activeName)} 的作答紀錄。</p>`; return;}
+  const summaryRecords = allNameRecords.filter(r => recordView.category === "all" || r.category === recordView.category);
+  const summary = summarizeByType(summaryRecords);
+  html += `<h3>${escapeHtml(activeName)} 的題型統計</h3>`;
+  html += `<table class="recordTable"><tr><th>類別</th><th>題型</th><th>練習次數</th><th>總正確題數</th><th>總錯誤題數</th><th>平均正確率</th><th>平均時間</th></tr>`;
+  Object.values(summary).forEach(s=>{
+    html += `<tr><td>${escapeHtml(s.categoryTitle)}</td><td>${escapeHtml(s.typeTitle)}</td><td>${s.count}</td><td>${s.correct}</td><td>${s.wrong}</td><td>${Math.round(s.accuracySum/s.count)}%</td><td>${formatDuration(Math.round(s.durationSum/s.count))}</td></tr>`;
+  });
+  html += `</table>`;
+  let records = allNameRecords.slice();
+  if(recordView.category !== "all") records = records.filter(r => r.category === recordView.category);
+  if(recordView.typeKey !== "all") records = records.filter(r => r.typeKey === recordView.typeKey);
+  if(recordView.wrongOnly) records = records.filter(r => r.wrongQuestions > 0);
+  const total = records.length;
+  const totalPages = Math.max(1, Math.ceil(total / recordView.pageSize));
+  if(recordView.page > totalPages) recordView.page = totalPages;
+  if(recordView.page < 1) recordView.page = 1;
+  const startIdx = (recordView.page - 1) * recordView.pageSize;
+  const pageRecords = records.slice(startIdx, startIdx + recordView.pageSize);
+  html += `<h3>每次練習紀錄</h3>`;
+  html += `<div class="muted">符合條件共 ${total} 筆，目前顯示第 ${startIdx + 1 > total ? 0 : startIdx + 1}～${Math.min(startIdx + recordView.pageSize, total)} 筆。</div>`;
+  if(total === 0){box.innerHTML = html + `<p>目前篩選條件下沒有紀錄。</p>`; return;}
+  html += `<table class="recordTable"><tr><th>日期</th><th>姓名</th><th>類別</th><th>題型</th><th>正確</th><th>錯誤</th><th>正確率</th><th>時間</th><th>詳細</th></tr>`;
+  pageRecords.forEach(r=>{
+    html += `<tr><td>${formatDate(r.startedAt)}</td><td>${escapeHtml(r.studentName)}</td><td>${escapeHtml(r.categoryTitle)}</td><td>${escapeHtml(r.typeTitle)}</td><td>${r.correctQuestions}</td><td>${r.wrongQuestions}</td><td>${r.accuracy}%</td><td>${formatDuration(r.durationSec)}</td><td><button onclick="showRecordDetail('${r.id}')">詳細</button></td></tr>`;
+  });
+  html += `</table>` + renderPagination(totalPages);
+  box.innerHTML = html;
+}
+function renderPagination(totalPages){
+  if(totalPages <= 1) return "";
+  let html = `<div class="pagination">`;
+  html += `<button onclick="setRecordPage(${recordView.page - 1})" ${recordView.page<=1 ? "disabled" : ""}>上一頁</button>`;
+  const pages = [];
+  const start = Math.max(1, recordView.page - 2);
+  const end = Math.min(totalPages, recordView.page + 2);
+  if(start > 1) pages.push(1);
+  if(start > 2) pages.push("...");
+  for(let p=start; p<=end; p++) pages.push(p);
+  if(end < totalPages - 1) pages.push("...");
+  if(end < totalPages) pages.push(totalPages);
+  pages.forEach(p => html += p === "..." ? `<span class="muted">...</span>` : `<button class="${p===recordView.page ? "active" : ""}" onclick="setRecordPage(${p})">${p}</button>`);
+  html += `<button onclick="setRecordPage(${recordView.page + 1})" ${recordView.page>=totalPages ? "disabled" : ""}>下一頁</button></div>`;
+  return html;
+}
+function updateRecordNameSearch(value){recordView.nameSearch = value; recordView.page = 1; renderRecordsPage();}
+function updateRecordName(value){recordView.selectedName = value; recordView.page = 1; renderRecordsPage();}
+function updateRecordCategory(value){recordView.category = value; recordView.typeKey = "all"; recordView.page = 1; renderRecordsPage();}
+function updateRecordType(value){recordView.typeKey = value; recordView.page = 1; renderRecordsPage();}
+function updateRecordWrongOnly(value){recordView.wrongOnly = value === "wrong"; recordView.page = 1; renderRecordsPage();}
+function updateRecordPageSize(value){recordView.pageSize = Number(value) || 20; recordView.page = 1; renderRecordsPage();}
+function setRecordPage(page){recordView.page = page; renderRecordsPage();}
+function summarizeByType(records){
+  const map = {};
+  records.forEach(r=>{
+    normalizeRecord(r);
+    const key = `${r.category}_${r.typeKey}`;
+    if(!map[key]) map[key] = {categoryTitle:r.categoryTitle,typeTitle:r.typeTitle,count:0,correct:0,wrong:0,accuracySum:0,durationSum:0};
+    const s = map[key];
+    s.count++; s.correct += r.correctQuestions; s.wrong += r.wrongQuestions; s.accuracySum += r.accuracy; s.durationSum += r.durationSec;
+  });
+  return map;
+}
+function showRecordDetail(id){
+  const rec = getAllRecords().map(normalizeRecord).find(r => r.id === id);
+  if(!rec) return;
+  let html = `
+    <div class="statLine">
+      姓名：<b>${escapeHtml(rec.studentName)}</b><br>
+      日期：<b>${formatDate(rec.startedAt)}</b><br>
+      類別：<b>${escapeHtml(rec.categoryTitle)}</b><br>
+      題型：<b>${escapeHtml(rec.typeTitle)}</b><br>
+      正確：<b>${rec.correctQuestions}</b> 題，錯誤：<b>${rec.wrongQuestions}</b> 題，
+      正確率：<b>${rec.accuracy}%</b>，花費時間：<b>${formatDuration(rec.durationSec)}</b>
+    </div>`;
+  rec.questions.forEach(q=>{
+    html += `<div class="questionDetail"><h3>第 ${q.index} 題：${escapeHtml(q.questionText)}　<span class="${q.isCorrect ? "rightText" : "wrongText"}">${q.isCorrect ? "正確" : "錯誤"}</span></h3><div class="reviewWrap"><div class="${q.operation === "division" ? "reviewDivisionGrid" : "reviewGrid"}">${renderVisualGrid(q)}</div><div style="min-width:260px;">${renderWrongSummary(q)}</div></div></div>`;
+  });
+  $("detailContent").innerHTML = html;
+  showPage("detailPage");
+}
+function renderWrongSummary(q){
+  if(!q.wrongCells || q.wrongCells.length === 0) return `<p class="rightText">本題全部格子正確。</p>`;
+  let html = `<div class="wrongText">錯誤格：</div><ul>`;
+  q.wrongCells.forEach(w=> html += `<li>${escapeHtml(w.row)}／${escapeHtml(w.col)}：填「${escapeHtml(w.user || "空白")}」，正確「${escapeHtml(w.expected || "空白")}」</li>`);
+  html += `</ul>`;
+  return html;
+}
+function renderVisualGrid(q){
+  if(q.operation === "division") return renderDivisionBoard(q, true);
+  const fixedTop = q.topNumber || digitsToCols(q.A);
+  const fixedBottom = q.bottomNumber || digitsToCols(q.B);
+  let html = `<table class="mathGrid"><tr><th></th>${labels.map(l=>`<th>${l}</th>`).join("")}</tr>`;
+  html += renderReviewInputRow(q, "carryTen");
+  html += renderReviewInputRow(q, "carryOne");
+  html += renderFixedRow("", fixedTop);
+  html += renderFixedRow("×", fixedBottom);
+  html += renderReviewInputRow(q, "partialOne", "lineTop");
+  html += renderReviewInputRow(q, "partialTen");
+  html += renderReviewInputRow(q, "result", "resultTop");
+  html += `</table>`;
+  return html;
+}
+
+function renderFixedRow(label, arr){
+  return `<tr><td class="label noBorder">${label}</td>${arr.map(v=>`<td class="grid fixed">${escapeHtml(v || "")}</td>`).join("")}</tr>`;
+}
+function renderReviewInputRow(q, rowName, extraClass=""){
+  const row = q.rows[rowName] || [];
+  let html = `<tr class="${extraClass}"><td class="label noBorder"></td>`;
+  for(let i=0;i<colCount;i++){
+    const c = row[i] || {user:"", expected:"", ok:true};
+    let cls = "grid ";
+    if(c.ok) cls += (c.expected === "" ? "reviewCellEmpty" : "reviewCellOk");
+    else cls += "reviewCellWrong";
+    const main = escapeHtml(c.user || "");
+    const expectedMark = c.ok ? "" : `<span class="expectedMark">答:${escapeHtml(c.expected || "空")}</span>`;
+    html += `<td class="${cls}">${main}${expectedMark}</td>`;
+  }
+  html += `</tr>`;
+  return html;
+}
+function rowLabel(rowName){
+  return {
+    carryTen:"十位乘法進位",
+    carryOne:"個位乘法進位",
+    partialOne:"個位部分積",
+    partialTen:"十位部分積",
+    result:"最後答案"
+  }[rowName] || rowName;
+}
+function clearRecordsForCurrentName(){
+  alert("清除功能已從介面移除。若需要備份或整理紀錄，建議之後改做匯出功能。");
+}
+function backHome(){
+  stopTimer();
+  practice = null;
+  showPage("homePage");
+}
+function formatDate(iso){
+  const d = new Date(iso);
+  return d.toLocaleString("zh-TW", {hour12:false});
+}
+function formatDuration(sec){
+  sec = Number(sec) || 0;
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}分${s}秒(${sec}秒)`;
+}
+function escapeHtml(s){
+  return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+}
+function escapeJs(s){
+  return String(s).replaceAll("\\","\\\\").replaceAll("'","\\'");
+}
+
+function renderAdminPanel(){
+  const loginBox = $("adminLoginBox");
+  const actionBox = $("adminActionBox");
+  if(!loginBox || !actionBox) return;
+
+  if(adminLoggedIn){
+    loginBox.classList.add("hidden");
+    actionBox.classList.remove("hidden");
+  }else{
+    loginBox.classList.remove("hidden");
+    actionBox.classList.add("hidden");
+  }
+}
+function adminLogin(){
+  const pwd = prompt("請輸入管理員密碼：");
+  if(pwd === null) return;
+
+  if(pwd === ADMIN_PASSWORD){
+    adminLoggedIn = true;
+    renderAdminPanel();
+    const msg = $("adminMessage");
+    if(msg) msg.textContent = "管理員已登入。";
+  }else{
+    alert("密碼錯誤。");
+  }
+}
+function adminLogout(){
+  adminLoggedIn = false;
+  renderAdminPanel();
+}
+function assertAdmin(){
+  if(!adminLoggedIn){
+    alert("請先登入管理員。");
+    return false;
+  }
+  return true;
+}
+function exportAllRecords(){
+  if(!assertAdmin()) return;
+
+  migrateLegacyRecords();
+  const records = getAllRecords();
+  const payload = {
+    app:"國小直式乘法練習",
+    version:"v4-admin-export",
+    exportedAt:new Date().toISOString(),
+    recordCount:records.length,
+    records:records
+  };
+
+  const text = JSON.stringify(payload, null, 2);
+  const blob = new Blob([text], {type:"application/json;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+
+  const d = new Date();
+  const pad = n => String(n).padStart(2, "0");
+  const filename = `math-practice-records-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}.json`;
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+
+  const msg = $("adminMessage");
+  if(msg) msg.textContent = `已匯出 ${records.length} 筆紀錄。`;
+}
+function triggerImportRecords(){
+  if(!assertAdmin()) return;
+  const input = $("importRecordsFile");
+  if(!input) return;
+  input.value = "";
+  input.click();
+}
+function importRecordsFromFile(event){
+  if(!assertAdmin()) return;
+
+  const file = event.target.files && event.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(){
+    try{
+      const parsed = JSON.parse(reader.result);
+      const importedRecords = Array.isArray(parsed) ? parsed : parsed.records;
+
+      if(!Array.isArray(importedRecords)){
+        alert("匯入失敗：這個 JSON 檔案沒有可用的 records 資料。");
+        return;
+      }
+
+      migrateLegacyRecords();
+      const existing = getAllRecords();
+      const existingIds = new Set(existing.map(r => r && r.id).filter(Boolean));
+
+      let added = 0;
+      let skipped = 0;
+      let invalid = 0;
+      const merged = existing.slice();
+
+      importedRecords.forEach(r => {
+        if(!r || typeof r !== "object" || !r.id || !r.studentName || !r.questions){
+          invalid++;
+          return;
+        }
+        if(existingIds.has(r.id)){
+          skipped++;
+          return;
+        }
+        normalizeRecord(r);
+        merged.unshift(r);
+        existingIds.add(r.id);
+        added++;
+      });
+
+      setAllRecords(merged);
+
+      const message = `匯入成功：新增 ${added} 筆，略過重複 ${skipped} 筆${invalid ? `，無效資料 ${invalid} 筆` : ""}。`;
+      alert(message);
+      const msg = $("adminMessage");
+      if(msg) msg.textContent = message;
+
+      if(!$("recordsPage").classList.contains("hidden")){
+        renderRecordsPage();
+      }
+    }catch(err){
+      alert("匯入失敗：JSON 檔案格式不正確。");
+    }
+  };
+  reader.readAsText(file, "utf-8");
+}
+
+
+document.addEventListener("input", function(e){
+  if(e.target.classList.contains("cell")){
+    e.target.value = e.target.value.replace(/[^0-9]/g, "").slice(0,1);
+    e.target.parentElement.classList.remove("ok","bad","emptyExpected");
+  }
+});
+document.addEventListener("keydown", function(e){
+  if(!e.target.classList.contains("cell")) return;
+  const inputs = getAllInputs();
+  const idx = inputs.indexOf(e.target);
+  if(e.key === "ArrowRight" && idx < inputs.length-1){ e.preventDefault(); inputs[idx+1].focus(); }
+  else if(e.key === "ArrowLeft" && idx > 0){ e.preventDefault(); inputs[idx-1].focus(); }
+  else if(e.key === "ArrowDown" && idx+6 < inputs.length){ e.preventDefault(); inputs[idx+6].focus(); }
+  else if(e.key === "ArrowUp" && idx-6 >= 0){ e.preventDefault(); inputs[idx-6].focus(); }
+});
+loadName();
+renderAdminPanel();
+</script>
+</body>
+</html>
