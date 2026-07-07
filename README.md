@@ -34,6 +34,7 @@ A_1_4.html 數學分與合單元。[數學分與合單元](https://joeking-wu.gi
 
 family_matching_game.html 社會-家系圖單元。[社會-家系圖單元](https://joeking-wu.github.io/multiplication-game/family_matching_game.html).
 
+國小直式練習_乘法除法整合版。[直式練習](https://joeking-wu.github.io/multiplication-game/a99b.html).
 
 其它作者的產品分享
 [太空漫遊](https://jinshuanyu.github.io/spacewalk/index.html).
