@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>英語1200字 US發音練習</title>
+<style>
+:root {
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --text: #172033;
+  --muted: #667085;
+  --line: #e5e7eb;
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --ok: #16a34a;
+  --warn: #d97706;
+  --shadow: 0 18px 45px rgba(15, 23, 42, .10);
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif; background: var(--bg); color: var(--text); }
+.wrap { max-width: 980px; margin: 0 auto; padding: 22px 14px 36px; }
+.header { display: flex; gap: 14px; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; }
+h1 { font-size: clamp(24px, 4vw, 40px); margin: 0 0 4px; letter-spacing: .5px; }
+.sub { color: var(--muted); font-size: 15px; }
+.badge { white-space: nowrap; background: #eef2ff; color: #3730a3; padding: 9px 12px; border-radius: 999px; font-weight: 700; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 22px; box-shadow: var(--shadow); padding: 18px; }
+.searchbar { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-bottom: 14px; }
+input { width: 100%; font-size: 18px; padding: 14px 15px; border-radius: 14px; border: 1px solid #cbd5e1; outline: none; }
+input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37,99,235,.12); }
+button { border: 0; border-radius: 14px; padding: 13px 16px; font-size: 17px; font-weight: 700; cursor: pointer; background: var(--primary); color: white; }
+button:hover { background: var(--primary-dark); }
+button.secondary { background: #eef2f7; color: #111827; }
+button.secondary:hover { background: #e2e8f0; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+.status { min-height: 24px; color: var(--muted); margin: 8px 2px 14px; }
+.wordbox { display: grid; grid-template-columns: 120px 1fr; gap: 16px; align-items: stretch; margin-top: 10px; }
+.no { display: flex; align-items: center; justify-content: center; border-radius: 18px; background: #f1f5f9; font-size: 30px; font-weight: 900; color: #334155; }
+.mainword { border: 1px solid var(--line); border-radius: 18px; padding: 20px; background: #fff; }
+.en { font-size: clamp(42px, 8vw, 76px); line-height: 1; font-weight: 900; letter-spacing: -.5px; margin-bottom: 12px; word-break: break-word; }
+.zh { font-size: clamp(24px, 5vw, 42px); color: #0f172a; font-weight: 800; margin-bottom: 12px; }
+.note { color: var(--muted); }
+.actions { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 16px; }
+.audio { margin-top: 16px; display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
+a { color: var(--primary); text-decoration: none; font-weight: 700; }
+a:hover { text-decoration: underline; }
+.footer { color: var(--muted); font-size: 13px; margin-top: 14px; line-height: 1.6; }
+.hidden { display: none; }
+@media (max-width: 720px) {
+  .header { display: block; }
+  .badge { display: inline-block; margin-top: 10px; }
+  .searchbar { grid-template-columns: 1fr; }
+  .wordbox { grid-template-columns: 1fr; }
+  .no { min-height: 72px; }
+  .actions { grid-template-columns: 1fr 1fr; }
+  .audio { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div>
+      <h1>英語1200字 US發音練習</h1>
+      <div class="sub">輸入序號或英文單字查詢，也可以用上一個／下一個切換。</div>
+    </div>
+    <div class="badge" id="countBadge">載入中...</div>
+  </div>
+
+  <div class="card">
+    <div class="searchbar">
+      <input id="searchInput" type="text" placeholder="輸入序號或英文，例如 1、apple、weekend" autocomplete="off" />
+      <button id="searchBtn">查詢</button>
+    </div>
+    <div class="status" id="statusText">正在讀取 words.json...</div>
+
+    <div class="wordbox">
+      <div class="no" id="wordNo">--</div>
+      <div class="mainword">
+        <div class="en" id="wordEn">請稍候</div>
+        <div class="zh" id="wordZh">正在載入單字資料</div>
+        <div class="note" id="wordNote"></div>
+        <div class="audio">
+          <audio id="audioPlayer" controls preload="none"></audio>
+          <button id="playBtn">播放 US 發音</button>
+        </div>
+        <div style="margin-top:12px;" id="linksBox" class="hidden">
+          <a id="cambridgeLink" href="#" target="_blank" rel="noopener">Cambridge 字典頁</a>
+          <span style="color:#cbd5e1; padding:0 8px;">|</span>
+          <a id="pronLink" href="#" target="_blank" rel="noopener">Cambridge 發音頁</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="secondary" id="firstBtn">第一個</button>
+      <button class="secondary" id="prevBtn">上一個 ←</button>
+      <button id="nextBtn">下一個 →</button>
+      <button class="secondary" id="lastBtn">最後一個</button>
+      <button class="secondary" id="randomBtn">隨機</button>
+    </div>
+
+    <div class="footer">
+      鍵盤操作：Enter 查詢、← 上一個、→ 下一個。資料來源為 words.json，適合放在 GitHub Pages 使用。
+    </div>
+  </div>
+</div>
+
+<script>
+let WORDS = [];
+let currentIndex = 0;
+
+const el = id => document.getElementById(id);
+const searchInput = el('searchInput');
+const searchBtn = el('searchBtn');
+const statusText = el('statusText');
+const wordNo = el('wordNo');
+const wordEn = el('wordEn');
+const wordZh = el('wordZh');
+const wordNote = el('wordNote');
+const audioPlayer = el('audioPlayer');
+const playBtn = el('playBtn');
+const countBadge = el('countBadge');
+const linksBox = el('linksBox');
+const cambridgeLink = el('cambridgeLink');
+const pronLink = el('pronLink');
+
+function normalizeText(s) {
+  return String(s || '').trim().toLowerCase().replace(/[.]/g, '').replace(/\s+/g, ' ');
+}
+
+function showWordByIndex(index, autoPlay = false) {
+  if (!WORDS.length) return;
+  currentIndex = Math.max(0, Math.min(index, WORDS.length - 1));
+  const item = WORDS[currentIndex];
+
+  wordNo.textContent = item.no ?? (currentIndex + 1);
+  wordEn.textContent = item.word || '';
+  wordZh.textContent = item.zh || '';
+  wordNote.textContent = item.note ? item.note : '';
+
+  if (item.usAudio) {
+    audioPlayer.src = item.usAudio;
+    audioPlayer.disabled = false;
+    playBtn.disabled = false;
+    statusText.textContent = `第 ${item.no} 筆，共 ${WORDS.length} 筆。`;
+    if (autoPlay) audioPlayer.play().catch(() => {});
+  } else {
+    audioPlayer.removeAttribute('src');
+    audioPlayer.load();
+    playBtn.disabled = true;
+    statusText.textContent = `第 ${item.no} 筆目前沒有 US 音檔連結。`;
+  }
+
+  if (item.cambridge || item.pronunciationPage) {
+    linksBox.classList.remove('hidden');
+    cambridgeLink.href = item.cambridge || '#';
+    pronLink.href = item.pronunciationPage || '#';
+  } else {
+    linksBox.classList.add('hidden');
+  }
+
+  searchInput.value = item.word || item.no || '';
+  el('prevBtn').disabled = currentIndex <= 0;
+  el('firstBtn').disabled = currentIndex <= 0;
+  el('nextBtn').disabled = currentIndex >= WORDS.length - 1;
+  el('lastBtn').disabled = currentIndex >= WORDS.length - 1;
+}
+
+function searchWord() {
+  const q = searchInput.value.trim();
+  if (!q) return;
+
+  let foundIndex = -1;
+  const number = Number(q);
+  if (Number.isInteger(number)) {
+    foundIndex = WORDS.findIndex(x => Number(x.no) === number);
+  }
+  if (foundIndex < 0) {
+    const nq = normalizeText(q);
+    foundIndex = WORDS.findIndex(x => normalizeText(x.word) === nq);
+  }
+  if (foundIndex < 0) {
+    const nq = normalizeText(q);
+    foundIndex = WORDS.findIndex(x => normalizeText(x.word).includes(nq));
+  }
+
+  if (foundIndex >= 0) {
+    showWordByIndex(foundIndex, false);
+  } else {
+    statusText.textContent = `找不到：「${q}」。可以輸入序號或完整英文單字。`;
+  }
+}
+
+async function loadWords() {
+  try {
+    const response = await fetch('./words.json', { cache: 'no-store' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    WORDS = await response.json();
+    if (!Array.isArray(WORDS) || WORDS.length === 0) throw new Error('words.json 格式不正確或沒有資料');
+    WORDS.sort((a, b) => Number(a.no) - Number(b.no));
+    const audioCount = WORDS.filter(x => x.usAudio).length;
+    countBadge.textContent = `${WORDS.length} 字｜${audioCount} 音檔`;
+    showWordByIndex(0, false);
+  } catch (err) {
+    countBadge.textContent = '讀取失敗';
+    statusText.textContent = '讀不到 words.json。請確認 index.html 和 words.json 放在同一層，並透過 GitHub Pages 或 http://localhost 開啟。';
+    wordEn.textContent = '讀取失敗';
+    wordZh.textContent = err.message;
+    playBtn.disabled = true;
+  }
+}
+
+searchBtn.addEventListener('click', searchWord);
+searchInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') searchWord();
+});
+el('firstBtn').addEventListener('click', () => showWordByIndex(0));
+el('prevBtn').addEventListener('click', () => showWordByIndex(currentIndex - 1));
+el('nextBtn').addEventListener('click', () => showWordByIndex(currentIndex + 1));
+el('lastBtn').addEventListener('click', () => showWordByIndex(WORDS.length - 1));
+el('randomBtn').addEventListener('click', () => showWordByIndex(Math.floor(Math.random() * WORDS.length)));
+playBtn.addEventListener('click', () => audioPlayer.play().catch(() => {
+  statusText.textContent = '瀏覽器目前沒有允許播放，請再按一次播放鍵。';
+}));
+
+document.addEventListener('keydown', e => {
+  const active = document.activeElement;
+  if (active === searchInput) return;
+  if (e.key === 'ArrowLeft') showWordByIndex(currentIndex - 1);
+  if (e.key === 'ArrowRight') showWordByIndex(currentIndex + 1);
+});
+
+loadWords();
+</script>
+</body>
+</html>
