@@ -115,7 +115,7 @@ th { color:#475569; background:#f8fafc; }
       </button>
       <button class="homebtn secondary-blue" id="goQuizBtn">
         <div class="big">單字測驗</div>
-        <div class="small">選序號範圍後隨機出題，支援聽音打字與中文看英文。</div>
+        <div class="small">選序號範圍後隨機出題，支援聽音打字與中文提示拼單字。</div>
       </button>
     </div>
     <div class="topActions">
@@ -180,7 +180,7 @@ th { color:#475569; background:#f8fafc; }
       </div>
       <div class="quizModes">
         <button id="listenModeBtn" class="modeBtn selected">聽音打字</button>
-        <button id="zhModeBtn" class="modeBtn">中文看英文</button>
+        <button id="zhModeBtn" class="modeBtn">中文提示拼單字</button>
       </div>
       <div id="selectedModeText" class="selectedModeBox">目前選擇：聽音打字</div>
       <div id="rangeInfo" class="status">目前範圍：1~10，共 10 題。</div>
@@ -456,7 +456,7 @@ function setMode(mode) {
   el('zhModeBtn').classList.toggle('selected', mode === 'zh');
   el('selectedModeText').textContent = `目前選擇：${modeName()}`;
 }
-function modeName() { return quizMode === 'listen' ? '聽音打字' : '中文看英文'; }
+function modeName() { return quizMode === 'listen' ? '聽音打字' : '中文提示拼單字'; }
 function updateRangeInfo() {
   if (!WORDS.length) return;
   const startNo = Number(el('startNo').value);
