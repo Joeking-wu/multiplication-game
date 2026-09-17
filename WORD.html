@@ -60,6 +60,11 @@ a:hover { text-decoration: underline; }
 .formgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 12px 0; }
 .formitem label { display:block; color: var(--muted); font-size: 14px; margin: 0 0 6px 4px; }
 .quizModes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0; }
+.modeBtn { position:relative; background:#eef2f7; color:#111827; border:2px solid transparent; min-height:76px; }
+.modeBtn:hover { background:#e2e8f0; }
+.modeBtn.selected { background:#dcfce7; color:#14532d; border-color:var(--ok); box-shadow:0 0 0 4px rgba(22,163,74,.12); }
+.modeBtn.selected::after { content:'目前選擇'; position:absolute; right:10px; top:8px; font-size:12px; background:var(--ok); color:white; padding:4px 8px; border-radius:999px; }
+.selectedModeBox { background:#f0fdf4; color:#14532d; border:1px solid #bbf7d0; border-radius:14px; padding:12px 14px; font-weight:900; margin: 10px 0 12px; }
 .quizTitle { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
 .progress { background:#f1f5f9; border-radius:999px; overflow:hidden; height:14px; margin:10px 0 16px; }
 .progress > div { height:100%; background:var(--primary); width:0%; transition:width .2s; }
@@ -78,12 +83,16 @@ th { color:#475569; background:#f8fafc; }
 .pill.ok { color:#166534; background:#dcfce7; }
 .pill.bad { color:#991b1b; background:#fee2e2; }
 .pill.warn { color:#92400e; background:#fef3c7; }
+.recordRowBtn { padding:7px 10px; font-size:14px; border-radius:10px; }
+.topActions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:14px; }
 @media (max-width: 720px) {
   .header { display: block; }
   .badge { display: inline-block; margin-top: 10px; }
   .grid2, .quizModes, .searchbar, .wordbox, .audio, .answerRow, .formgrid { grid-template-columns: 1fr; }
   .no { min-height: 72px; }
   .actions { grid-template-columns: 1fr 1fr; }
+  .quizTitle { display:block; }
+  .quizTitle button { margin-top:10px; width:100%; }
 }
 </style>
 </head>
@@ -102,12 +111,15 @@ th { color:#475569; background:#f8fafc; }
     <div class="grid2">
       <button class="homebtn" id="goPracticeBtn">
         <div class="big">聽力練習</div>
-        <div class="small">目前原本功能：查詢單字、播放 US 發音、上一個／下一個、隨機切換。</div>
+        <div class="small">查詢單字、播放 US 發音、上一個／下一個、隨機切換。</div>
       </button>
       <button class="homebtn secondary-blue" id="goQuizBtn">
         <div class="big">單字測驗</div>
-        <div class="small">可選序號範圍與題數，支援聽音打字、中文看英文，並記錄作答結果。</div>
+        <div class="small">選序號範圍後隨機出題，支援聽音打字與中文看英文。</div>
       </button>
+    </div>
+    <div class="topActions">
+      <button class="secondary" id="goRecordsBtnHome">查看本機測驗紀錄</button>
     </div>
   </section>
 
@@ -119,7 +131,6 @@ th { color:#475569; background:#f8fafc; }
         <button id="searchBtn">查詢</button>
       </div>
       <div class="status" id="statusText">正在讀取 words.json...</div>
-
       <div class="wordbox">
         <div class="no" id="wordNo">--</div>
         <div class="mainword">
@@ -137,7 +148,6 @@ th { color:#475569; background:#f8fafc; }
           </div>
         </div>
       </div>
-
       <div class="actions">
         <button class="secondary" id="firstBtn">第一個</button>
         <button class="secondary" id="prevBtn">上一個 ←</button>
@@ -145,7 +155,6 @@ th { color:#475569; background:#f8fafc; }
         <button class="secondary" id="lastBtn">最後一個</button>
         <button class="secondary" id="randomBtn">隨機</button>
       </div>
-
       <div class="footer">鍵盤操作：Enter 查詢、← 上一個、→ 下一個。資料來源為 words.json，適合放在 GitHub Pages 使用。</div>
     </div>
   </section>
@@ -154,14 +163,12 @@ th { color:#475569; background:#f8fafc; }
     <div class="card">
       <button class="secondary" id="quizHomeBtn">← 回首頁</button>
       <h2 style="margin-top:14px;">單字測驗設定</h2>
-      <div class="sub">先選擇測驗模式，再設定序號範圍與題數。測驗開始後，不能回上一題修改。</div>
-
-      <div class="quizModes">
-        <button id="listenModeBtn" class="green">聽音打字</button>
-        <button id="zhModeBtn">中文看英文</button>
-      </div>
-
+      <div class="sub">先輸入姓名，再選擇測驗模式與序號範圍。題數會依照範圍自動產生，例如 5~10 就是 6 題，題目會隨機排序。</div>
       <div class="formgrid">
+        <div class="formitem">
+          <label for="studentName">姓名</label>
+          <input id="studentName" type="text" placeholder="例如：承翰" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+        </div>
         <div class="formitem">
           <label for="startNo">起始序號</label>
           <input id="startNo" type="number" min="1" inputmode="numeric" value="1" autocomplete="off" />
@@ -170,21 +177,18 @@ th { color:#475569; background:#f8fafc; }
           <label for="endNo">結束序號</label>
           <input id="endNo" type="number" min="1" inputmode="numeric" value="10" autocomplete="off" />
         </div>
-        <div class="formitem">
-          <label for="quizCount">題數</label>
-          <input id="quizCount" type="number" min="1" inputmode="numeric" value="10" autocomplete="off" />
-        </div>
       </div>
-      <button id="startQuizBtn">開始測驗</button>
+      <div class="quizModes">
+        <button id="listenModeBtn" class="modeBtn selected">聽音打字</button>
+        <button id="zhModeBtn" class="modeBtn">中文看英文</button>
+      </div>
+      <div id="selectedModeText" class="selectedModeBox">目前選擇：聽音打字</div>
+      <div id="rangeInfo" class="status">目前範圍：1~10，共 10 題。</div>
+      <div class="topActions">
+        <button id="startQuizBtn">開始測驗</button>
+        <button class="secondary" id="goRecordsBtnQuiz">查看本機測驗紀錄</button>
+      </div>
       <div class="status" id="quizMenuStatus"></div>
-    </div>
-
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; gap:10px; align-items:center; flex-wrap:wrap;">
-        <h2 style="margin:0;">本機測驗紀錄</h2>
-        <button class="secondary" id="clearRecordsBtn">清除紀錄</button>
-      </div>
-      <div class="tableWrap" id="recordsBox"></div>
     </div>
   </section>
 
@@ -230,6 +234,34 @@ th { color:#475569; background:#f8fafc; }
       </div>
     </div>
   </section>
+
+  <section id="recordsSection" class="hidden">
+    <div class="card">
+      <button class="secondary" id="recordsHomeBtn">← 回首頁</button>
+      <h2 style="margin-top:14px;">本機測驗紀錄</h2>
+      <div class="sub">紀錄存在目前這台裝置的瀏覽器裡。可依姓名篩選，並點「查看」看每一題作答過程。</div>
+      <div class="formgrid">
+        <div class="formitem">
+          <label for="recordNameFilter">姓名分類查看</label>
+          <select id="recordNameFilter"><option value="">全部姓名</option></select>
+        </div>
+        <div class="formitem">
+          <label>&nbsp;</label>
+          <button class="secondary" id="clearRecordsBtn">清除全部紀錄</button>
+        </div>
+        <div class="formitem">
+          <label>&nbsp;</label>
+          <button class="secondary" id="exportRecordsBtn">匯出 JSON 紀錄</button>
+        </div>
+      </div>
+      <div class="tableWrap" id="recordsBox"></div>
+    </div>
+    <div class="card hidden" id="recordDetailCard">
+      <h2>作答過程</h2>
+      <div id="recordDetailSummary" class="result"></div>
+      <div class="tableWrap" id="recordDetailBox"></div>
+    </div>
+  </section>
 </div>
 
 <script>
@@ -240,10 +272,13 @@ let activeQuiz = null;
 let tabId = sessionStorage.getItem('english1200_tabId') || String(Date.now()) + '_' + Math.random().toString(36).slice(2);
 sessionStorage.setItem('english1200_tabId', tabId);
 let lockTimer = null;
+let siteHeartbeatTimer = null;
+let leavingBecauseFinish = false;
 
 const QUIZ_LOCK_KEY = 'english1200_quiz_lock';
 const QUIZ_RECORDS_KEY = 'english1200_quiz_records';
-const MAX_RECORDS = 100;
+const SITE_TAB_KEY = 'english1200_site_tab';
+const MAX_RECORDS = 300;
 
 const el = id => document.getElementById(id);
 const searchInput = el('searchInput');
@@ -263,22 +298,24 @@ const pronLink = el('pronLink');
 function normalizeText(s) {
   return String(s || '').trim().toLowerCase().replace(/[.]/g, '').replace(/\s+/g, ' ');
 }
-
 function nowText() {
   const d = new Date();
   const pad = n => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
-
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+}
 function showSection(name) {
-  ['homeSection','practiceSection','quizMenuSection','quizRunSection','quizDoneSection'].forEach(id => el(id).classList.add('hidden'));
+  ['homeSection','practiceSection','quizMenuSection','quizRunSection','quizDoneSection','recordsSection'].forEach(id => el(id).classList.add('hidden'));
   el(name).classList.remove('hidden');
   const sub = {
     homeSection: '首頁：選擇聽力練習或單字測驗。',
     practiceSection: '聽力練習：輸入序號或英文單字查詢，也可以用上一個／下一個切換。',
-    quizMenuSection: '單字測驗：選擇測驗模式、序號範圍與題數。',
-    quizRunSection: '測驗中：離開畫面、重新整理或重複開啟測驗分頁會被記錄。',
-    quizDoneSection: '測驗結果：已儲存在本機瀏覽器。'
+    quizMenuSection: '單字測驗：輸入姓名，選擇測驗模式與序號範圍。',
+    quizRunSection: '測驗中：離開畫面、重新整理或重複開啟分頁會記錄為未完成。',
+    quizDoneSection: '測驗結果：已儲存在本機瀏覽器。',
+    recordsSection: '本機測驗紀錄：依姓名查看每次測驗與作答過程。'
   };
   el('pageSub').textContent = sub[name] || '';
 }
@@ -291,10 +328,8 @@ function showWordByIndex(index, autoPlay = false) {
   wordEn.textContent = item.word || '';
   wordZh.textContent = item.zh || '';
   wordNote.textContent = item.note ? item.note : '';
-
   if (item.usAudio) {
     audioPlayer.src = item.usAudio;
-    audioPlayer.disabled = false;
     playBtn.disabled = false;
     statusText.textContent = `第 ${item.no} 筆，共 ${WORDS.length} 筆。`;
     if (autoPlay) audioPlayer.play().catch(() => {});
@@ -304,22 +339,17 @@ function showWordByIndex(index, autoPlay = false) {
     playBtn.disabled = true;
     statusText.textContent = `第 ${item.no} 筆目前沒有 US 音檔連結。`;
   }
-
   if (item.cambridge || item.pronunciationPage) {
     linksBox.classList.remove('hidden');
     cambridgeLink.href = item.cambridge || '#';
     pronLink.href = item.pronunciationPage || '#';
-  } else {
-    linksBox.classList.add('hidden');
-  }
-
+  } else linksBox.classList.add('hidden');
   searchInput.value = item.word || item.no || '';
   el('prevBtn').disabled = currentIndex <= 0;
   el('firstBtn').disabled = currentIndex <= 0;
   el('nextBtn').disabled = currentIndex >= WORDS.length - 1;
   el('lastBtn').disabled = currentIndex >= WORDS.length - 1;
 }
-
 function searchWord() {
   const q = searchInput.value.trim();
   if (!q) return;
@@ -337,7 +367,6 @@ function searchWord() {
   if (foundIndex >= 0) showWordByIndex(foundIndex, false);
   else statusText.textContent = `找不到：「${q}」。可以輸入序號或完整英文單字。`;
 }
-
 async function loadWords() {
   try {
     const response = await fetch('./words.json', { cache: 'no-store' });
@@ -348,7 +377,8 @@ async function loadWords() {
     const audioCount = WORDS.filter(x => x.usAudio).length;
     countBadge.textContent = `${WORDS.length} 字｜${audioCount} 音檔`;
     showWordByIndex(0, false);
-    renderRecords();
+    updateRangeInfo();
+    renderRecordNameFilter();
   } catch (err) {
     countBadge.textContent = '讀取失敗';
     statusText.textContent = '讀不到 words.json。請確認 index.html 和 words.json 放在同一層，並透過 GitHub Pages 或 http://localhost 開啟。';
@@ -363,23 +393,36 @@ function getRecords() {
   try { return JSON.parse(localStorage.getItem(QUIZ_RECORDS_KEY) || '[]'); }
   catch { return []; }
 }
+function saveRecords(records) { localStorage.setItem(QUIZ_RECORDS_KEY, JSON.stringify(records.slice(0, MAX_RECORDS))); }
 function saveRecord(record) {
   const records = getRecords();
   records.unshift(record);
-  localStorage.setItem(QUIZ_RECORDS_KEY, JSON.stringify(records.slice(0, MAX_RECORDS)));
+  saveRecords(records);
+  renderRecordNameFilter();
   renderRecords();
 }
+function renderRecordNameFilter() {
+  const select = el('recordNameFilter');
+  if (!select) return;
+  const current = select.value;
+  const names = [...new Set(getRecords().map(r => r.studentName || '未填姓名'))].sort((a,b)=>a.localeCompare(b, 'zh-Hant'));
+  select.innerHTML = '<option value="">全部姓名</option>' + names.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
+  select.value = names.includes(current) ? current : '';
+}
 function renderRecords() {
-  const records = getRecords();
+  const nameFilter = el('recordNameFilter') ? el('recordNameFilter').value : '';
+  const records = getRecords().filter(r => !nameFilter || (r.studentName || '未填姓名') === nameFilter);
   const box = el('recordsBox');
   if (!records.length) {
-    box.innerHTML = '<div class="status">目前沒有測驗紀錄。</div>';
+    box.innerHTML = '<div class="status">目前沒有符合條件的測驗紀錄。</div>';
+    el('recordDetailCard').classList.add('hidden');
     return;
   }
-  const rows = records.slice(0, 20).map(r => {
+  const rows = records.map(r => {
     const statusClass = r.status === '完成' ? 'ok' : (r.status === '未完成' ? 'warn' : 'bad');
     return `<tr>
       <td>${escapeHtml(r.startTime || '')}</td>
+      <td>${escapeHtml(r.studentName || '未填姓名')}</td>
       <td>${escapeHtml(r.modeName || '')}</td>
       <td>${r.startNo}~${r.endNo}</td>
       <td>${r.total || 0}</td>
@@ -387,27 +430,49 @@ function renderRecords() {
       <td>${r.score || 0}%</td>
       <td><span class="pill ${statusClass}">${escapeHtml(r.status || '')}</span></td>
       <td>${escapeHtml(r.reason || '')}</td>
+      <td><button class="recordRowBtn secondary" onclick="showRecordDetail('${escapeHtml(r.id)}')">查看</button></td>
     </tr>`;
   }).join('');
-  box.innerHTML = `<table><thead><tr><th>時間</th><th>模式</th><th>範圍</th><th>題數</th><th>答對</th><th>分數</th><th>狀態</th><th>備註</th></tr></thead><tbody>${rows}</tbody></table>`;
+  box.innerHTML = `<table><thead><tr><th>時間</th><th>姓名</th><th>模式</th><th>範圍</th><th>題數</th><th>答對</th><th>分數</th><th>狀態</th><th>備註</th><th>過程</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
-}
+window.showRecordDetail = function(id) {
+  const record = getRecords().find(r => r.id === id);
+  if (!record) return;
+  el('recordDetailCard').classList.remove('hidden');
+  el('recordDetailSummary').className = record.status === '完成' ? 'result ok' : 'result bad';
+  el('recordDetailSummary').innerHTML = `姓名：${escapeHtml(record.studentName || '未填姓名')}<br>模式：${escapeHtml(record.modeName)}<br>時間：${escapeHtml(record.startTime || '')} ~ ${escapeHtml(record.endTime || '')}<br>範圍：${record.startNo}~${record.endNo}｜答對：${record.correct}/${record.total}｜分數：${record.score}%<br>狀態：${escapeHtml(record.status)} ${record.reason ? '｜' + escapeHtml(record.reason) : ''}`;
+  const answers = record.answers || [];
+  if (!answers.length) {
+    el('recordDetailBox').innerHTML = '<div class="status">這筆紀錄沒有作答明細，可能是在開始前或重複分頁時被記錄。</div>';
+    return;
+  }
+  const rows = answers.map((a, i) => `<tr><td>${i+1}</td><td>${a.no}</td><td>${escapeHtml(a.zh)}</td><td>${escapeHtml(a.answer)}</td><td>${escapeHtml(a.word)}</td><td><span class="pill ${a.ok ? 'ok' : 'bad'}">${a.ok ? '對' : '錯'}</span></td><td>${a.seconds}s</td></tr>`).join('');
+  el('recordDetailBox').innerHTML = `<table><thead><tr><th>題號</th><th>序號</th><th>中文</th><th>作答</th><th>正解</th><th>結果</th><th>秒數</th></tr></thead><tbody>${rows}</tbody></table>`;
+};
 
 function setMode(mode) {
   quizMode = mode;
-  el('listenModeBtn').classList.toggle('green', mode === 'listen');
-  el('zhModeBtn').classList.toggle('green', mode === 'zh');
+  el('listenModeBtn').classList.toggle('selected', mode === 'listen');
+  el('zhModeBtn').classList.toggle('selected', mode === 'zh');
+  el('selectedModeText').textContent = `目前選擇：${modeName()}`;
 }
-
+function modeName() { return quizMode === 'listen' ? '聽音打字' : '中文看英文'; }
+function updateRangeInfo() {
+  if (!WORDS.length) return;
+  const startNo = Number(el('startNo').value);
+  const endNo = Number(el('endNo').value);
+  if (!Number.isInteger(startNo) || !Number.isInteger(endNo) || startNo <= 0 || endNo <= 0 || endNo < startNo) {
+    el('rangeInfo').textContent = '請輸入正確的起始序號與結束序號。';
+    return;
+  }
+  const pool = WORDS.filter(w => Number(w.no) >= startNo && Number(w.no) <= endNo);
+  el('rangeInfo').textContent = `目前範圍：${startNo}~${endNo}，共 ${pool.length} 題，開始後會隨機排序。`;
+}
 function readLock() {
   try { return JSON.parse(localStorage.getItem(QUIZ_LOCK_KEY) || 'null'); }
   catch { return null; }
 }
-function isLockActive(lock) {
-  return lock && lock.tabId !== tabId && Date.now() - Number(lock.lastSeen || 0) < 6000;
-}
+function isLockActive(lock) { return lock && lock.tabId !== tabId && Date.now() - Number(lock.lastSeen || 0) < 6000; }
 function acquireQuizLock() {
   const lock = readLock();
   if (isLockActive(lock)) return false;
@@ -417,7 +482,10 @@ function acquireQuizLock() {
 }
 function writeQuizLock() {
   if (!activeQuiz) return;
-  localStorage.setItem(QUIZ_LOCK_KEY, JSON.stringify({ tabId, quizId: activeQuiz.id, lastSeen: Date.now() }));
+  localStorage.setItem(QUIZ_LOCK_KEY, JSON.stringify({
+    tabId, quizId: activeQuiz.id, lastSeen: Date.now(), studentName: activeQuiz.studentName,
+    modeName: activeQuiz.modeName, startNo: activeQuiz.startNo, endNo: activeQuiz.endNo, total: activeQuiz.total, startTime: activeQuiz.startTime
+  }));
 }
 function releaseQuizLock() {
   if (lockTimer) clearInterval(lockTimer);
@@ -425,49 +493,44 @@ function releaseQuizLock() {
   const lock = readLock();
   if (lock && lock.tabId === tabId) localStorage.removeItem(QUIZ_LOCK_KEY);
 }
+function startSiteHeartbeat() {
+  localStorage.setItem(SITE_TAB_KEY, JSON.stringify({tabId, lastSeen: Date.now()}));
+  siteHeartbeatTimer = setInterval(() => {
+    localStorage.setItem(SITE_TAB_KEY, JSON.stringify({tabId, lastSeen: Date.now()}));
+  }, 2000);
+}
 
 function startQuiz() {
-  if (!WORDS.length) {
-    el('quizMenuStatus').textContent = '單字資料尚未載入完成。';
-    return;
+  if (!WORDS.length) { el('quizMenuStatus').textContent = '單字資料尚未載入完成。'; return; }
+  const studentName = el('studentName').value.trim();
+  if (!studentName) { el('quizMenuStatus').textContent = '請先輸入姓名，才可以開始測驗。'; el('studentName').focus(); return; }
+  const startNo = Number(el('startNo').value);
+  const endNo = Number(el('endNo').value);
+  if (!Number.isInteger(startNo) || !Number.isInteger(endNo) || startNo <= 0 || endNo <= 0 || endNo < startNo) {
+    el('quizMenuStatus').textContent = '請確認起始序號與結束序號正確。'; return;
   }
+  const pool = WORDS.filter(w => Number(w.no) >= startNo && Number(w.no) <= endNo);
+  if (!pool.length) { el('quizMenuStatus').textContent = '這個序號範圍內找不到單字。'; return; }
   if (!acquireQuizLock()) {
+    const lock = readLock();
     el('quizMenuStatus').textContent = '偵測到另一個分頁已經在測驗中，請回到原本分頁繼續。';
     saveRecord({
-      id: 'blocked_' + Date.now(), startTime: nowText(), modeName: modeName(), startNo: Number(el('startNo').value), endNo: Number(el('endNo').value), total: 0, correct: 0, score: 0, status: '中止', reason: '重複開啟測驗分頁', answers: []
+      id: 'blocked_' + Date.now(), studentName, startTime: nowText(), endTime: nowText(), modeName: modeName(),
+      startNo, endNo, total: 0, correct: 0, score: 0, status: '中止', reason: `重複開啟測驗分頁${lock && lock.studentName ? '；原測驗姓名：' + lock.studentName : ''}`, answers: []
     });
     return;
   }
-  const startNo = Number(el('startNo').value);
-  const endNo = Number(el('endNo').value);
-  let count = Number(el('quizCount').value);
-  if (!Number.isInteger(startNo) || !Number.isInteger(endNo) || startNo <= 0 || endNo <= 0 || endNo < startNo) {
-    releaseQuizLock();
-    el('quizMenuStatus').textContent = '請確認起始序號與結束序號正確。';
-    return;
-  }
-  const pool = WORDS.filter(w => Number(w.no) >= startNo && Number(w.no) <= endNo);
-  if (!pool.length) {
-    releaseQuizLock();
-    el('quizMenuStatus').textContent = '這個序號範圍內找不到單字。';
-    return;
-  }
-  if (!Number.isInteger(count) || count <= 0) count = pool.length;
-  count = Math.min(count, pool.length);
-  const questions = shuffle(pool).slice(0, count);
+  const questions = shuffle(pool);
   activeQuiz = {
     id: 'quiz_' + Date.now() + '_' + Math.random().toString(36).slice(2),
-    mode: quizMode,
-    modeName: modeName(),
-    startNo, endNo, total: count,
-    questions, index: 0, correct: 0,
-    answers: [], startTime: nowText(), questionStartMs: Date.now(), abnormal: [], submitted: false
+    studentName, mode: quizMode, modeName: modeName(), startNo, endNo, total: questions.length,
+    questions, index: 0, correct: 0, answers: [], startTime: nowText(), questionStartMs: Date.now(), abnormal: [], submitted: false
   };
+  writeQuizLock();
   history.pushState({ quiz: activeQuiz.id }, '', location.href);
   showSection('quizRunSection');
   renderQuestion();
 }
-function modeName() { return quizMode === 'listen' ? '聽音打字' : '中文看英文'; }
 function shuffle(arr) {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
@@ -476,14 +539,13 @@ function shuffle(arr) {
   }
   return a;
 }
-
 function renderQuestion() {
   if (!activeQuiz) return;
   const q = activeQuiz.questions[activeQuiz.index];
   activeQuiz.submitted = false;
   activeQuiz.questionStartMs = Date.now();
   el('quizRunTitle').textContent = activeQuiz.modeName;
-  el('quizRunInfo').textContent = `範圍：${activeQuiz.startNo}~${activeQuiz.endNo}｜題數：${activeQuiz.total}`;
+  el('quizRunInfo').textContent = `姓名：${activeQuiz.studentName}｜範圍：${activeQuiz.startNo}~${activeQuiz.endNo}｜題數：${activeQuiz.total}`;
   el('questionNoText').textContent = `第 ${activeQuiz.index + 1} 題 / 共 ${activeQuiz.total} 題｜序號 ${q.no}`;
   el('quizProgress').style.width = `${(activeQuiz.index / activeQuiz.total) * 100}%`;
   el('answerInput').value = '';
@@ -495,14 +557,8 @@ function renderQuestion() {
   if (activeQuiz.mode === 'listen') {
     el('listenQuestionBox').classList.remove('hidden');
     el('zhQuestionBox').classList.add('hidden');
-    if (q.usAudio) {
-      el('quizAudio').src = q.usAudio;
-      el('quizPlayBtn').disabled = false;
-    } else {
-      el('quizAudio').removeAttribute('src');
-      el('quizAudio').load();
-      el('quizPlayBtn').disabled = true;
-    }
+    if (q.usAudio) { el('quizAudio').src = q.usAudio; el('quizPlayBtn').disabled = false; }
+    else { el('quizAudio').removeAttribute('src'); el('quizAudio').load(); el('quizPlayBtn').disabled = true; }
   } else {
     el('listenQuestionBox').classList.add('hidden');
     el('zhQuestionBox').classList.remove('hidden');
@@ -510,17 +566,17 @@ function renderQuestion() {
   }
   setTimeout(() => el('answerInput').focus(), 50);
 }
-
 function submitAnswer() {
   if (!activeQuiz || activeQuiz.submitted) return;
   const q = activeQuiz.questions[activeQuiz.index];
-  const userAnswer = normalizeText(el('answerInput').value);
+  const raw = el('answerInput').value.trim().toLowerCase();
+  const userAnswer = normalizeText(raw);
   const correctAnswer = normalizeText(q.word);
   if (!userAnswer) return;
   const ok = userAnswer === correctAnswer;
   if (ok) activeQuiz.correct++;
   const seconds = Math.round((Date.now() - activeQuiz.questionStartMs) / 1000);
-  activeQuiz.answers.push({ no: q.no, zh: q.zh, word: q.word, answer: el('answerInput').value.trim(), ok, seconds });
+  activeQuiz.answers.push({ no: q.no, zh: q.zh, word: q.word, answer: raw, ok, seconds });
   activeQuiz.submitted = true;
   el('answerInput').disabled = true;
   el('submitAnswerBtn').disabled = true;
@@ -534,57 +590,39 @@ function submitAnswer() {
   el('nextQuestionBtn').classList.remove('hidden');
   el('quizProgress').style.width = `${((activeQuiz.index + 1) / activeQuiz.total) * 100}%`;
 }
-
 function nextQuestion() {
   if (!activeQuiz) return;
   if (activeQuiz.index >= activeQuiz.total - 1) finishQuiz('完成', '');
-  else {
-    activeQuiz.index++;
-    renderQuestion();
-  }
+  else { activeQuiz.index++; renderQuestion(); }
 }
-
 function finishQuiz(status, reason) {
   if (!activeQuiz) return;
-  const score = Math.round((activeQuiz.correct / activeQuiz.total) * 100);
+  const score = activeQuiz.total ? Math.round((activeQuiz.correct / activeQuiz.total) * 100) : 0;
+  const abnormalText = (activeQuiz.abnormal || []).join('；');
   const record = {
-    id: activeQuiz.id,
-    startTime: activeQuiz.startTime,
-    endTime: nowText(),
-    mode: activeQuiz.mode,
-    modeName: activeQuiz.modeName,
-    startNo: activeQuiz.startNo,
-    endNo: activeQuiz.endNo,
-    total: activeQuiz.total,
-    correct: activeQuiz.correct,
-    score,
-    status,
-    reason: reason || (activeQuiz.abnormal || []).join('；'),
-    answers: activeQuiz.answers
+    id: activeQuiz.id, studentName: activeQuiz.studentName, startTime: activeQuiz.startTime, endTime: nowText(),
+    mode: activeQuiz.mode, modeName: activeQuiz.modeName, startNo: activeQuiz.startNo, endNo: activeQuiz.endNo,
+    total: activeQuiz.total, correct: activeQuiz.correct, score, status,
+    reason: reason || abnormalText, answers: activeQuiz.answers
   };
   saveRecord(record);
   releaseQuizLock();
   activeQuiz = null;
   if (status === '完成') showSummary(record);
-  else {
-    showSection('quizMenuSection');
-    el('quizMenuStatus').textContent = `剛剛的測驗已記錄為「${status}」：${record.reason}`;
-  }
+  else { showSection('quizMenuSection'); el('quizMenuStatus').textContent = `剛剛的測驗已記錄為「${status}」：${record.reason}`; }
 }
-
 function showSummary(record) {
   showSection('quizDoneSection');
   el('summaryBox').className = record.score >= 80 ? 'result ok' : 'result bad';
-  el('summaryBox').innerHTML = `模式：${escapeHtml(record.modeName)}<br>範圍：${record.startNo}~${record.endNo}<br>答對：${record.correct} / ${record.total}<br>分數：${record.score}%`;
+  el('summaryBox').innerHTML = `姓名：${escapeHtml(record.studentName || '未填姓名')}<br>模式：${escapeHtml(record.modeName)}<br>範圍：${record.startNo}~${record.endNo}<br>答對：${record.correct} / ${record.total}<br>分數：${record.score}%`;
   const rows = record.answers.map((a, i) => `<tr><td>${i+1}</td><td>${a.no}</td><td>${escapeHtml(a.zh)}</td><td>${escapeHtml(a.answer)}</td><td>${escapeHtml(a.word)}</td><td><span class="pill ${a.ok ? 'ok' : 'bad'}">${a.ok ? '對' : '錯'}</span></td><td>${a.seconds}s</td></tr>`).join('');
   el('detailBox').innerHTML = `<table><thead><tr><th>題號</th><th>序號</th><th>中文</th><th>作答</th><th>正解</th><th>結果</th><th>秒數</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
-
-function markAbnormal(reason) {
+function markAbnormal(reason, finishNow = false) {
   if (!activeQuiz) return;
   if (!activeQuiz.abnormal.includes(reason)) activeQuiz.abnormal.push(reason);
+  if (finishNow) finishQuiz('未完成', reason);
 }
-
 function playWrongSound() {
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -593,16 +631,27 @@ function playWrongSound() {
     const gain = ctx.createGain();
     osc.frequency.value = 220;
     gain.gain.value = 0.12;
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start();
+    osc.connect(gain); gain.connect(ctx.destination); osc.start();
     setTimeout(() => { osc.stop(); ctx.close(); }, 180);
   } catch {}
 }
-
 function goHomeSafely() {
   if (activeQuiz) finishQuiz('未完成', '離開測驗畫面');
   showSection('homeSection');
+}
+function openRecords() {
+  renderRecordNameFilter();
+  renderRecords();
+  showSection('recordsSection');
+}
+function exportRecords() {
+  const blob = new Blob([JSON.stringify(getRecords(), null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'english1200_quiz_records.json';
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 searchBtn.addEventListener('click', searchWord);
@@ -624,52 +673,60 @@ document.addEventListener('keydown', e => {
 });
 
 el('goPracticeBtn').addEventListener('click', () => showSection('practiceSection'));
-el('goQuizBtn').addEventListener('click', () => { showSection('quizMenuSection'); renderRecords(); });
+el('goQuizBtn').addEventListener('click', () => { showSection('quizMenuSection'); updateRangeInfo(); });
+el('goRecordsBtnHome').addEventListener('click', openRecords);
+el('goRecordsBtnQuiz').addEventListener('click', openRecords);
+el('recordsHomeBtn').addEventListener('click', () => showSection('homeSection'));
 el('practiceHomeBtn').addEventListener('click', goHomeSafely);
 el('quizHomeBtn').addEventListener('click', goHomeSafely);
 el('listenModeBtn').addEventListener('click', () => setMode('listen'));
 el('zhModeBtn').addEventListener('click', () => setMode('zh'));
+el('startNo').addEventListener('input', updateRangeInfo);
+el('endNo').addEventListener('input', updateRangeInfo);
 el('startQuizBtn').addEventListener('click', startQuiz);
 el('submitAnswerBtn').addEventListener('click', submitAnswer);
 el('answerInput').addEventListener('keydown', e => { if (e.key === 'Enter') submitAnswer(); });
 el('answerInput').addEventListener('input', e => { e.target.value = e.target.value.toLowerCase(); });
-el('nextQuestionBtn').addEventListener('click', nextQuestion);
 el('quizPlayBtn').addEventListener('click', () => el('quizAudio').play().catch(() => {}));
+el('nextQuestionBtn').addEventListener('click', nextQuestion);
 el('abortQuizBtn').addEventListener('click', () => finishQuiz('未完成', '手動中止測驗'));
 el('againBtn').addEventListener('click', () => showSection('quizMenuSection'));
 el('doneHomeBtn').addEventListener('click', () => showSection('homeSection'));
-el('clearRecordsBtn').addEventListener('click', () => {
-  if (confirm('確定要清除本機測驗紀錄嗎？')) {
-    localStorage.removeItem(QUIZ_RECORDS_KEY);
-    renderRecords();
-  }
-});
+el('recordNameFilter').addEventListener('change', renderRecords);
+el('clearRecordsBtn').addEventListener('click', () => { if (confirm('確定要清除本機全部測驗紀錄嗎？')) { localStorage.removeItem(QUIZ_RECORDS_KEY); renderRecordNameFilter(); renderRecords(); } });
+el('exportRecordsBtn').addEventListener('click', exportRecords);
 
 window.addEventListener('storage', e => {
   if (e.key === QUIZ_LOCK_KEY && activeQuiz) {
     const lock = readLock();
-    if (lock && lock.tabId !== tabId && Date.now() - Number(lock.lastSeen || 0) < 6000) markAbnormal('偵測到重複測驗分頁');
+    if (lock && lock.tabId !== tabId && Date.now() - Number(lock.lastSeen || 0) < 6000) {
+      markAbnormal('偵測到同網站重複開啟分頁', true);
+    }
+  }
+  if (e.key === SITE_TAB_KEY && activeQuiz) {
+    try {
+      const other = JSON.parse(e.newValue || 'null');
+      if (other && other.tabId !== tabId && Date.now() - Number(other.lastSeen || 0) < 6000) {
+        markAbnormal('測驗中開啟同網站另一個分頁', true);
+      }
+    } catch {}
   }
 });
-
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden && activeQuiz) markAbnormal('測驗中切換分頁或離開畫面');
+  if (document.hidden && activeQuiz) finishQuiz('未完成', '測驗中切換分頁或離開畫面');
 });
 window.addEventListener('pagehide', () => {
-  if (activeQuiz) finishQuiz('未完成', '重新整理、關閉或離開頁面');
+  if (activeQuiz && !leavingBecauseFinish) finishQuiz('未完成', '重新整理、關閉或離開頁面');
 });
 window.addEventListener('beforeunload', e => {
-  if (activeQuiz) {
-    markAbnormal('重新整理或關閉頁面');
-    e.preventDefault();
-    e.returnValue = '';
-  }
+  if (activeQuiz) { markAbnormal('重新整理或關閉頁面'); e.preventDefault(); e.returnValue = ''; }
 });
 window.addEventListener('popstate', () => {
   if (activeQuiz) finishQuiz('未完成', '使用上一頁離開測驗');
   showSection('homeSection');
 });
 
+startSiteHeartbeat();
 loadWords();
 </script>
 </body>
