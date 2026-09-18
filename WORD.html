@@ -53,6 +53,10 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .note { color: var(--muted); }
 .actions { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 16px; }
 .audio { margin-top: 16px; display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
+.audioStatus { grid-column: 1 / -1; min-height: 22px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.audioStatus.ok { color: var(--ok); }
+.audioStatus.warn { color: var(--warn); }
+.audioStatus.bad { color: var(--bad); }
 a { color: var(--primary); text-decoration: none; font-weight: 700; }
 a:hover { text-decoration: underline; }
 .footer { color: var(--muted); font-size: 13px; margin-top: 14px; line-height: 1.6; }
@@ -140,6 +144,7 @@ th { color:#475569; background:#f8fafc; }
           <div class="audio">
             <audio id="audioPlayer" controls preload="none"></audio>
             <button id="playBtn">播放 US 發音</button>
+            <div id="audioStatus" class="audioStatus" aria-live="polite"></div>
           </div>
           <div style="margin-top:12px;" id="linksBox" class="hidden">
             <a id="cambridgeLink" href="#" target="_blank" rel="noopener">Cambridge 字典頁</a>
@@ -208,6 +213,7 @@ th { color:#475569; background:#f8fafc; }
           <div class="sub">請聽 US 發音，輸入你聽到的英文單字。</div>
           <audio id="quizAudio" controls preload="none"></audio>
           <div style="margin-top:12px;"><button id="quizPlayBtn">播放發音</button></div>
+          <div id="quizAudioStatus" class="audioStatus" aria-live="polite"></div>
         </div>
         <div id="zhQuestionBox" class="hidden">
           <div class="sub">請依照中文意思，輸入英文單字。</div>
@@ -290,6 +296,7 @@ const wordZh = el('wordZh');
 const wordNote = el('wordNote');
 const audioPlayer = el('audioPlayer');
 const playBtn = el('playBtn');
+const audioStatus = el('audioStatus');
 const countBadge = el('countBadge');
 const linksBox = el('linksBox');
 const cambridgeLink = el('cambridgeLink');
@@ -305,6 +312,89 @@ function nowText() {
 }
 function escapeHtml(s) {
   return String(s).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+}
+
+function setAudioStatus(target, message, type = '') {
+  target.textContent = message;
+  target.className = `audioStatus${type ? ' ' + type : ''}`;
+}
+
+function mediaErrorText(audio, error) {
+  if (error && error.name === 'NotAllowedError') return '瀏覽器未允許播放';
+  if (error && error.name === 'NotSupportedError') return '瀏覽器不支援這個音檔';
+  const code = audio.error && audio.error.code;
+  const messages = {
+    1: '音檔載入被中止（MEDIA_ERR_ABORTED）',
+    2: '網路或外部網站拒絕載入（MEDIA_ERR_NETWORK）',
+    3: '音檔解碼失敗（MEDIA_ERR_DECODE）',
+    4: '音檔網址無法使用（MEDIA_ERR_SRC_NOT_SUPPORTED）'
+  };
+  return messages[code] || (error && error.message) || '外部音檔載入失敗';
+}
+
+function getUsVoice() {
+  if (!('speechSynthesis' in window)) return null;
+  const voices = window.speechSynthesis.getVoices();
+  const usVoices = voices.filter(v => /^en-US$/i.test(v.lang));
+  const preferred = ['Google US English', 'Microsoft Aria', 'Samantha', 'Alex'];
+  return preferred.map(name => usVoices.find(v => v.name.includes(name))).find(Boolean)
+    || usVoices[0]
+    || voices.find(v => /^en[-_]/i.test(v.lang))
+    || null;
+}
+
+function cancelSpeech() {
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+}
+
+function speakWithTts(word, statusTarget, reason = '') {
+  return new Promise((resolve, reject) => {
+    if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') {
+      setAudioStatus(statusTarget, `${reason ? reason + '；' : ''}此瀏覽器也不支援 TTS 語音。`, 'bad');
+      reject(new Error('TTS_NOT_SUPPORTED'));
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(String(word || ''));
+    utterance.lang = 'en-US';
+    utterance.rate = 0.85;
+    utterance.pitch = 1;
+    const voice = getUsVoice();
+    if (voice) utterance.voice = voice;
+    utterance.onstart = () => setAudioStatus(statusTarget, `${reason ? reason + '；' : ''}已自動改用裝置美式英文語音（TTS）。`, 'warn');
+    utterance.onend = () => resolve('tts');
+    utterance.onerror = event => {
+      const detail = event.error || '未知錯誤';
+      setAudioStatus(statusTarget, `${reason ? reason + '；' : ''}TTS 播放也失敗（${detail}）。`, 'bad');
+      reject(new Error(detail));
+    };
+    window.speechSynthesis.speak(utterance);
+  });
+}
+
+async function playAudioWithFallback(audio, word, statusTarget) {
+  cancelSpeech();
+  if (!audio.getAttribute('src')) {
+    await speakWithTts(word, statusTarget, '沒有 Cambridge 音檔');
+    return;
+  }
+  try {
+    setAudioStatus(statusTarget, '正在載入 Cambridge 真人發音…');
+    audio.currentTime = 0;
+    let timeoutId;
+    await Promise.race([
+      audio.play(),
+      new Promise((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error('音檔載入逾時')), 8000);
+      })
+    ]).finally(() => clearTimeout(timeoutId));
+    setAudioStatus(statusTarget, '正在播放 Cambridge 真人發音。', 'ok');
+  } catch (error) {
+    audio.pause();
+    const reason = mediaErrorText(audio, error);
+    console.warn('Cambridge audio playback failed:', error, audio.currentSrc || audio.src);
+    await speakWithTts(word, statusTarget, reason);
+  }
 }
 function showSection(name) {
   ['homeSection','practiceSection','quizMenuSection','quizRunSection','quizDoneSection','recordsSection'].forEach(id => el(id).classList.add('hidden'));
@@ -328,16 +418,18 @@ function showWordByIndex(index, autoPlay = false) {
   wordEn.textContent = item.word || '';
   wordZh.textContent = item.zh || '';
   wordNote.textContent = item.note ? item.note : '';
+  setAudioStatus(audioStatus, '');
+  cancelSpeech();
   if (item.usAudio) {
     audioPlayer.src = item.usAudio;
     playBtn.disabled = false;
     statusText.textContent = `第 ${item.no} 筆，共 ${WORDS.length} 筆。`;
-    if (autoPlay) audioPlayer.play().catch(() => {});
+    if (autoPlay) playAudioWithFallback(audioPlayer, item.word, audioStatus).catch(() => {});
   } else {
     audioPlayer.removeAttribute('src');
     audioPlayer.load();
-    playBtn.disabled = true;
-    statusText.textContent = `第 ${item.no} 筆目前沒有 US 音檔連結。`;
+    playBtn.disabled = false;
+    statusText.textContent = `第 ${item.no} 筆目前沒有 US 音檔連結，播放時會使用 TTS。`;
   }
   if (item.cambridge || item.pronunciationPage) {
     linksBox.classList.remove('hidden');
@@ -557,8 +649,10 @@ function renderQuestion() {
   if (activeQuiz.mode === 'listen') {
     el('listenQuestionBox').classList.remove('hidden');
     el('zhQuestionBox').classList.add('hidden');
+    setAudioStatus(el('quizAudioStatus'), '');
+    cancelSpeech();
     if (q.usAudio) { el('quizAudio').src = q.usAudio; el('quizPlayBtn').disabled = false; }
-    else { el('quizAudio').removeAttribute('src'); el('quizAudio').load(); el('quizPlayBtn').disabled = true; }
+    else { el('quizAudio').removeAttribute('src'); el('quizAudio').load(); el('quizPlayBtn').disabled = false; }
   } else {
     el('listenQuestionBox').classList.add('hidden');
     el('zhQuestionBox').classList.remove('hidden');
@@ -661,7 +755,17 @@ el('prevBtn').addEventListener('click', () => showWordByIndex(currentIndex - 1))
 el('nextBtn').addEventListener('click', () => showWordByIndex(currentIndex + 1));
 el('lastBtn').addEventListener('click', () => showWordByIndex(WORDS.length - 1));
 el('randomBtn').addEventListener('click', () => showWordByIndex(Math.floor(Math.random() * WORDS.length)));
-playBtn.addEventListener('click', () => audioPlayer.play().catch(() => { statusText.textContent = '瀏覽器目前沒有允許播放，請再按一次播放鍵。'; }));
+playBtn.addEventListener('click', () => {
+  const item = WORDS[currentIndex];
+  if (item) playAudioWithFallback(audioPlayer, item.word, audioStatus).catch(() => {});
+});
+
+audioPlayer.addEventListener('error', () => {
+  setAudioStatus(audioStatus, `${mediaErrorText(audioPlayer)}；請按「播放 US 發音」使用 TTS 備援。`, 'warn');
+});
+audioPlayer.addEventListener('ended', () => {
+  if (audioStatus.classList.contains('ok')) setAudioStatus(audioStatus, 'Cambridge 真人發音播放完成。', 'ok');
+});
 
 document.addEventListener('keydown', e => {
   const active = document.activeElement;
@@ -687,7 +791,18 @@ el('startQuizBtn').addEventListener('click', startQuiz);
 el('submitAnswerBtn').addEventListener('click', submitAnswer);
 el('answerInput').addEventListener('keydown', e => { if (e.key === 'Enter') submitAnswer(); });
 el('answerInput').addEventListener('input', e => { e.target.value = e.target.value.toLowerCase(); });
-el('quizPlayBtn').addEventListener('click', () => el('quizAudio').play().catch(() => {}));
+el('quizPlayBtn').addEventListener('click', () => {
+  if (!activeQuiz) return;
+  const q = activeQuiz.questions[activeQuiz.index];
+  playAudioWithFallback(el('quizAudio'), q.word, el('quizAudioStatus')).catch(() => {});
+});
+el('quizAudio').addEventListener('error', () => {
+  setAudioStatus(el('quizAudioStatus'), `${mediaErrorText(el('quizAudio'))}；請按「播放發音」使用 TTS 備援。`, 'warn');
+});
+el('quizAudio').addEventListener('ended', () => {
+  const target = el('quizAudioStatus');
+  if (target.classList.contains('ok')) setAudioStatus(target, 'Cambridge 真人發音播放完成。', 'ok');
+});
 el('nextQuestionBtn').addEventListener('click', nextQuestion);
 el('abortQuizBtn').addEventListener('click', () => finishQuiz('未完成', '手動中止測驗'));
 el('againBtn').addEventListener('click', () => showSection('quizMenuSection'));
