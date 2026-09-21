@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>英語1200字 US發音練習</title>
+<title>英語1200字 US發音練習_V5</title>
 <style>
 :root {
   --bg: #f6f7fb;
@@ -50,6 +50,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .mainword { border: 1px solid var(--line); border-radius: 18px; padding: 20px; background: #fff; }
 .en { font-size: clamp(42px, 8vw, 76px); line-height: 1; font-weight: 900; letter-spacing: -.5px; margin-bottom: 12px; word-break: break-word; }
 .zh { font-size: clamp(24px, 5vw, 42px); color: #0f172a; font-weight: 800; margin-bottom: 12px; }
+.ipa { font-size: clamp(20px, 4vw, 30px); color: #475569; font-weight: 800; margin: -2px 0 12px; letter-spacing: .3px; }
 .note { color: var(--muted); }
 .actions { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 16px; }
 .audio { margin-top: 16px; display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
@@ -139,6 +140,7 @@ th { color:#475569; background:#f8fafc; }
         <div class="no" id="wordNo">--</div>
         <div class="mainword">
           <div class="en" id="wordEn">請稍候</div>
+          <div class="ipa hidden" id="wordIpa"></div>
           <div class="zh" id="wordZh">正在載入單字資料</div>
           <div class="note" id="wordNote"></div>
           <div class="audio">
@@ -292,6 +294,7 @@ const searchBtn = el('searchBtn');
 const statusText = el('statusText');
 const wordNo = el('wordNo');
 const wordEn = el('wordEn');
+const wordIpa = el('wordIpa');
 const wordZh = el('wordZh');
 const wordNote = el('wordNote');
 const audioPlayer = el('audioPlayer');
@@ -312,6 +315,13 @@ function nowText() {
 }
 function escapeHtml(s) {
   return String(s).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+}
+function getIpa(item) {
+  return String((item && (item.ipaUS || item.ipa || item.usIpa)) || '').trim();
+}
+function ipaLine(item) {
+  const ipa = getIpa(item);
+  return ipa ? `<br>音標：<span style="font-size:20px;color:#475569;">${escapeHtml(ipa)}</span>` : '';
 }
 
 function setAudioStatus(target, message, type = '') {
@@ -416,6 +426,9 @@ function showWordByIndex(index, autoPlay = false) {
   const item = WORDS[currentIndex];
   wordNo.textContent = item.no ?? (currentIndex + 1);
   wordEn.textContent = item.word || '';
+  const ipa = getIpa(item);
+  if (ipa) { wordIpa.textContent = ipa; wordIpa.classList.remove('hidden'); }
+  else { wordIpa.textContent = ''; wordIpa.classList.add('hidden'); }
   wordZh.textContent = item.zh || '';
   wordNote.textContent = item.note ? item.note : '';
   setAudioStatus(audioStatus, '');
@@ -475,6 +488,7 @@ async function loadWords() {
     countBadge.textContent = '讀取失敗';
     statusText.textContent = '讀不到 words.json。請確認 index.html 和 words.json 放在同一層，並透過 GitHub Pages 或 http://localhost 開啟。';
     wordEn.textContent = '讀取失敗';
+    if (wordIpa) wordIpa.classList.add('hidden');
     wordZh.textContent = err.message;
     playBtn.disabled = true;
     el('quizMenuStatus').textContent = '讀不到 words.json，暫時無法開始測驗。';
@@ -538,8 +552,8 @@ window.showRecordDetail = function(id) {
     el('recordDetailBox').innerHTML = '<div class="status">這筆紀錄沒有作答明細，可能是在開始前或重複分頁時被記錄。</div>';
     return;
   }
-  const rows = answers.map((a, i) => `<tr><td>${i+1}</td><td>${a.no}</td><td>${escapeHtml(a.zh)}</td><td>${escapeHtml(a.answer)}</td><td>${escapeHtml(a.word)}</td><td><span class="pill ${a.ok ? 'ok' : 'bad'}">${a.ok ? '對' : '錯'}</span></td><td>${a.seconds}s</td></tr>`).join('');
-  el('recordDetailBox').innerHTML = `<table><thead><tr><th>題號</th><th>序號</th><th>中文</th><th>作答</th><th>正解</th><th>結果</th><th>秒數</th></tr></thead><tbody>${rows}</tbody></table>`;
+  const rows = answers.map((a, i) => `<tr><td>${i+1}</td><td>${a.no}</td><td>${escapeHtml(a.zh)}</td><td>${escapeHtml(a.answer)}</td><td>${escapeHtml(a.word)}</td><td>${escapeHtml(a.ipaUS || '')}</td><td><span class="pill ${a.ok ? 'ok' : 'bad'}">${a.ok ? '對' : '錯'}</span></td><td>${a.seconds}s</td></tr>`).join('');
+  el('recordDetailBox').innerHTML = `<table><thead><tr><th>題號</th><th>序號</th><th>中文</th><th>作答</th><th>正解</th><th>音標</th><th>結果</th><th>秒數</th></tr></thead><tbody>${rows}</tbody></table>`;
 };
 
 function setMode(mode) {
@@ -670,7 +684,7 @@ function submitAnswer() {
   const ok = userAnswer === correctAnswer;
   if (ok) activeQuiz.correct++;
   const seconds = Math.round((Date.now() - activeQuiz.questionStartMs) / 1000);
-  activeQuiz.answers.push({ no: q.no, zh: q.zh, word: q.word, answer: raw, ok, seconds });
+  activeQuiz.answers.push({ no: q.no, zh: q.zh, word: q.word, ipaUS: getIpa(q), answer: raw, ok, seconds });
   activeQuiz.submitted = true;
   el('answerInput').disabled = true;
   el('submitAnswerBtn').disabled = true;
@@ -678,7 +692,7 @@ function submitAnswer() {
   result.classList.remove('hidden');
   result.classList.toggle('ok', ok);
   result.classList.toggle('bad', !ok);
-  result.innerHTML = ok ? `答對！` : `答錯。正確答案：<span style="font-size:22px;">${escapeHtml(q.word)}</span>`;
+  result.innerHTML = ok ? `答對！${ipaLine(q)}` : `答錯。正確答案：<span style="font-size:22px;">${escapeHtml(q.word)}</span>${ipaLine(q)}`;
   if (!ok) playWrongSound();
   el('nextQuestionBtn').textContent = activeQuiz.index >= activeQuiz.total - 1 ? '查看結果' : '下一題';
   el('nextQuestionBtn').classList.remove('hidden');
@@ -709,8 +723,8 @@ function showSummary(record) {
   showSection('quizDoneSection');
   el('summaryBox').className = record.score >= 80 ? 'result ok' : 'result bad';
   el('summaryBox').innerHTML = `姓名：${escapeHtml(record.studentName || '未填姓名')}<br>模式：${escapeHtml(record.modeName)}<br>範圍：${record.startNo}~${record.endNo}<br>答對：${record.correct} / ${record.total}<br>分數：${record.score}%`;
-  const rows = record.answers.map((a, i) => `<tr><td>${i+1}</td><td>${a.no}</td><td>${escapeHtml(a.zh)}</td><td>${escapeHtml(a.answer)}</td><td>${escapeHtml(a.word)}</td><td><span class="pill ${a.ok ? 'ok' : 'bad'}">${a.ok ? '對' : '錯'}</span></td><td>${a.seconds}s</td></tr>`).join('');
-  el('detailBox').innerHTML = `<table><thead><tr><th>題號</th><th>序號</th><th>中文</th><th>作答</th><th>正解</th><th>結果</th><th>秒數</th></tr></thead><tbody>${rows}</tbody></table>`;
+  const rows = record.answers.map((a, i) => `<tr><td>${i+1}</td><td>${a.no}</td><td>${escapeHtml(a.zh)}</td><td>${escapeHtml(a.answer)}</td><td>${escapeHtml(a.word)}</td><td>${escapeHtml(a.ipaUS || '')}</td><td><span class="pill ${a.ok ? 'ok' : 'bad'}">${a.ok ? '對' : '錯'}</span></td><td>${a.seconds}s</td></tr>`).join('');
+  el('detailBox').innerHTML = `<table><thead><tr><th>題號</th><th>序號</th><th>中文</th><th>作答</th><th>正解</th><th>音標</th><th>結果</th><th>秒數</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 function markAbnormal(reason, finishNow = false) {
   if (!activeQuiz) return;
