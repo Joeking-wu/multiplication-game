@@ -3,44 +3,148 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>音檔無限循環播放</title>
+  <title>音訊播放器</title>
   <style>
+    * { box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       min-height: 100vh;
       margin: 0;
-      background-color: #f5f5f7;
-      color: #333;
+      background-color: #f2f2f7;
+      color: #1c1c1e;
     }
-    .card {
-      background: white;
-      padding: 30px;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      text-align: center;
-      width: 80%;
+    .player-card {
+      background: #ffffff;
+      padding: 24px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      width: 90%;
       max-width: 400px;
     }
-    audio {
-      width: 100%;
-      margin-top: 15px;
+    h2 { margin: 0 0 8px 0; font-size: 1.2rem; text-align: center; }
+    .current-title { text-align: center; font-weight: bold; color: #007aff; margin-bottom: 16px; min-height: 24px; }
+    audio { width: 100%; margin-bottom: 16px; }
+    .controls { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 20px; }
+    .mode-btn {
+      flex: 1;
+      padding: 10px 4px;
+      border: 1px solid #e5e5ea;
+      border-radius: 10px;
+      background: #f2f2f7;
+      color: #3a3a3c;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
+    .mode-btn.active {
+      background: #007aff;
+      color: white;
+      border-color: #007aff;
+      font-weight: bold;
+    }
+    .playlist { list-style: none; padding: 0; margin: 0; border-top: 1px solid #e5e5ea; }
+    .playlist li {
+      padding: 12px;
+      border-bottom: 1px solid #f2f2f7;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      border-radius: 8px;
+    }
+    .playlist li:hover { background-color: #f9f9f9; }
+    .playlist li.active { background-color: #e5f1ff; color: #007aff; font-weight: bold; }
   </style>
 </head>
 <body>
 
-  <div class="card">
-    <h2>重複播放器</h2>
-    <!-- loop 屬性就是讓音檔一直重複的核心鍵 -->
-    <audio controls loop preload="auto">
-      <source src="audio.m4a" type="audio/mpeg">
-      您的瀏覽器不支援音訊播放。
-    </audio>
+  <div class="player-card">
+    <h2>🎵 我的播放器</h2>
+    <div class="current-title" id="currentTitle">準備播放</div>
+
+    <!-- 原生播放控制列 -->
+    <audio id="audioPlayer" controls preload="auto"></audio>
+
+    <!-- 播放模式切換 -->
+    <div class="controls">
+      <button class="mode-btn active" id="btnRepeatAll" onclick="setMode('repeatAll')">🔁 全部循環</button>
+      <button class="mode-btn" id="btnRepeatOne" onclick="setMode('repeatOne')">🔂 單曲循環</button>
+      <button class="mode-btn" id="btnShuffle" onclick="setMode('shuffle')">🔀 隨機播放</button>
+    </div>
+
+    <!-- 5 首曲目清單 -->
+    <ul class="playlist" id="playlist"></ul>
   </div>
 
+  <script>
+    // 1. 設定你的 5 首音檔檔名與顯示名稱 (檔名大小寫需與 GitHub 上完全一致)
+    const tracks = [
+      { name: "來去外星踅夜市", src: "audio.m4a" },
+      { name: "04_阿公變魔術", src: "A2.m4a" },
+      { name: "Song", src: "Song.mp4" },
+      { name: "第四首歌", src: "song4.m4a" },
+      { name: "第五首歌", src: "song5.m4a" }
+    ];
+
+    let currentIndex = 0;
+    let playMode = 'repeatAll'; // 預設模式：repeatAll (全部循環), repeatOne (單曲循環), shuffle (隨機)
+
+    const audio = document.getElementById('audioPlayer');
+    const playlistEl = document.getElementById('playlist');
+    const currentTitleEl = document.getElementById('currentTitle');
+
+    // 渲染播放清單 UI
+    function renderPlaylist() {
+      playlistEl.innerHTML = '';
+      tracks.forEach((track, index) => {
+        const li = document.createElement('li');
+        li.textContent = `${index + 1}. ${track.name}`;
+        if (index === currentIndex) li.classList.add('active');
+        li.onclick = () => loadAndPlay(index);
+        playlistEl.appendChild(li);
+      });
+    }
+
+    // 載入並播放指定歌曲
+    function loadAndPlay(index) {
+      currentIndex = index;
+      audio.src = tracks[currentIndex].src;
+      currentTitleEl.textContent = tracks[currentIndex].name;
+      renderPlaylist();
+      audio.play().catch(e => console.log("等待使用者手動點擊播放"));
+    }
+
+    // 切換播放模式
+    function setMode(mode) {
+      playMode = mode;
+      document.getElementById('btnRepeatAll').classList.toggle('active', mode === 'repeatAll');
+      document.getElementById('btnRepeatOne').classList.toggle('active', mode === 'repeatOne');
+      document.getElementById('btnShuffle').classList.toggle('active', mode === 'shuffle');
+    }
+
+    // 當目前歌曲播放結束時自動觸發邏輯
+    audio.onended = function() {
+      if (playMode === 'repeatOne') {
+        // 單曲循環：重複播放同一首
+        audio.play();
+      } else if (playMode === 'shuffle') {
+        // 隨機播放：隨機挑選一首 (避免連續抽到同一首)
+        let nextIndex;
+        do {
+          nextIndex = Math.floor(Math.random() * tracks.length);
+        } while (tracks.length > 1 && nextIndex === currentIndex);
+        loadAndPlay(nextIndex);
+      } else {
+        // 全部循環：順序播放下一首，播到最後一首後跳回第一首
+        let nextIndex = (currentIndex + 1) % tracks.length;
+        loadAndPlay(nextIndex);
+      }
+    };
+
+    // 初始化載入第一首
+    loadAndPlay(0);
+  </script>
 </body>
 </html>
