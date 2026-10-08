@@ -38,6 +38,8 @@ family_matching_game.html 社會-家系圖單元。[社會-家系圖單元](http
 
 英語1200字 US發音練習。[英語1200字](https://joeking-wu.github.io/multiplication-game/WORD.html).
 
+重複播放器[重複播放器](https://joeking-wu.github.io/multiplication-game/audio-player.html).
+
 其它作者的產品分享
 [太空漫遊](https://jinshuanyu.github.io/spacewalk/index.html).
 [量詞配對](https://jinshuanyu.github.io/chinese-quantifiers/index.html).
